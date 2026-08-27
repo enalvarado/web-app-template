@@ -1,0 +1,78 @@
+{
+  "id": "temperature-log",
+  "title": "Temperature Log",
+  "includeReviewScreen": true,
+  "screens": [
+    {
+      "id": "site-info",
+      "title": "Site Info",
+      "fields": [
+        {
+          "name": "warehouse",
+          "label": "Warehouse",
+          "type": "select",
+          "required": true,
+          "options": ["Warehouse A", "Warehouse B", "Warehouse C"]
+        },
+        {
+          "name": "inspector",
+          "label": "Inspector Name",
+          "type": "text",
+          "required": true,
+          "placeholder": "Full name"
+        },
+        {
+          "name": "inspectionTime",
+          "label": "Inspection Date/Time",
+          "type": "datetime",
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "readings",
+      "title": "Temperature Readings",
+      "fields": [
+        {
+          "name": "temperatureF",
+          "label": "Temperature (°F)",
+          "type": "number",
+          "required": true
+        },
+        {
+          "name": "withinRange",
+          "label": "Within acceptable range?",
+          "type": "toggle"
+        },
+        {
+          "name": "notes",
+          "label": "Notes",
+          "type": "textarea",
+          "placeholder": "Optional notes"
+        },
+        {
+          "name": "conditionRating",
+          "label": "Overall Condition",
+          "type": "rating"
+        }
+      ]
+    },
+    {
+      "id": "sign-off",
+      "title": "Sign-off",
+      "fields": [
+        {
+          "name": "photo",
+          "label": "Photo of Site",
+          "type": "photo"
+        },
+        {
+          "name": "signature",
+          "label": "Inspector Signature",
+          "type": "signature",
+          "required": true
+        }
+      ]
+    }
+  ]
+}
