@@ -1,0 +1,211 @@
+<title>Form Page</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --morado: #545386;
+    --morado-dark: #454371;
+    --rosado-deep: #C24C64;
+    --azul: #C2DFEA;
+    --gris: #383A35;
+    --gris-soft: rgba(56, 58, 53, .62);
+    --beige: #D8D2C4;
+    --surface: #FFFFFF;
+    --backdrop: #F3F1F6;
+    --font-head: 'Montserrat', sans-serif;
+    --font-body: 'Roboto', sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--backdrop);
+    color: var(--gris);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--surface);
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(56, 58, 53, .06), 0 16px 36px -18px rgba(56, 58, 53, .28);
+    overflow: hidden;
+  }
+
+  .titlebar { background: var(--morado); padding: 15px 20px; }
+
+  .titlebar h1 {
+    margin: 0;
+    font-family: var(--font-head);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    text-align: center;
+    color: #fff;
+  }
+
+  .body { padding: 22px 22px 26px; }
+
+  .progress { margin-bottom: 20px; }
+
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: var(--gris-soft);
+    margin-bottom: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .progress-track { width: 100%; height: 5px; border-radius: 999px; background: var(--beige); overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 999px; background: var(--morado); }
+
+  .screen-title {
+    margin: 0 0 16px;
+    font-family: var(--font-head);
+    font-size: 15.5px;
+    font-weight: 600;
+  }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .field-label {
+    display: block;
+    font-family: var(--font-head);
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .req { color: var(--rosado-deep); }
+
+  input[type="text"], select {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    color: var(--gris);
+    background: var(--surface);
+    border: 1.3px solid var(--beige);
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+
+  input:focus, select:focus {
+    outline: none;
+    border-color: var(--morado);
+    box-shadow: 0 0 0 3px rgba(84, 83, 134, .16);
+  }
+
+  .action-btn {
+    width: 100%;
+    appearance: none;
+    border: none;
+    background: var(--morado);
+    color: #fff;
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 9px 14px;
+    border-radius: 9px;
+    cursor: pointer;
+  }
+
+  .action-btn:hover { background: var(--morado-dark); }
+  .action-btn:active { transform: translateY(1px); }
+
+  .nav { display: flex; justify-content: space-between; gap: 10px; margin-top: 22px; }
+
+  .btn {
+    appearance: none;
+    border-radius: 9px;
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 9px 16px;
+    cursor: pointer;
+    border: 1.3px solid transparent;
+  }
+
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .btn-back { background: transparent; border-color: var(--morado); color: var(--morado); }
+  .btn-next { background: var(--morado); color: #fff; }
+  .btn-next:not(:disabled):hover { background: var(--morado-dark); }
+
+  .done { text-align: center; padding: 20px 4px 6px; }
+
+  .done-badge {
+    width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 50%;
+    background: var(--azul); display: flex; align-items: center; justify-content: center;
+  }
+
+  .done h2 { margin: 0 0 6px; font-family: var(--font-head); font-size: 19px; color: var(--morado); }
+  .done p { margin: 0; font-size: 14px; color: var(--gris-soft); }
+</style>
+
+<div class="card">
+  <div class="titlebar"><h1>Untitled Form</h1></div>
+  <div class="body" id="body">
+    <div class="progress">
+      <div class="progress-row"><span>Step 1 of 1</span><span>100%</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+    </div>
+    <h2 class="screen-title">Screen 1</h2>
+
+    <div class="field">
+      <label class="field-label">Full Name<span class="req"> *</span></label>
+      <input type="text" placeholder="Full name">
+    </div>
+
+    <div class="field">
+      <label class="field-label">Category</label>
+      <select>
+        <option disabled selected>Select…</option>
+        <option>Option 1</option>
+        <option>Option 2</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <button type="button" class="action-btn" id="customBtn">Button</button>
+    </div>
+
+    <div class="nav">
+      <button class="btn btn-back" disabled>◀ Back</button>
+      <button class="btn btn-next" id="submitBtn">Submit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('customBtn').addEventListener('click', () => {
+    const btn = document.getElementById('customBtn');
+    const original = btn.textContent;
+    btn.textContent = 'No action wired up yet';
+    setTimeout(() => { btn.textContent = original; }, 1400);
+  });
+
+  document.getElementById('submitBtn').addEventListener('click', () => {
+    document.getElementById('body').innerHTML = `
+      <div class="done">
+        <div class="done-badge">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
+            <path d="M5 13l4 4L19 7" stroke="#545386" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2>Thank you!</h2>
+        <p>Your submission was received.</p>
+      </div>
+    `;
+  });
+</script>

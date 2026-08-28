@@ -1,0 +1,898 @@
+<title>Form Template</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --morado: #545386;
+    --morado-dark: #454371;
+    --rosado: #F4C7CE;
+    --rosado-deep: #C24C64;
+    --azul: #C2DFEA;
+    --gris: #383A35;
+    --gris-soft: rgba(56, 58, 53, .62);
+    --gris-faint: rgba(56, 58, 53, .38);
+    --beige: #D8D2C4;
+    --surface: #FFFFFF;
+    --backdrop: #F3F1F6;
+    --font-head: 'Montserrat', sans-serif;
+    --font-body: 'Roboto', sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--backdrop);
+    color: var(--gris);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 40px 20px 56px;
+  }
+
+  .intro {
+    max-width: 580px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .eyebrow {
+    margin: 0;
+    font-family: var(--font-head);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+    color: var(--morado);
+  }
+
+  .lede {
+    margin: 0;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--gris-soft);
+  }
+
+  .switcher-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 22px;
+  }
+
+  .switcher-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .switcher-label {
+    font-family: var(--font-head);
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--gris-faint);
+  }
+
+  .switcher {
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--surface);
+    border: 1px solid var(--beige);
+    border-radius: 999px;
+  }
+
+  .chip {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--gris-soft);
+    font-family: var(--font-head);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 7px 15px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .chip:hover { color: var(--gris); }
+
+  .chip.active {
+    background: var(--morado);
+    color: #fff;
+  }
+
+  .frame-wrap {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .frame {
+    width: min(var(--frame-w, 390px), 100%);
+    background: var(--surface);
+    border-radius: 18px;
+    box-shadow: 0 1px 2px rgba(56, 58, 53, .06), 0 18px 40px -20px rgba(56, 58, 53, .28);
+    overflow: hidden;
+    transition: width .32s cubic-bezier(.4, 0, .2, 1);
+  }
+
+  .frame-chrome {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 0;
+    background: var(--beige);
+  }
+
+  .frame-chrome span {
+    font-family: var(--font-body);
+    font-size: 11px;
+    letter-spacing: .04em;
+    color: var(--gris-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .app-titlebar {
+    background: var(--morado);
+    padding: 15px 20px;
+  }
+
+  .app-title {
+    margin: 0;
+    font-family: var(--font-head);
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    text-align: center;
+    color: #fff;
+    text-wrap: balance;
+  }
+
+  .app-body {
+    padding: 24px 26px 26px;
+  }
+
+  .progress { margin-bottom: 22px; }
+
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    color: var(--gris-soft);
+    margin-bottom: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--beige);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--morado);
+    transition: width .35s ease;
+  }
+
+  .screen-title {
+    margin: 0 0 18px;
+    font-family: var(--font-head);
+    font-size: 16.5px;
+    font-weight: 600;
+    color: var(--gris);
+  }
+
+  .field { margin-bottom: 20px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .field-label {
+    display: block;
+    font-family: var(--font-head);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--gris);
+    margin-bottom: 7px;
+  }
+
+  .req { color: var(--rosado-deep); }
+
+  .field-error {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: var(--rosado-deep);
+  }
+
+  .field-help {
+    margin: 6px 0 0;
+    font-size: 12px;
+    color: var(--gris-soft);
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  input[type="datetime-local"],
+  select,
+  textarea {
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--gris);
+    background: var(--surface);
+    border: 1.5px solid var(--beige);
+    border-radius: 10px;
+    padding: 11px 13px;
+  }
+
+  textarea { resize: vertical; min-height: 84px; }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--morado);
+    box-shadow: 0 0 0 3px rgba(84, 83, 134, .16);
+  }
+
+  .field.has-error input,
+  .field.has-error select,
+  .field.has-error .signature-pad,
+  .field.has-error .rating {
+    border-color: var(--rosado-deep);
+  }
+
+  .toggle-switch {
+    appearance: none;
+    border: none;
+    width: 50px;
+    height: 30px;
+    border-radius: 999px;
+    background: var(--beige);
+    position: relative;
+    cursor: pointer;
+    transition: background .2s ease;
+  }
+
+  .toggle-switch[aria-checked="true"] { background: var(--morado); }
+
+  .toggle-switch .knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(56, 58, 53, .3);
+    transition: transform .2s ease;
+  }
+
+  .toggle-switch[aria-checked="true"] .knob { transform: translateX(20px); }
+
+  .check-row, .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .check-row label, .radio-group label {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 15px;
+    color: var(--gris);
+  }
+
+  .check-row input, .radio-group input {
+    width: 19px;
+    height: 19px;
+    accent-color: var(--morado);
+  }
+
+  .rating { display: flex; gap: 4px; }
+
+  .star {
+    appearance: none;
+    border: none;
+    background: transparent;
+    font-size: 27px;
+    line-height: 1;
+    color: var(--beige);
+    cursor: pointer;
+    padding: 2px;
+  }
+
+  .star.filled { color: var(--morado); }
+
+  .photo-input {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    color: var(--gris-soft);
+  }
+
+  .photo-preview {
+    display: block;
+    margin-top: 10px;
+    max-height: 150px;
+    border-radius: 10px;
+    border: 1.5px solid var(--beige);
+  }
+
+  .signature-pad {
+    width: 100%;
+    height: 130px;
+    display: block;
+    border: 1.5px solid var(--beige);
+    border-radius: 10px;
+    background: #fff;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .sig-clear {
+    margin-top: 8px;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    color: var(--morado);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  .btn-inline {
+    appearance: none;
+    border: none;
+    border-radius: 10px;
+    background: var(--morado);
+    color: #fff;
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 10px 16px;
+    cursor: pointer;
+  }
+
+  .btn-inline:hover { background: var(--morado-dark); }
+
+  .review-group { margin-bottom: 18px; }
+  .review-group:last-child { margin-bottom: 0; }
+
+  .review-heading {
+    margin: 0 0 8px;
+    font-family: var(--font-head);
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--gris);
+  }
+
+  .review-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 8px 0;
+    border-top: 1px solid var(--beige);
+    font-size: 14px;
+  }
+
+  .review-row dt { margin: 0; color: var(--gris-soft); }
+  .review-row dd { margin: 0; text-align: right; color: var(--gris); }
+
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 26px;
+  }
+
+  .btn {
+    appearance: none;
+    border-radius: 10px;
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 14.5px;
+    padding: 12px 20px;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+  }
+
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  .btn-back {
+    background: transparent;
+    border-color: var(--morado);
+    color: var(--morado);
+  }
+
+  .btn-next {
+    background: var(--morado);
+    color: #fff;
+  }
+
+  .btn-next:not(:disabled):hover { background: var(--morado-dark); }
+
+  .done {
+    text-align: center;
+    padding: 20px 4px 6px;
+  }
+
+  .done-badge {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: var(--azul);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .done h2 {
+    margin: 0 0 6px;
+    font-family: var(--font-head);
+    font-size: 19px;
+    color: var(--morado);
+  }
+
+  .done p {
+    margin: 0 0 22px;
+    font-size: 14px;
+    color: var(--gris-soft);
+  }
+
+  .btn-restart {
+    background: var(--beige);
+    color: var(--gris);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .frame, .progress-fill, .toggle-switch, .toggle-switch .knob { transition: none; }
+  }
+</style>
+
+<div class="page">
+  <div class="intro">
+    <p class="eyebrow">Form template</p>
+    <p class="lede">The same field library and screen flow renders any form you configure — not just one use case. Swap between three example configs below (drawn from the brief's initial Power Apps replacements) to see it adapt, and check the width chips for how each reflows on phone, tablet, and desktop.</p>
+  </div>
+
+  <div class="switcher-row">
+    <div class="switcher-group">
+      <span class="switcher-label">Example config</span>
+      <div class="switcher" id="exampleSwitcher" role="group" aria-label="Example form">
+        <button class="chip active" data-ex="temp">Example 1</button>
+        <button class="chip" data-ex="security">Example 2</button>
+        <button class="chip" data-ex="cargo">Example 3</button>
+      </div>
+    </div>
+    <div class="switcher-group">
+      <span class="switcher-label">Preview width</span>
+      <div class="switcher" id="widthSwitcher" role="group" aria-label="Preview width">
+        <button class="chip active" data-w="390">Phone</button>
+        <button class="chip" data-w="768">Tablet</button>
+        <button class="chip" data-w="1080">Desktop</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="frame-wrap">
+    <div class="frame" id="frame" style="--frame-w:390px">
+      <div class="frame-chrome"><span id="frameLabel">390px · Phone</span></div>
+      <div id="app"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const examples = {
+    temp: {
+      title: 'Example 1',
+      includeReviewScreen: true,
+      screens: [
+        {
+          id: 'site-info', title: 'Site Info', fields: [
+            { name: 'warehouse', label: 'Warehouse', type: 'select', required: true, placeholder: 'Select warehouse…', options: ['Warehouse A', 'Warehouse B', 'Warehouse C'] },
+            { name: 'inspector', label: 'Inspector Name', type: 'text', required: true, placeholder: 'Full name' },
+            { name: 'inspectionTime', label: 'Inspection Date/Time', type: 'datetime', required: true },
+          ]
+        },
+        {
+          id: 'readings', title: 'Temperature Readings', fields: [
+            { name: 'temperatureF', label: 'Temperature (°F)', type: 'number', required: true },
+            { name: 'withinRange', label: 'Within acceptable range?', type: 'toggle' },
+            { name: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Optional notes' },
+            { name: 'conditionRating', label: 'Overall Condition', type: 'rating' },
+          ]
+        },
+        {
+          id: 'sign-off', title: 'Sign-off', fields: [
+            { name: 'photo', label: 'Photo of Site', type: 'photo' },
+            { name: 'signature', label: 'Inspector Signature', type: 'signature', required: true },
+          ]
+        },
+      ],
+    },
+    security: {
+      title: 'Example 2',
+      includeReviewScreen: false,
+      screens: [
+        {
+          id: 'visit', title: 'Walkthrough Details', fields: [
+            { name: 'location', label: 'Location', type: 'select', required: true, placeholder: 'Select location…', options: ['Main Entrance', 'Loading Dock', 'Perimeter Fence', 'Server Room'] },
+            { name: 'guardName', label: 'Guard Name', type: 'text', required: true, placeholder: 'Full name' },
+            { name: 'shift', label: 'Shift', type: 'radio', options: ['Day', 'Night'] },
+            { name: 'walkthroughDate', label: 'Date', type: 'date', required: true },
+          ]
+        },
+        {
+          id: 'findings', title: 'Findings', fields: [
+            { name: 'issuesFound', label: 'Issues Found', type: 'checkbox', placeholder: 'Issues observed during this walkthrough' },
+            { name: 'severity', label: 'Severity', type: 'rating' },
+            { name: 'description', label: 'Description', type: 'textarea', placeholder: 'What did you observe?' },
+            { name: 'photoEvidence', label: 'Photo Evidence', type: 'photo' },
+            { name: 'signature', label: 'Guard Signature', type: 'signature', required: true },
+          ]
+        },
+      ],
+    },
+    cargo: {
+      title: 'Example 3',
+      includeReviewScreen: true,
+      screens: [
+        {
+          id: 'driver', title: 'Driver & Load', fields: [
+            { name: 'driverName', label: 'Driver Name', type: 'text', required: true, placeholder: 'Full name' },
+            { name: 'carrier', label: 'Carrier', type: 'select', required: true, placeholder: 'Select carrier…', options: ['ACME Freight', 'Northbound Logistics', 'Rapid Haul'] },
+            { name: 'trailerNumber', label: 'Trailer Number', type: 'text', placeholder: 'e.g. TR-4021' },
+          ]
+        },
+        {
+          id: 'cargo', title: 'Cargo', fields: [
+            { name: 'cargoTag', label: 'Cargo Tag', type: 'qrscan', autoFillTargets: ['sealNumber'], helpText: 'Preview simulates a scan — the real app opens the device camera and looks up the record.' },
+            { name: 'sealNumber', label: 'Seal Number', type: 'text', placeholder: 'Auto-filled from scan' },
+            { name: 'condition', label: 'Load Condition', type: 'rating' },
+            { name: 'damaged', label: 'Visible Damage', type: 'checkbox', placeholder: 'Damage observed on arrival' },
+            { name: 'notes', label: 'Notes', type: 'textarea', placeholder: 'Optional notes' },
+            { name: 'signature', label: 'Driver Signature', type: 'signature', required: true },
+          ]
+        },
+      ],
+    },
+  };
+
+  const state = { exampleKey: 'temp', step: 0, values: {}, errors: new Set(), submitting: false, submitted: false };
+
+  function currentConfig() { return examples[state.exampleKey]; }
+
+  function h(tag, attrs, ...children) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (k === 'class') el.className = v;
+      else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2).toLowerCase(), v);
+      else if (v !== undefined && v !== null && v !== false) el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const c of children.flat()) {
+      if (c === null || c === undefined) continue;
+      el.append(c.nodeType ? c : document.createTextNode(c));
+    }
+    return el;
+  }
+
+  function totalSteps() { const c = currentConfig(); return c.screens.length + (c.includeReviewScreen ? 1 : 0); }
+  function isReviewStep() { const c = currentConfig(); return c.includeReviewScreen && state.step === c.screens.length; }
+  function isLastFieldScreen() { const c = currentConfig(); return !c.includeReviewScreen && state.step === c.screens.length - 1; }
+
+  function renderControl(field) {
+    const val = state.values[field.name];
+    const setVal = (v) => { state.values[field.name] = v; };
+
+    switch (field.type) {
+      case 'text':
+        return h('input', { type: 'text', value: val ?? '', placeholder: field.placeholder, oninput: (e) => setVal(e.target.value) });
+      case 'number':
+        return h('input', { type: 'number', value: val ?? '', oninput: (e) => setVal(e.target.value) });
+      case 'date':
+        return h('input', { type: 'date', value: val ?? '', oninput: (e) => setVal(e.target.value) });
+      case 'datetime':
+        return h('input', { type: 'datetime-local', value: val ?? '', oninput: (e) => setVal(e.target.value) });
+      case 'textarea':
+        return h('textarea', { rows: 4, placeholder: field.placeholder, oninput: (e) => setVal(e.target.value) }, val ?? '');
+      case 'select': {
+        const sel = h('select', { onchange: (e) => setVal(e.target.value) },
+          h('option', { value: '', disabled: true, selected: !val }, field.placeholder || 'Select…'),
+          ...field.options.map((opt) => h('option', { value: opt, selected: val === opt }, opt)),
+        );
+        return sel;
+      }
+      case 'checkbox':
+        return h('div', { class: 'check-row' },
+          h('label', {},
+            h('input', { type: 'checkbox', checked: !!val, onchange: (e) => { setVal(e.target.checked); } }),
+            field.placeholder || field.label,
+          ),
+        );
+      case 'radio':
+        return h('div', { class: 'radio-group' },
+          ...field.options.map((opt) => h('label', {},
+            h('input', { type: 'radio', name: field.name, checked: val === opt, onchange: () => { setVal(opt); } }),
+            opt,
+          )),
+        );
+      case 'toggle':
+        return h('button', {
+          type: 'button', class: 'toggle-switch', role: 'switch', 'aria-checked': String(!!val),
+          onclick: () => { setVal(!val); renderApp(); },
+        }, h('span', { class: 'knob' }));
+      case 'rating': {
+        const wrap = h('div', { class: 'rating' });
+        for (let n = 1; n <= 5; n++) {
+          wrap.append(h('button', {
+            type: 'button', class: 'star' + (n <= (val || 0) ? ' filled' : ''), 'aria-label': n + ' stars',
+            onclick: () => { setVal(n); renderApp(); },
+          }, '★'));
+        }
+        return wrap;
+      }
+      case 'photo': {
+        const wrap = h('div', {});
+        const input = h('input', {
+          type: 'file', accept: 'image/*', capture: 'environment', class: 'photo-input',
+          onchange: (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => { setVal(reader.result); renderApp(); };
+            reader.readAsDataURL(file);
+          },
+        });
+        wrap.append(input);
+        if (val) wrap.append(h('img', { class: 'photo-preview', src: val, alt: 'Preview' }));
+        return wrap;
+      }
+      case 'qrscan': {
+        const wrap = h('div', {});
+        if (val) wrap.append(h('p', { class: 'field-help', style: 'margin-top:0;margin-bottom:8px;' }, `Scanned: ${val}`));
+        wrap.append(h('button', {
+          type: 'button', class: 'btn-inline',
+          onclick: () => {
+            const code = 'CARGO-' + Math.floor(10000 + Math.random() * 89999);
+            setVal(code);
+            if (field.autoFillTargets) {
+              const looked = { sealNumber: 'SL-' + Math.floor(1000 + Math.random() * 8999) };
+              field.autoFillTargets.forEach((t) => { if (looked[t] !== undefined) state.values[t] = looked[t]; });
+            }
+            renderApp();
+          },
+        }, val ? 'Rescan (simulated)' : 'Scan Tag (simulated)'));
+        return wrap;
+      }
+      case 'signature': {
+        const canvas = h('canvas', { class: 'signature-pad', width: 600, height: 260 });
+        const ctx = canvas.getContext('2d');
+        ctx.strokeStyle = '#383A35';
+        ctx.lineWidth = 2.4;
+        ctx.lineCap = 'round';
+        let drawing = false;
+
+        const pos = (e) => {
+          const rect = canvas.getBoundingClientRect();
+          const sx = canvas.width / rect.width, sy = canvas.height / rect.height;
+          return [(e.clientX - rect.left) * sx, (e.clientY - rect.top) * sy];
+        };
+        canvas.addEventListener('pointerdown', (e) => {
+          drawing = true;
+          const [x, y] = pos(e);
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+        });
+        canvas.addEventListener('pointermove', (e) => {
+          if (!drawing) return;
+          const [x, y] = pos(e);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+        });
+        const end = () => {
+          if (!drawing) return;
+          drawing = false;
+          setVal(true);
+        };
+        canvas.addEventListener('pointerup', end);
+        canvas.addEventListener('pointerleave', end);
+
+        const clearBtn = h('button', {
+          type: 'button', class: 'sig-clear',
+          onclick: () => { ctx.clearRect(0, 0, canvas.width, canvas.height); setVal(false); },
+        }, 'Clear');
+
+        return h('div', {}, canvas, clearBtn);
+      }
+      default:
+        return h('p', {}, 'Unsupported field type: ' + field.type);
+    }
+  }
+
+  function renderField(field) {
+    const hasError = state.errors.has(field.name);
+    return h('div', { class: 'field' + (hasError ? ' has-error' : '') },
+      h('label', { class: 'field-label' }, field.label, field.required ? h('span', { class: 'req' }, ' *') : null),
+      renderControl(field),
+      hasError ? h('p', { class: 'field-error' }, 'This field is required.') : null,
+      field.helpText ? h('p', { class: 'field-help' }, field.helpText) : null,
+    );
+  }
+
+  function formatValue(v) {
+    if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+    if (v === undefined || v === null || v === '') return '—';
+    if (typeof v === 'string' && v.startsWith('data:image')) return '[image attached]';
+    return String(v);
+  }
+
+  function renderReview() {
+    const container = h('div', {});
+    for (const screen of currentConfig().screens) {
+      const dl = h('dl', {});
+      for (const field of screen.fields) {
+        dl.append(h('div', { class: 'review-row' },
+          h('dt', {}, field.label),
+          h('dd', {}, formatValue(state.values[field.name])),
+        ));
+      }
+      container.append(h('div', { class: 'review-group' },
+        h('h3', { class: 'review-heading' }, screen.title),
+        dl,
+      ));
+    }
+    return container;
+  }
+
+  function validateCurrentScreen() {
+    const screen = currentConfig().screens[state.step];
+    if (!screen) return true;
+    const missing = screen.fields.filter((f) => {
+      if (!f.required) return false;
+      const v = state.values[f.name];
+      return v === undefined || v === null || v === '' || v === false;
+    });
+    state.errors = new Set(missing.map((f) => f.name));
+    return missing.length === 0;
+  }
+
+  function handleNext() {
+    if (isReviewStep() || isLastFieldScreen()) {
+      if (!isReviewStep() && !validateCurrentScreen()) { renderApp(); return; }
+      state.submitting = true;
+      renderApp();
+      setTimeout(() => {
+        state.submitting = false;
+        state.submitted = true;
+        renderApp();
+      }, 650);
+      return;
+    }
+    if (!validateCurrentScreen()) { renderApp(); return; }
+    state.step += 1;
+    renderApp();
+  }
+
+  function handleBack() {
+    state.errors = new Set();
+    state.step = Math.max(0, state.step - 1);
+    renderApp();
+  }
+
+  function handleRestart() {
+    state.step = 0;
+    state.values = {};
+    state.errors = new Set();
+    state.submitted = false;
+    renderApp();
+  }
+
+  function renderApp() {
+    const app = document.getElementById('app');
+    app.innerHTML = '';
+    const config = currentConfig();
+
+    const titlebar = h('div', { class: 'app-titlebar' }, h('h1', { class: 'app-title' }, config.title));
+
+    if (state.submitted) {
+      app.append(titlebar, h('div', { class: 'app-body done' },
+        h('div', { class: 'done-badge' },
+          (() => {
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 24 24');
+            svg.setAttribute('width', '26');
+            svg.setAttribute('height', '26');
+            svg.setAttribute('fill', 'none');
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', 'M5 13l4 4L19 7');
+            path.setAttribute('stroke', '#545386');
+            path.setAttribute('stroke-width', '2.4');
+            path.setAttribute('stroke-linecap', 'round');
+            path.setAttribute('stroke-linejoin', 'round');
+            svg.append(path);
+            return svg;
+          })(),
+        ),
+        h('h2', {}, 'Thank you!'),
+        h('p', {}, 'Your submission was received.'),
+        h('button', { class: 'btn btn-restart', onclick: handleRestart }, 'Start Another'),
+      ));
+      return;
+    }
+
+    const step = state.step + 1;
+    const total = totalSteps();
+    const pct = Math.round((step / total) * 100);
+    const onReview = isReviewStep();
+    const onLastField = isLastFieldScreen();
+
+    const body = h('div', { class: 'app-body' },
+      h('div', { class: 'progress' },
+        h('div', { class: 'progress-row' }, h('span', {}, `Step ${step} of ${total}`), h('span', {}, `${pct}%`)),
+        h('div', { class: 'progress-track' }, h('div', { class: 'progress-fill', style: `width:${pct}%` })),
+      ),
+      onReview
+        ? h('div', {}, h('h2', { class: 'screen-title' }, 'Review your answers'), renderReview())
+        : h('div', {},
+            h('h2', { class: 'screen-title' }, config.screens[state.step].title),
+            ...config.screens[state.step].fields.map(renderField),
+          ),
+      h('div', { class: 'nav' },
+        h('button', { class: 'btn btn-back', disabled: state.step === 0, onclick: handleBack }, '◀ Back'),
+        h('button', {
+          class: 'btn btn-next', disabled: state.submitting, onclick: handleNext,
+        }, state.submitting ? 'Submitting…' : (onReview || onLastField ? 'Submit' : 'Next ▶')),
+      ),
+    );
+    app.append(titlebar, body);
+  }
+
+  document.querySelectorAll('#widthSwitcher .chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#widthSwitcher .chip').forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      const w = chip.dataset.w;
+      document.getElementById('frame').style.setProperty('--frame-w', w + 'px');
+      document.getElementById('frameLabel').textContent = `${w}px · ${chip.textContent}`;
+    });
+  });
+
+  document.querySelectorAll('#exampleSwitcher .chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#exampleSwitcher .chip').forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      state.exampleKey = chip.dataset.ex;
+      state.step = 0;
+      state.values = {};
+      state.errors = new Set();
+      state.submitting = false;
+      state.submitted = false;
+      renderApp();
+    });
+  });
+
+  renderApp();
+</script>
