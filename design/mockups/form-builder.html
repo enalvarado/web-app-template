@@ -334,6 +334,39 @@
 
   .confirm-actions button, .confirm-view > button { cursor: default; }
 
+  .review-preview { padding: 22px 22px 26px; }
+
+  .review-title {
+    margin: 0 0 16px;
+    font-family: var(--font-head);
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--gris);
+  }
+
+  .review-group { margin-bottom: 18px; }
+  .review-group:last-child { margin-bottom: 0; }
+
+  .review-heading {
+    margin: 0 0 8px;
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gris);
+  }
+
+  .review-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 7px 0;
+    border-top: 1px solid var(--beige);
+    font-size: 13px;
+  }
+
+  .review-row dt { margin: 0; color: var(--gris-soft); }
+  .review-row dd { margin: 0; text-align: right; color: var(--gris-faint); font-style: italic; }
+
   .canvas-progress { margin-bottom: 20px; }
 
   .canvas-progress-row {
@@ -779,6 +812,7 @@
     <main class="canvas-wrap">
       <div class="width-switcher" id="viewSwitcher" role="group" aria-label="Canvas preview mode">
         <button class="w-chip active" data-view="screens">Screens</button>
+        <button class="w-chip" data-view="review">Review summary</button>
         <button class="w-chip" data-view="success">Success screen</button>
         <button class="w-chip" data-view="failure">Failure screen</button>
       </div>
@@ -1154,7 +1188,37 @@
     el.append(titlebar, body);
   }
 
+  function renderReviewPreview() {
+    const el = document.getElementById('canvas');
+    el.innerHTML = '';
+    const titlebar = h('div', { class: 'canvas-titlebar' }, h('h1', {}, state.title || 'Untitled Form'));
+
+    const groups = state.screens
+      .map((s) => ({ screen: s, fields: s.fields.filter((f) => f.type !== 'button') }))
+      .filter((g) => g.fields.length > 0)
+      .map((g) => h('div', { class: 'review-group' },
+        h('h3', { class: 'review-heading' }, g.screen.title),
+        h('dl', {},
+          ...g.fields.map((f) => h('div', { class: 'review-row' },
+            h('dt', {}, f.label),
+            h('dd', {}, '—'),
+          )),
+        ),
+      ));
+
+    const body = h('div', { class: 'review-preview' },
+      h('h2', { class: 'review-title' }, 'Review your answers'),
+      groups.length ? groups : h('p', { class: 'empty-canvas' }, 'Add fields to a screen to see them listed here.'),
+    );
+
+    el.append(titlebar, body);
+  }
+
   function renderCanvas() {
+    if (state.canvasView === 'review') {
+      renderReviewPreview();
+      return;
+    }
     if (state.canvasView !== 'screens') {
       renderConfirmPreview();
       return;
@@ -1315,6 +1379,24 @@
   function renderProperties() {
     const el = document.getElementById('properties');
     el.innerHTML = '';
+
+    if (state.canvasView === 'review') {
+      el.append(
+        h('p', { class: 'prop-heading' }, 'Review preview'),
+        h('p', { class: 'prop-hint' }, "Lists every field from every screen, right before Submit, so people can double-check their answers. Values shown here are placeholders — the builder doesn't collect real input."),
+        h('div', { class: 'prop-field' },
+          h('label', { class: 'prop-check' },
+            h('input', {
+              type: 'checkbox', checked: state.includeReviewScreen,
+              onchange: (e) => { state.includeReviewScreen = e.target.checked; renderCanvas(); renderProperties(); },
+            }),
+            'Include review screen before submit',
+          ),
+        ),
+        !state.includeReviewScreen ? h('p', { class: 'prop-hint' }, "Currently off — this screen won't appear in the exported form until you turn it on.") : null,
+      );
+      return;
+    }
 
     if (state.canvasView !== 'screens') {
       const label = state.canvasView === 'success' ? 'success' : 'failure';
