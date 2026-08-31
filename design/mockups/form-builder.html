@@ -377,6 +377,12 @@
 
   .cf-req { color: var(--rosado-deep); }
 
+  .cf-label-hidden-note {
+    font-style: italic;
+    font-weight: 500;
+    color: var(--gris-faint);
+  }
+
   .canvas-field.cf-disabled { opacity: .5; }
   .canvas-field.cf-disabled:hover { opacity: .7; }
 
@@ -458,6 +464,7 @@
   .cf-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gris-soft); }
   .cf-row input[type="checkbox"], .cf-row input[type="radio"] { accent-color: var(--beige); width: 16px; height: 16px; }
   .cf-radio-list { display: flex; flex-direction: column; gap: 6px; }
+  .cf-radio-list.horizontal { flex-direction: row; flex-wrap: wrap; column-gap: 16px; row-gap: 6px; }
 
   .cf-toggle-static {
     width: 40px; height: 24px; border-radius: 999px; background: var(--beige); position: relative;
@@ -812,8 +819,8 @@
     screens: [
       {
         id: 'screen-1', title: 'Screen 1', fields: [
-          { id: 'f1', type: 'text', label: 'Full Name', name: 'full_name', required: true, placeholder: 'Full name', helpText: '', widthPct: 100, disabled: false },
-          { id: 'f2', type: 'select', label: 'Category', name: 'category', required: false, placeholder: 'Select…', options: ['Option 1', 'Option 2'], helpText: '', widthPct: 100, disabled: false, sourceKind: 'static', sourceQuery: '', sourceWorkbookId: '', sourceSheet: '' },
+          { id: 'f1', type: 'text', label: 'Full Name', name: 'full_name', required: true, placeholder: 'Full name', helpText: '', widthPct: 100, disabled: false, hideLabel: false },
+          { id: 'f2', type: 'select', label: 'Category', name: 'category', required: false, placeholder: 'Select…', options: ['Option 1', 'Option 2'], helpText: '', widthPct: 100, disabled: false, hideLabel: false, sourceKind: 'static', sourceQuery: '', sourceWorkbookId: '', sourceSheet: '' },
         ]
       },
     ],
@@ -862,12 +869,18 @@
     return null;
   }
 
-  function actionHint(action) {
+  function actionHint(field) {
+    const action = field.buttonAction;
     switch (action) {
       case 'back': return '← Returns to the previous screen';
       case 'submit': return '✓ Submits the form';
       case 'reset': return '↺ Clears all fields on this screen';
       case 'none': return '';
+      case 'goto': {
+        const idx = state.screens.findIndex((s) => s.id === field.buttonTargetScreenId);
+        if (idx === -1) return '⇥ Jumps to a screen (pick which one in the properties panel)';
+        return `⇥ Jumps to Screen ${idx + 1}: ${state.screens[idx].title}`;
+      }
       case 'next':
       default: return '→ Advances to the next screen';
     }
@@ -889,12 +902,14 @@
     const count = activeScreen().fields.length + 1;
     const field = {
       id, type, label: meta.label, name: slug(meta.label) + '_' + count,
-      required: false, placeholder: '', helpText: '', widthPct: 100, disabled: false,
+      required: false, placeholder: '', helpText: '', widthPct: 100, disabled: false, hideLabel: false,
       options: usesOptions(type) ? ['Option 1', 'Option 2'] : undefined,
       sourceKind: usesOptions(type) ? 'static' : undefined,
+      radioLayout: type === 'radio' ? 'vertical' : undefined,
       sourceQuery: '', sourceWorkbookId: '', sourceSheet: '',
       buttonStyle: type === 'button' ? 'primary' : undefined,
       buttonAction: type === 'button' ? 'next' : undefined,
+      buttonTargetScreenId: undefined,
     };
     activeScreen().fields.push(field);
     state.selectedFieldId = id;
@@ -1029,7 +1044,7 @@
         if (field.sourceKind && field.sourceKind !== 'static') {
           return h('div', { class: 'cf-dashed' }, sourceHint(field));
         }
-        return h('div', { class: 'cf-radio-list' },
+        return h('div', { class: 'cf-radio-list' + (field.radioLayout === 'horizontal' ? ' horizontal' : '') },
           ...(field.options || []).map((opt) => h('label', { class: 'cf-row' }, h('input', { type: 'radio', disabled: true }), opt)),
         );
       case 'toggle':
@@ -1087,9 +1102,13 @@
           ),
           field.type === 'button'
             ? (field.disabled ? h('div', { class: 'cf-label' }, h('span', { class: 'cf-disabled-badge' }, 'Disabled')) : null)
-            : h('label', { class: 'cf-label' }, field.label, field.required ? h('span', { class: 'cf-req' }, ' *') : null, field.disabled ? h('span', { class: 'cf-disabled-badge' }, 'Disabled') : null),
+            : h('label', { class: 'cf-label' + (field.hideLabel ? ' cf-label-hidden-note' : '') },
+                field.hideLabel ? 'Label hidden' : field.label,
+                (!field.hideLabel && field.required) ? h('span', { class: 'cf-req' }, ' *') : null,
+                field.disabled ? h('span', { class: 'cf-disabled-badge' }, 'Disabled') : null,
+              ),
           h('div', { class: 'cf-preview' }, fieldPreview(field)),
-          field.type === 'button' && actionHint(field.buttonAction) ? h('p', { class: 'cf-action-hint' }, actionHint(field.buttonAction)) : null,
+          field.type === 'button' && actionHint(field) ? h('p', { class: 'cf-action-hint' }, actionHint(field)) : null,
         ));
       });
     }
@@ -1225,6 +1244,13 @@
           ),
           h('p', { class: 'prop-hint' }, 'Greyed out and not usable, without removing it — use this to restrict a field.'),
         ),
+        field.type === 'button' ? null : h('div', { class: 'prop-field' },
+          h('label', { class: 'prop-check' },
+            h('input', { type: 'checkbox', checked: !!field.hideLabel, onchange: (e) => { field.hideLabel = e.target.checked; renderCanvas(); } }),
+            'Hide label',
+          ),
+          h('p', { class: 'prop-hint' }, 'Hides the visible label on this screen — e.g. when the placeholder already makes it obvious. Keep the label filled in for screen readers.'),
+        ),
         field.type === 'button' ? h('div', { class: 'prop-field' },
           h('span', { class: 'prop-label' }, 'Action'),
           h('select', {
@@ -1232,9 +1258,20 @@
           },
             h('option', { value: 'next', selected: (field.buttonAction || 'next') === 'next' }, 'Go to next screen'),
             h('option', { value: 'back', selected: field.buttonAction === 'back' }, 'Go to previous screen'),
+            h('option', { value: 'goto', selected: field.buttonAction === 'goto' }, 'Jump to a specific screen'),
             h('option', { value: 'submit', selected: field.buttonAction === 'submit' }, 'Submit form'),
             h('option', { value: 'reset', selected: field.buttonAction === 'reset' }, 'Reset form'),
             h('option', { value: 'none', selected: field.buttonAction === 'none' }, 'None (decorative only)'),
+          ),
+        ) : null,
+        field.type === 'button' && field.buttonAction === 'goto' ? h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, 'Target screen'),
+          h('select', {
+            onchange: (e) => { field.buttonTargetScreenId = e.target.value; renderCanvas(); },
+          },
+            ...state.screens.map((s, i) => h('option', {
+              value: s.id, selected: (field.buttonTargetScreenId || state.screens[0].id) === s.id,
+            }, `Screen ${i + 1}: ${s.title}`)),
           ),
         ) : null,
         field.type === 'button' ? h('div', { class: 'prop-field' },
@@ -1255,6 +1292,15 @@
         usesPlaceholder(field.type) ? h('div', { class: 'prop-field' },
           h('span', { class: 'prop-label' }, 'Placeholder'),
           h('input', { type: 'text', value: field.placeholder || '', oninput: (e) => { field.placeholder = e.target.value; renderCanvas(); } }),
+        ) : null,
+        field.type === 'radio' ? h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, 'Layout'),
+          h('select', {
+            onchange: (e) => { field.radioLayout = e.target.value; renderCanvas(); },
+          },
+            h('option', { value: 'vertical', selected: (field.radioLayout || 'vertical') === 'vertical' }, 'Vertical (stacked)'),
+            h('option', { value: 'horizontal', selected: field.radioLayout === 'horizontal' }, 'Horizontal (side by side)'),
+          ),
         ) : null,
         usesOptions(field.type) ? optionsSourceEditor(field) : null,
         field.type === 'button' ? null : h('div', { class: 'prop-field' },
@@ -1333,6 +1379,9 @@
           helpText: f.helpText || undefined,
           buttonStyle: f.buttonStyle,
           buttonAction: f.type === 'button' ? (f.buttonAction || 'next') : undefined,
+          targetScreenId: (f.type === 'button' && f.buttonAction === 'goto') ? (f.buttonTargetScreenId || undefined) : undefined,
+          layout: (f.type === 'radio' && f.radioLayout === 'horizontal') ? 'horizontal' : undefined,
+          hideLabel: (f.type !== 'button' && f.hideLabel) ? true : undefined,
           width: f.widthPct && f.widthPct < 100 ? f.widthPct : undefined,
           disabled: f.disabled || undefined,
         })),
