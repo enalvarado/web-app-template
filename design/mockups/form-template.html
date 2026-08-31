@@ -448,6 +448,8 @@
     justify-content: center;
   }
 
+  .done-badge.error { background: var(--rosado); }
+
   .done h2 {
     margin: 0 0 6px;
     font-family: var(--font-head);
@@ -455,10 +457,18 @@
     color: var(--morado);
   }
 
+  .done h2.error { color: var(--rosado-deep); }
+
   .done p {
     margin: 0 0 22px;
     font-size: 14px;
     color: var(--gris-soft);
+  }
+
+  .done-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
   }
 
   .btn-restart {
@@ -492,6 +502,13 @@
         <button class="chip active" data-w="390">Phone</button>
         <button class="chip" data-w="768">Tablet</button>
         <button class="chip" data-w="1080">Desktop</button>
+      </div>
+    </div>
+    <div class="switcher-group">
+      <span class="switcher-label">Simulate submit</span>
+      <div class="switcher" id="outcomeSwitcher" role="group" aria-label="Simulated submit outcome">
+        <button class="chip active" data-outcome="success">Success</button>
+        <button class="chip" data-outcome="failure">Failure</button>
       </div>
     </div>
   </div>
@@ -581,7 +598,7 @@
     },
   };
 
-  const state = { exampleKey: 'temp', step: 0, values: {}, errors: new Set(), submitting: false, submitted: false };
+  const state = { exampleKey: 'temp', step: 0, values: {}, errors: new Set(), submitting: false, submitted: false, submitFailed: false, simulateOutcome: 'success' };
 
   function currentConfig() { return examples[state.exampleKey]; }
 
@@ -742,6 +759,22 @@
     );
   }
 
+  function resultIcon(pathD, stroke) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('width', '26');
+    svg.setAttribute('height', '26');
+    svg.setAttribute('fill', 'none');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathD);
+    path.setAttribute('stroke', stroke);
+    path.setAttribute('stroke-width', '2.4');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    svg.append(path);
+    return svg;
+  }
+
   function formatValue(v) {
     if (typeof v === 'boolean') return v ? 'Yes' : 'No';
     if (v === undefined || v === null || v === '') return '—';
@@ -783,16 +816,26 @@
     if (isReviewStep() || isLastFieldScreen()) {
       if (!isReviewStep() && !validateCurrentScreen()) { renderApp(); return; }
       state.submitting = true;
+      state.submitFailed = false;
       renderApp();
       setTimeout(() => {
         state.submitting = false;
-        state.submitted = true;
+        if (state.simulateOutcome === 'failure') {
+          state.submitFailed = true;
+        } else {
+          state.submitted = true;
+        }
         renderApp();
       }, 650);
       return;
     }
     if (!validateCurrentScreen()) { renderApp(); return; }
     state.step += 1;
+    renderApp();
+  }
+
+  function handleTryAgain() {
+    state.submitFailed = false;
     renderApp();
   }
 
@@ -807,6 +850,7 @@
     state.values = {};
     state.errors = new Set();
     state.submitted = false;
+    state.submitFailed = false;
     renderApp();
   }
 
@@ -819,26 +863,23 @@
 
     if (state.submitted) {
       app.append(titlebar, h('div', { class: 'app-body done' },
-        h('div', { class: 'done-badge' },
-          (() => {
-            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.setAttribute('viewBox', '0 0 24 24');
-            svg.setAttribute('width', '26');
-            svg.setAttribute('height', '26');
-            svg.setAttribute('fill', 'none');
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttribute('d', 'M5 13l4 4L19 7');
-            path.setAttribute('stroke', '#545386');
-            path.setAttribute('stroke-width', '2.4');
-            path.setAttribute('stroke-linecap', 'round');
-            path.setAttribute('stroke-linejoin', 'round');
-            svg.append(path);
-            return svg;
-          })(),
-        ),
+        h('div', { class: 'done-badge' }, resultIcon('M5 13l4 4L19 7', '#545386')),
         h('h2', {}, 'Thank you!'),
         h('p', {}, 'Your submission was received.'),
         h('button', { class: 'btn btn-restart', onclick: handleRestart }, 'Start Another'),
+      ));
+      return;
+    }
+
+    if (state.submitFailed) {
+      app.append(titlebar, h('div', { class: 'app-body done' },
+        h('div', { class: 'done-badge error' }, resultIcon('M8 8l8 8M16 8l-8 8', '#C24C64')),
+        h('h2', { class: 'error' }, 'Submission failed'),
+        h('p', {}, "We couldn't save your submission. Your answers are still here — check your connection and try again."),
+        h('div', { class: 'done-actions' },
+          h('button', { class: 'btn btn-restart', onclick: handleRestart }, 'Start Over'),
+          h('button', { class: 'btn btn-next', onclick: handleTryAgain }, 'Try Again'),
+        ),
       ));
       return;
     }
@@ -890,7 +931,16 @@
       state.errors = new Set();
       state.submitting = false;
       state.submitted = false;
+      state.submitFailed = false;
       renderApp();
+    });
+  });
+
+  document.querySelectorAll('#outcomeSwitcher .chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#outcomeSwitcher .chip').forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      state.simulateOutcome = chip.dataset.outcome;
     });
   });
 

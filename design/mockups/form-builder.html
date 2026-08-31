@@ -293,6 +293,47 @@
 
   .canvas-body { padding: 22px 22px 26px; }
 
+  .confirm-view {
+    padding: 40px 22px 34px;
+    text-align: center;
+  }
+
+  .confirm-badge {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    background: var(--azul);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .confirm-badge.error { background: var(--rosado); }
+
+  .confirm-view h2 {
+    margin: 0 0 6px;
+    font-family: var(--font-head);
+    font-size: 17px;
+    color: var(--morado);
+  }
+
+  .confirm-view h2.error { color: var(--rosado-deep); }
+
+  .confirm-view p {
+    margin: 0 0 20px;
+    font-size: 13px;
+    color: var(--gris-soft);
+  }
+
+  .confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .confirm-actions button, .confirm-view > button { cursor: default; }
+
   .canvas-progress { margin-bottom: 20px; }
 
   .canvas-progress-row {
@@ -736,6 +777,11 @@
   <div class="workspace">
     <aside class="palette" id="palette"></aside>
     <main class="canvas-wrap">
+      <div class="width-switcher" id="viewSwitcher" role="group" aria-label="Canvas preview mode">
+        <button class="w-chip active" data-view="screens">Screens</button>
+        <button class="w-chip" data-view="success">Success screen</button>
+        <button class="w-chip" data-view="failure">Failure screen</button>
+      </div>
       <div class="width-switcher" id="widthSwitcher" role="group" aria-label="Preview width">
         <button class="w-chip active" data-w="390">Phone</button>
         <button class="w-chip" data-w="768">Tablet</button>
@@ -816,6 +862,7 @@
     nextScreenId: 2,
     panel: 'form',
     selectedFieldId: null,
+    canvasView: 'screens',
     screens: [
       {
         id: 'screen-1', title: 'Screen 1', fields: [
@@ -914,6 +961,7 @@
     activeScreen().fields.push(field);
     state.selectedFieldId = id;
     state.panel = 'field';
+    state.canvasView = 'screens';
     render();
   }
 
@@ -943,6 +991,7 @@
     state.activeScreen = idx;
     state.selectedFieldId = null;
     state.panel = 'screen';
+    state.canvasView = 'screens';
     render();
   }
 
@@ -1062,7 +1111,54 @@
     }
   }
 
+  function confirmIcon(pathD, stroke) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 24 24');
+    svg.setAttribute('width', '26');
+    svg.setAttribute('height', '26');
+    svg.setAttribute('fill', 'none');
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', pathD);
+    path.setAttribute('stroke', stroke);
+    path.setAttribute('stroke-width', '2.4');
+    path.setAttribute('stroke-linecap', 'round');
+    path.setAttribute('stroke-linejoin', 'round');
+    svg.append(path);
+    return svg;
+  }
+
+  function renderConfirmPreview() {
+    const el = document.getElementById('canvas');
+    el.innerHTML = '';
+    const isSuccess = state.canvasView === 'success';
+
+    const titlebar = h('div', { class: 'canvas-titlebar' }, h('h1', {}, state.title || 'Untitled Form'));
+
+    const body = isSuccess
+      ? h('div', { class: 'confirm-view' },
+          h('div', { class: 'confirm-badge' }, confirmIcon('M5 13l4 4L19 7', '#545386')),
+          h('h2', {}, 'Thank you!'),
+          h('p', {}, 'Your submission was received.'),
+          h('button', { type: 'button', disabled: true, style: buttonPreviewStyle('outline') }, 'Start Another'),
+        )
+      : h('div', { class: 'confirm-view' },
+          h('div', { class: 'confirm-badge error' }, confirmIcon('M8 8l8 8M16 8l-8 8', '#C24C64')),
+          h('h2', { class: 'error' }, 'Submission failed'),
+          h('p', {}, "We couldn't save your submission. Your answers are still here — check your connection and try again."),
+          h('div', { class: 'confirm-actions' },
+            h('button', { type: 'button', disabled: true, style: buttonPreviewStyle('outline') }, 'Start Over'),
+            h('button', { type: 'button', disabled: true, style: buttonPreviewStyle('primary') }, 'Try Again'),
+          ),
+        );
+
+    el.append(titlebar, body);
+  }
+
   function renderCanvas() {
+    if (state.canvasView !== 'screens') {
+      renderConfirmPreview();
+      return;
+    }
     const el = document.getElementById('canvas');
     el.innerHTML = '';
     const screen = activeScreen();
@@ -1219,6 +1315,15 @@
   function renderProperties() {
     const el = document.getElementById('properties');
     el.innerHTML = '';
+
+    if (state.canvasView !== 'screens') {
+      const label = state.canvasView === 'success' ? 'success' : 'failure';
+      el.append(
+        h('p', { class: 'prop-heading' }, 'Confirmation preview'),
+        h('p', { class: 'prop-hint' }, `This is what people see after they hit Submit, if it ${label === 'success' ? 'goes through' : 'fails'}. It's fixed template copy — not editable per form — so there's nothing to configure here. Switch back to "Screens" above to keep building.`),
+      );
+      return;
+    }
 
     if (state.panel === 'field' && state.selectedFieldId) {
       const field = findField(state.selectedFieldId);
@@ -1421,6 +1526,16 @@
       document.querySelectorAll('#widthSwitcher .w-chip').forEach((c) => c.classList.remove('active'));
       chip.classList.add('active');
       document.getElementById('canvasCol').style.setProperty('--canvas-w', chip.dataset.w + 'px');
+    });
+  });
+
+  document.querySelectorAll('#viewSwitcher .w-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('#viewSwitcher .w-chip').forEach((c) => c.classList.remove('active'));
+      chip.classList.add('active');
+      state.canvasView = chip.dataset.view;
+      renderCanvas();
+      renderProperties();
     });
   });
 
