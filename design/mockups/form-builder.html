@@ -377,6 +377,24 @@
 
   .cf-req { color: var(--rosado-deep); }
 
+  .canvas-field.cf-disabled { opacity: .5; }
+  .canvas-field.cf-disabled:hover { opacity: .7; }
+
+  .cf-disabled-badge {
+    display: inline-block;
+    margin-left: 6px;
+    font-family: var(--font-head);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--rosado-deep);
+    background: var(--rosado);
+    padding: 2px 6px;
+    border-radius: 999px;
+    vertical-align: middle;
+  }
+
   .cf-toolbar {
     position: absolute;
     top: -12px;
@@ -429,6 +447,13 @@
   }
 
   .cf-preview textarea { min-height: 46px; resize: none; }
+
+  .cf-action-hint {
+    margin: 7px 2px 0;
+    text-align: center;
+    font-size: 11px;
+    color: var(--gris-faint);
+  }
 
   .cf-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gris-soft); }
   .cf-row input[type="checkbox"], .cf-row input[type="radio"] { accent-color: var(--beige); width: 16px; height: 16px; }
@@ -650,6 +675,15 @@
 
   .export-body p { margin: 0 0 10px; font-size: 12.5px; color: var(--gris-soft); }
 
+  .export-warning {
+    background: var(--rosado);
+    color: var(--rosado-deep);
+    border-radius: 8px;
+    padding: 9px 11px;
+  }
+
+  .export-warning code { color: inherit; }
+
   .export-body pre {
     margin: 0;
     background: var(--backdrop);
@@ -716,6 +750,7 @@
     </div>
     <div class="export-body">
       <p>Save this as <code>frontend/src/forms/&lt;id&gt;/config.json</code> in the template repo — <code>FieldRenderer</code> already knows how to render every field type below.</p>
+      <p id="sourceWarning" class="export-warning" hidden>Heads up: one or more dropdowns pull options from SQL or Excel via <code>source</code>. The backend endpoint that resolves those queries isn't built yet — it currently throws <code>NotImplementedError</code> — so wire that up before this config works end-to-end.</p>
       <pre id="exportJson"></pre>
     </div>
     <div class="export-panel-foot">
@@ -777,8 +812,8 @@
     screens: [
       {
         id: 'screen-1', title: 'Screen 1', fields: [
-          { id: 'f1', type: 'text', label: 'Full Name', name: 'full_name', required: true, placeholder: 'Full name', helpText: '', widthPct: 100 },
-          { id: 'f2', type: 'select', label: 'Category', name: 'category', required: false, placeholder: 'Select…', options: ['Option 1', 'Option 2'], helpText: '', widthPct: 100 },
+          { id: 'f1', type: 'text', label: 'Full Name', name: 'full_name', required: true, placeholder: 'Full name', helpText: '', widthPct: 100, disabled: false },
+          { id: 'f2', type: 'select', label: 'Category', name: 'category', required: false, placeholder: 'Select…', options: ['Option 1', 'Option 2'], helpText: '', widthPct: 100, disabled: false, sourceKind: 'static', sourceQuery: '', sourceWorkbookId: '', sourceSheet: '' },
         ]
       },
     ],
@@ -827,6 +862,17 @@
     return null;
   }
 
+  function actionHint(action) {
+    switch (action) {
+      case 'back': return '← Returns to the previous screen';
+      case 'submit': return '✓ Submits the form';
+      case 'reset': return '↺ Clears all fields on this screen';
+      case 'none': return '';
+      case 'next':
+      default: return '→ Advances to the next screen';
+    }
+  }
+
   function usesPlaceholder(type) {
     return ['text', 'textarea', 'number', 'date', 'datetime', 'select'].includes(type);
   }
@@ -843,9 +889,12 @@
     const count = activeScreen().fields.length + 1;
     const field = {
       id, type, label: meta.label, name: slug(meta.label) + '_' + count,
-      required: false, placeholder: '', helpText: '', widthPct: 100,
+      required: false, placeholder: '', helpText: '', widthPct: 100, disabled: false,
       options: usesOptions(type) ? ['Option 1', 'Option 2'] : undefined,
+      sourceKind: usesOptions(type) ? 'static' : undefined,
+      sourceQuery: '', sourceWorkbookId: '', sourceSheet: '',
       buttonStyle: type === 'button' ? 'primary' : undefined,
+      buttonAction: type === 'button' ? 'next' : undefined,
     };
     activeScreen().fields.push(field);
     state.selectedFieldId = id;
@@ -970,10 +1019,16 @@
       case 'textarea':
         return h('textarea', { disabled: true, placeholder: field.placeholder || '' });
       case 'select':
+        if (field.sourceKind && field.sourceKind !== 'static') {
+          return h('div', { class: 'cf-dashed' }, sourceHint(field));
+        }
         return h('select', { disabled: true }, h('option', {}, field.placeholder || 'Select…'));
       case 'checkbox':
         return h('div', { class: 'cf-row' }, h('input', { type: 'checkbox', disabled: true }), field.placeholder || field.label);
       case 'radio':
+        if (field.sourceKind && field.sourceKind !== 'static') {
+          return h('div', { class: 'cf-dashed' }, sourceHint(field));
+        }
         return h('div', { class: 'cf-radio-list' },
           ...(field.options || []).map((opt) => h('label', { class: 'cf-row' }, h('input', { type: 'radio', disabled: true }), opt)),
         );
@@ -1021,7 +1076,7 @@
       screen.fields.forEach((field, idx) => {
         const pct = field.widthPct || 100;
         fieldsWrap.append(h('div', {
-          class: 'canvas-field' + (field.id === state.selectedFieldId ? ' selected' : ''),
+          class: 'canvas-field' + (field.disabled ? ' cf-disabled' : '') + (field.id === state.selectedFieldId ? ' selected' : ''),
           style: pct < 100 ? `flex: 1 1 calc(${pct}% - 6px); min-width: 0;` : undefined,
           onclick: () => selectField(field.id),
         },
@@ -1030,8 +1085,11 @@
             h('button', { type: 'button', title: 'Move down', disabled: idx === screen.fields.length - 1, onclick: (e) => { e.stopPropagation(); moveField(field.id, 1); } }, '↓'),
             h('button', { type: 'button', class: 'danger', title: 'Delete', onclick: (e) => { e.stopPropagation(); deleteField(field.id); } }, '✕'),
           ),
-          field.type === 'button' ? null : h('label', { class: 'cf-label' }, field.label, field.required ? h('span', { class: 'cf-req' }, ' *') : null),
+          field.type === 'button'
+            ? (field.disabled ? h('div', { class: 'cf-label' }, h('span', { class: 'cf-disabled-badge' }, 'Disabled')) : null)
+            : h('label', { class: 'cf-label' }, field.label, field.required ? h('span', { class: 'cf-req' }, ' *') : null, field.disabled ? h('span', { class: 'cf-disabled-badge' }, 'Disabled') : null),
           h('div', { class: 'cf-preview' }, fieldPreview(field)),
+          field.type === 'button' && actionHint(field.buttonAction) ? h('p', { class: 'cf-action-hint' }, actionHint(field.buttonAction)) : null,
         ));
       });
     }
@@ -1060,6 +1118,67 @@
       onclick: () => { field.options.push('Option ' + (field.options.length + 1)); render(); },
     }, '+ Add option'));
     return wrap;
+  }
+
+  function optionsSourceEditor(field) {
+    const kind = field.sourceKind || 'static';
+    const wrap = h('div', {});
+
+    wrap.append(h('div', { class: 'prop-field' },
+      h('span', { class: 'prop-label' }, 'Options source'),
+      h('select', {
+        onchange: (e) => { field.sourceKind = e.target.value; renderProperties(); renderCanvas(); },
+      },
+        h('option', { value: 'static', selected: kind === 'static' }, 'Static list'),
+        h('option', { value: 'sql', selected: kind === 'sql' }, 'SQL query'),
+        h('option', { value: 'excel', selected: kind === 'excel' }, 'Excel workbook'),
+      ),
+    ));
+
+    if (kind === 'sql') {
+      wrap.append(h('div', { class: 'prop-field' },
+        h('span', { class: 'prop-label' }, 'SQL query'),
+        h('textarea', {
+          placeholder: 'SELECT DISTINCT name FROM dbo.Warehouses ORDER BY name',
+          oninput: (e) => { field.sourceQuery = e.target.value; },
+        }, field.sourceQuery || ''),
+        h('p', { class: 'prop-hint' }, 'Runs against the shared SQL Server connection — the first column becomes the option list.'),
+      ));
+    } else if (kind === 'excel') {
+      wrap.append(
+        h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, 'Workbook ID'),
+          h('input', {
+            type: 'text', placeholder: 'OneDrive/SharePoint workbook ID or path', value: field.sourceWorkbookId || '',
+            oninput: (e) => { field.sourceWorkbookId = e.target.value; },
+          }),
+        ),
+        h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, 'Sheet name'),
+          h('input', {
+            type: 'text', placeholder: 'Sheet1', value: field.sourceSheet || '',
+            oninput: (e) => { field.sourceSheet = e.target.value; },
+          }),
+          h('p', { class: 'prop-hint' }, "Reads the sheet's first column as the option list."),
+        ),
+      );
+    } else {
+      wrap.append(optionsEditor(field));
+    }
+
+    return wrap;
+  }
+
+  function sourceHint(field) {
+    if (field.sourceKind === 'sql') {
+      const q = (field.sourceQuery || '').trim();
+      return 'SQL: ' + (q ? (q.length > 46 ? q.slice(0, 46) + '…' : q) : '(no query set yet)');
+    }
+    if (field.sourceKind === 'excel') {
+      const sheet = field.sourceSheet || 'sheet';
+      return 'Excel: ' + sheet + (field.sourceWorkbookId ? ' — ' + field.sourceWorkbookId : ' (no workbook set yet)');
+    }
+    return '';
   }
 
   function widthField(field) {
@@ -1099,6 +1218,25 @@
           h('input', { type: 'text', value: field.name, oninput: (e) => { field.name = e.target.value; } }),
         ),
         widthField(field),
+        h('div', { class: 'prop-field' },
+          h('label', { class: 'prop-check' },
+            h('input', { type: 'checkbox', checked: !!field.disabled, onchange: (e) => { field.disabled = e.target.checked; renderCanvas(); } }),
+            'Disabled on this screen',
+          ),
+          h('p', { class: 'prop-hint' }, 'Greyed out and not usable, without removing it — use this to restrict a field.'),
+        ),
+        field.type === 'button' ? h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, 'Action'),
+          h('select', {
+            onchange: (e) => { field.buttonAction = e.target.value; renderCanvas(); },
+          },
+            h('option', { value: 'next', selected: (field.buttonAction || 'next') === 'next' }, 'Go to next screen'),
+            h('option', { value: 'back', selected: field.buttonAction === 'back' }, 'Go to previous screen'),
+            h('option', { value: 'submit', selected: field.buttonAction === 'submit' }, 'Submit form'),
+            h('option', { value: 'reset', selected: field.buttonAction === 'reset' }, 'Reset form'),
+            h('option', { value: 'none', selected: field.buttonAction === 'none' }, 'None (decorative only)'),
+          ),
+        ) : null,
         field.type === 'button' ? h('div', { class: 'prop-field' },
           h('span', { class: 'prop-label' }, 'Style'),
           h('select', {
@@ -1118,7 +1256,7 @@
           h('span', { class: 'prop-label' }, 'Placeholder'),
           h('input', { type: 'text', value: field.placeholder || '', oninput: (e) => { field.placeholder = e.target.value; renderCanvas(); } }),
         ) : null,
-        usesOptions(field.type) ? optionsEditor(field) : null,
+        usesOptions(field.type) ? optionsSourceEditor(field) : null,
         field.type === 'button' ? null : h('div', { class: 'prop-field' },
           h('span', { class: 'prop-label' }, 'Help text'),
           h('textarea', { oninput: (e) => { field.helpText = e.target.value; } }, field.helpText || ''),
@@ -1185,18 +1323,29 @@
           type: f.type,
           required: f.required || undefined,
           placeholder: f.placeholder || undefined,
-          options: f.options,
+          options: (!f.sourceKind || f.sourceKind === 'static') ? f.options : undefined,
+          source: (usesOptions(f.type) && f.sourceKind && f.sourceKind !== 'static') ? {
+            kind: f.sourceKind,
+            query: f.sourceKind === 'sql' ? (f.sourceQuery || undefined) : undefined,
+            workbookId: f.sourceKind === 'excel' ? (f.sourceWorkbookId || undefined) : undefined,
+            sheet: f.sourceKind === 'excel' ? (f.sourceSheet || undefined) : undefined,
+          } : undefined,
           helpText: f.helpText || undefined,
           buttonStyle: f.buttonStyle,
+          buttonAction: f.type === 'button' ? (f.buttonAction || 'next') : undefined,
           width: f.widthPct && f.widthPct < 100 ? f.widthPct : undefined,
+          disabled: f.disabled || undefined,
         })),
       })),
     };
   }
 
   document.getElementById('exportBtn').addEventListener('click', () => {
-    document.getElementById('exportJson').textContent = JSON.stringify(buildConfig(), null, 2);
+    const config = buildConfig();
+    document.getElementById('exportJson').textContent = JSON.stringify(config, null, 2);
     document.getElementById('copyStatus').textContent = '';
+    const hasRemoteSource = config.screens.some((s) => s.fields.some((f) => f.source));
+    document.getElementById('sourceWarning').hidden = !hasRemoteSource;
     document.getElementById('exportOverlay').classList.add('open');
   });
   document.getElementById('exportClose').addEventListener('click', () => {
