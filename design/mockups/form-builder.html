@@ -331,13 +331,32 @@
   .canvas-screen-title:hover { background: var(--backdrop); }
   .canvas-screen-title.selected { border-color: var(--rosado); background: var(--morado-tint); }
 
+  .fields-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 12px;
+    margin: 0 -12px;
+  }
+
   .canvas-field {
     position: relative;
+    flex: 1 1 100%;
+    min-width: 0;
     padding: 12px 12px 14px;
-    margin: 0 -12px 14px;
     border-radius: 10px;
     border: 2px solid transparent;
     cursor: pointer;
+  }
+
+  .prop-field input[type="range"] {
+    width: 100%;
+    accent-color: var(--morado);
+  }
+
+  .width-readout {
+    font-variant-numeric: tabular-nums;
+    color: var(--gris-soft);
+    font-weight: 400;
   }
 
   .canvas-field:hover { background: var(--backdrop); }
@@ -435,6 +454,7 @@
   }
 
   .empty-canvas {
+    flex: 1 1 100%;
     text-align: center;
     padding: 30px 10px;
     color: var(--gris-faint);
@@ -757,8 +777,8 @@
     screens: [
       {
         id: 'screen-1', title: 'Screen 1', fields: [
-          { id: 'f1', type: 'text', label: 'Full Name', name: 'full_name', required: true, placeholder: 'Full name', helpText: '' },
-          { id: 'f2', type: 'select', label: 'Category', name: 'category', required: false, placeholder: 'Select…', options: ['Option 1', 'Option 2'], helpText: '' },
+          { id: 'f1', type: 'text', label: 'Full Name', name: 'full_name', required: true, placeholder: 'Full name', helpText: '', widthPct: 100 },
+          { id: 'f2', type: 'select', label: 'Category', name: 'category', required: false, placeholder: 'Select…', options: ['Option 1', 'Option 2'], helpText: '', widthPct: 100 },
         ]
       },
     ],
@@ -823,7 +843,7 @@
     const count = activeScreen().fields.length + 1;
     const field = {
       id, type, label: meta.label, name: slug(meta.label) + '_' + count,
-      required: false, placeholder: '', helpText: '',
+      required: false, placeholder: '', helpText: '', widthPct: 100,
       options: usesOptions(type) ? ['Option 1', 'Option 2'] : undefined,
       buttonStyle: type === 'button' ? 'primary' : undefined,
     };
@@ -994,13 +1014,15 @@
       onclick: () => { state.panel = 'screen'; state.selectedFieldId = null; render(); },
     }, screen.title);
 
-    const fieldsWrap = h('div', {});
+    const fieldsWrap = h('div', { class: 'fields-wrap' });
     if (screen.fields.length === 0) {
       fieldsWrap.append(h('div', { class: 'empty-canvas' }, 'Add fields from the palette on the left.'));
     } else {
       screen.fields.forEach((field, idx) => {
+        const pct = field.widthPct || 100;
         fieldsWrap.append(h('div', {
           class: 'canvas-field' + (field.id === state.selectedFieldId ? ' selected' : ''),
+          style: pct < 100 ? `flex: 1 1 calc(${pct}% - 6px); min-width: 0;` : undefined,
           onclick: () => selectField(field.id),
         },
           h('div', { class: 'cf-toolbar' },
@@ -1040,6 +1062,22 @@
     return wrap;
   }
 
+  function widthField(field) {
+    const pct = field.widthPct || 100;
+    const label = h('span', { class: 'prop-label' }, 'Width ', h('span', { class: 'width-readout' }, `(${pct}%)`));
+    const slider = h('input', {
+      type: 'range', min: '20', max: '100', step: '5', value: String(pct),
+      oninput: (e) => {
+        field.widthPct = Number(e.target.value);
+        label.lastChild.textContent = `(${field.widthPct}%)`;
+        renderCanvas();
+      },
+    });
+    return h('div', { class: 'prop-field' }, label, slider,
+      h('p', { class: 'prop-hint' }, 'Drag below 100% to place this next to the following field on the same row.'),
+    );
+  }
+
   function renderProperties() {
     const el = document.getElementById('properties');
     el.innerHTML = '';
@@ -1060,6 +1098,7 @@
           h('span', { class: 'prop-label' }, 'Field key'),
           h('input', { type: 'text', value: field.name, oninput: (e) => { field.name = e.target.value; } }),
         ),
+        widthField(field),
         field.type === 'button' ? h('div', { class: 'prop-field' },
           h('span', { class: 'prop-label' }, 'Style'),
           h('select', {
@@ -1149,6 +1188,7 @@
           options: f.options,
           helpText: f.helpText || undefined,
           buttonStyle: f.buttonStyle,
+          width: f.widthPct && f.widthPct < 100 ? f.widthPct : undefined,
         })),
       })),
     };
