@@ -271,6 +271,10 @@
   }
 
   .canvas-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
     background: var(--morado);
     padding: 15px 20px;
     cursor: pointer;
@@ -289,6 +293,15 @@
     text-transform: uppercase;
     text-align: center;
     color: #fff;
+  }
+
+  .titlebar-logo {
+    flex: 0 0 auto;
+    height: 22px;
+    width: auto;
+    max-width: 60px;
+    border-radius: 4px;
+    object-fit: contain;
   }
 
   .canvas-body { padding: 22px 22px 26px; }
@@ -557,6 +570,18 @@
     font-size: 12.5px;
     color: var(--gris-faint);
     background: var(--backdrop);
+  }
+
+  .cf-image-wrap { display: flex; }
+  .cf-image-wrap.align-left { justify-content: flex-start; }
+  .cf-image-wrap.align-center { justify-content: center; }
+  .cf-image-wrap.align-right { justify-content: flex-end; }
+
+  .cf-image-wrap img {
+    max-width: 100%;
+    max-height: 160px;
+    border-radius: 6px;
+    display: block;
   }
 
   .empty-canvas {
@@ -836,7 +861,7 @@
       <button class="export-close" id="exportClose" aria-label="Close">✕</button>
     </div>
     <div class="export-body">
-      <p>Save this as <code>frontend/src/forms/&lt;id&gt;/config.json</code> in the template repo — <code>FieldRenderer</code> already knows how to render every field type below.</p>
+      <p>Save this as <code>frontend/src/forms/&lt;id&gt;/config.json</code> in the template repo — <code>FieldRenderer</code> renders every field type below, and screen-level <code>actions</code> (your Button fields) are rendered by <code>ScreenActions</code>, above the automatic Back/Next row.</p>
       <p id="sourceWarning" class="export-warning" hidden>Heads up: one or more dropdowns pull options from SQL or Excel via <code>source</code>. The backend endpoint that resolves those queries isn't built yet — it currently throws <code>NotImplementedError</code> — so wire that up before this config works end-to-end.</p>
       <pre id="exportJson"></pre>
     </div>
@@ -866,10 +891,12 @@
     listbox: '<rect x="3" y="4" width="14" height="12" rx="1.5"/><line x1="5.5" y1="7" x2="14.5" y2="7"/><line x1="5.5" y1="10" x2="14.5" y2="10"/><line x1="5.5" y1="13" x2="14.5" y2="13"/>',
     slider: '<line x1="3" y1="10" x2="17" y2="10"/><circle cx="11" cy="10" r="2.5" fill="currentColor" stroke="none"/>',
     button: '<rect x="2.5" y="7" width="15" height="6.5" rx="2" fill="currentColor" stroke="none"/>',
+    image: '<rect x="3" y="4" width="14" height="12" rx="1.5"/><circle cx="7.5" cy="8.5" r="1.5"/><path d="M4 14l4-4 3 3 2-2 3 3"/>',
   };
 
   const FIELD_TYPES = [
-    { type: 'button', label: 'Button', group: 'Core' },
+    { type: 'button', label: 'Button', group: 'hidden' },
+    { type: 'image', label: 'Image', group: 'Core' },
     { type: 'text', label: 'Text', group: 'Core' },
     { type: 'textarea', label: 'Textarea', group: 'Core' },
     { type: 'number', label: 'Number', group: 'Core' },
@@ -888,9 +915,20 @@
     { type: 'slider', label: 'Slider', group: 'Later phase', disabled: true },
   ];
 
+  const BUTTON_PRESETS = [
+    { presetAction: 'next', paletteLabel: 'Next', buttonLabel: 'Next', buttonStyle: 'primary' },
+    { presetAction: 'back', paletteLabel: 'Back', buttonLabel: 'Back', buttonStyle: 'outline' },
+    { presetAction: 'submit', paletteLabel: 'Submit', buttonLabel: 'Submit', buttonStyle: 'primary' },
+    { presetAction: 'goto', paletteLabel: 'Skip to step…', buttonLabel: 'Skip ahead', buttonStyle: 'outline' },
+  ];
+
   const state = {
     title: 'Untitled Form',
     includeReviewScreen: true,
+    backgroundImageUrl: '',
+    headerLogoUrl: '',
+    headerLogoPosition: 'left',
+    headerLogoSize: 22,
     activeScreen: 0,
     nextFieldId: 3,
     nextScreenId: 2,
@@ -991,6 +1029,28 @@
       buttonStyle: type === 'button' ? 'primary' : undefined,
       buttonAction: type === 'button' ? 'next' : undefined,
       buttonTargetScreenId: undefined,
+      imageUrl: type === 'image' ? '' : undefined,
+      imageAlt: type === 'image' ? '' : undefined,
+      imageAlign: type === 'image' ? 'center' : undefined,
+    };
+    activeScreen().fields.push(field);
+    state.selectedFieldId = id;
+    state.panel = 'field';
+    state.canvasView = 'screens';
+    render();
+  }
+
+  function addButtonPreset(preset) {
+    const id = 'f' + state.nextFieldId++;
+    const count = activeScreen().fields.length + 1;
+    const field = {
+      id, type: 'button', label: preset.buttonLabel, name: slug(preset.buttonLabel) + '_' + count,
+      required: false, placeholder: '', helpText: '', widthPct: 100, disabled: false, hideLabel: false,
+      options: undefined, sourceKind: undefined, radioLayout: undefined,
+      sourceQuery: '', sourceWorkbookId: '', sourceSheet: '',
+      buttonStyle: preset.buttonStyle,
+      buttonAction: preset.presetAction,
+      buttonTargetScreenId: undefined,
     };
     activeScreen().fields.push(field);
     state.selectedFieldId = id;
@@ -1056,8 +1116,17 @@
     const groups = ['Core', 'Advanced', 'Later phase'];
     for (const g of groups) {
       const items = FIELD_TYPES.filter((f) => f.group === g);
+      const presetButtons = g === 'Core' ? BUTTON_PRESETS.map((preset) => h('button', {
+        class: 'palette-item',
+        type: 'button',
+        onclick: () => addButtonPreset(preset),
+      },
+        h('span', { class: 'pi-icon' }, icon('button')),
+        h('span', {}, preset.paletteLabel),
+      )) : [];
       const group = h('div', { class: 'palette-group' },
         h('span', { class: 'palette-group-label' }, g),
+        ...presetButtons,
         ...items.map((meta) => h('button', {
           class: 'palette-item' + (meta.disabled ? ' disabled' : ''),
           type: 'button',
@@ -1106,6 +1175,13 @@
     switch (field.type) {
       case 'button':
         return h('button', { type: 'button', disabled: true, style: buttonPreviewStyle(field.buttonStyle) }, field.label || 'Button');
+      case 'image':
+        if (!field.imageUrl) {
+          return h('div', { class: 'cf-dashed' }, 'No image set — add an Image URL in properties');
+        }
+        return h('div', { class: 'cf-image-wrap align-' + (field.imageAlign || 'center') },
+          h('img', { src: field.imageUrl, alt: field.imageAlt || '' }),
+        );
       case 'text':
         return h('input', { type: 'text', disabled: true, placeholder: field.placeholder || '' });
       case 'number':
@@ -1145,6 +1221,29 @@
     }
   }
 
+  function titlebarContent() {
+    const title = h('h1', {}, state.title || 'Untitled Form');
+    if (!state.headerLogoUrl) return [title];
+    const size = state.headerLogoSize || 22;
+    const logo = h('img', {
+      class: 'titlebar-logo', src: state.headerLogoUrl, alt: '',
+      style: `height:${size}px; max-width:${size * 2.6}px;`,
+    });
+    return state.headerLogoPosition === 'right' ? [title, logo] : [logo, title];
+  }
+
+  function applyCanvasBackground(el) {
+    if (state.backgroundImageUrl) {
+      el.style.backgroundImage = `url("${state.backgroundImageUrl}")`;
+      el.style.backgroundSize = 'cover';
+      el.style.backgroundPosition = 'center';
+      el.style.backgroundColor = 'transparent';
+    } else {
+      el.style.backgroundImage = '';
+      el.style.backgroundColor = '';
+    }
+  }
+
   function confirmIcon(pathD, stroke) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', '0 0 24 24');
@@ -1164,9 +1263,10 @@
   function renderConfirmPreview() {
     const el = document.getElementById('canvas');
     el.innerHTML = '';
+    applyCanvasBackground(el);
     const isSuccess = state.canvasView === 'success';
 
-    const titlebar = h('div', { class: 'canvas-titlebar' }, h('h1', {}, state.title || 'Untitled Form'));
+    const titlebar = h('div', { class: 'canvas-titlebar' }, ...titlebarContent());
 
     const body = isSuccess
       ? h('div', { class: 'confirm-view' },
@@ -1191,10 +1291,11 @@
   function renderReviewPreview() {
     const el = document.getElementById('canvas');
     el.innerHTML = '';
-    const titlebar = h('div', { class: 'canvas-titlebar' }, h('h1', {}, state.title || 'Untitled Form'));
+    applyCanvasBackground(el);
+    const titlebar = h('div', { class: 'canvas-titlebar' }, ...titlebarContent());
 
     const groups = state.screens
-      .map((s) => ({ screen: s, fields: s.fields.filter((f) => f.type !== 'button') }))
+      .map((s) => ({ screen: s, fields: s.fields.filter((f) => f.type !== 'button' && f.type !== 'image') }))
       .filter((g) => g.fields.length > 0)
       .map((g) => h('div', { class: 'review-group' },
         h('h3', { class: 'review-heading' }, g.screen.title),
@@ -1225,6 +1326,7 @@
     }
     const el = document.getElementById('canvas');
     el.innerHTML = '';
+    applyCanvasBackground(el);
     const screen = activeScreen();
     const totalSteps = state.screens.length + (state.includeReviewScreen ? 1 : 0);
     const pct = Math.round(((state.activeScreen + 1) / totalSteps) * 100);
@@ -1232,7 +1334,7 @@
     const titlebar = h('div', {
       class: 'canvas-titlebar' + (state.panel === 'form' ? ' selected' : ''),
       onclick: () => { state.panel = 'form'; state.selectedFieldId = null; render(); },
-    }, h('h1', {}, state.title || 'Untitled Form'));
+    }, ...titlebarContent());
 
     const progress = h('div', { class: 'canvas-progress' },
       h('div', { class: 'canvas-progress-row' }, h('span', {}, `Step ${state.activeScreen + 1} of ${totalSteps}`), h('span', {}, `${pct}%`)),
@@ -1260,7 +1362,7 @@
             h('button', { type: 'button', title: 'Move down', disabled: idx === screen.fields.length - 1, onclick: (e) => { e.stopPropagation(); moveField(field.id, 1); } }, '↓'),
             h('button', { type: 'button', class: 'danger', title: 'Delete', onclick: (e) => { e.stopPropagation(); deleteField(field.id); } }, '✕'),
           ),
-          field.type === 'button'
+          (field.type === 'button' || field.type === 'image')
             ? (field.disabled ? h('div', { class: 'cf-label' }, h('span', { class: 'cf-disabled-badge' }, 'Disabled')) : null)
             : h('label', { class: 'cf-label' + (field.hideLabel ? ' cf-label-hidden-note' : '') },
                 field.hideLabel ? 'Label hidden' : field.label,
@@ -1431,7 +1533,7 @@
           ),
           h('p', { class: 'prop-hint' }, 'Greyed out and not usable, without removing it — use this to restrict a field.'),
         ),
-        field.type === 'button' ? null : h('div', { class: 'prop-field' },
+        (field.type === 'button' || field.type === 'image') ? null : h('div', { class: 'prop-field' },
           h('label', { class: 'prop-check' },
             h('input', { type: 'checkbox', checked: !!field.hideLabel, onchange: (e) => { field.hideLabel = e.target.checked; renderCanvas(); } }),
             'Hide label',
@@ -1469,8 +1571,9 @@
             h('option', { value: 'primary', selected: field.buttonStyle !== 'outline' }, 'Primary (filled)'),
             h('option', { value: 'outline', selected: field.buttonStyle === 'outline' }, 'Outline'),
           ),
+          h('p', { class: 'prop-hint' }, "In the real app, all of a screen's buttons render together in one row above Back/Next — their order here (relative to other buttons) carries over, but their position among regular fields doesn't."),
         ) : null,
-        field.type === 'button' ? null : h('div', { class: 'prop-field' },
+        (field.type === 'button' || field.type === 'image') ? null : h('div', { class: 'prop-field' },
           h('label', { class: 'prop-check' },
             h('input', { type: 'checkbox', checked: field.required, onchange: (e) => { field.required = e.target.checked; renderCanvas(); } }),
             'Required',
@@ -1479,6 +1582,26 @@
         usesPlaceholder(field.type) ? h('div', { class: 'prop-field' },
           h('span', { class: 'prop-label' }, 'Placeholder'),
           h('input', { type: 'text', value: field.placeholder || '', oninput: (e) => { field.placeholder = e.target.value; renderCanvas(); } }),
+        ) : null,
+        field.type === 'image' ? h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, 'Image URL'),
+          h('input', { type: 'text', placeholder: 'https://…/logo.png', value: field.imageUrl || '', oninput: (e) => { field.imageUrl = e.target.value; renderCanvas(); } }),
+          h('p', { class: 'prop-hint' }, 'There\'s no file upload yet — paste a hosted URL (e.g. the company logo).'),
+        ) : null,
+        field.type === 'image' ? h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, 'Alt text'),
+          h('input', { type: 'text', value: field.imageAlt || '', oninput: (e) => { field.imageAlt = e.target.value; } }),
+          h('p', { class: 'prop-hint' }, 'Describes the image for screen readers.'),
+        ) : null,
+        field.type === 'image' ? h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, 'Alignment'),
+          h('select', {
+            onchange: (e) => { field.imageAlign = e.target.value; renderCanvas(); },
+          },
+            h('option', { value: 'left', selected: field.imageAlign === 'left' }, 'Left'),
+            h('option', { value: 'center', selected: (field.imageAlign || 'center') === 'center' }, 'Center'),
+            h('option', { value: 'right', selected: field.imageAlign === 'right' }, 'Right'),
+          ),
         ) : null,
         field.type === 'radio' ? h('div', { class: 'prop-field' },
           h('span', { class: 'prop-label' }, 'Layout'),
@@ -1490,7 +1613,7 @@
           ),
         ) : null,
         usesOptions(field.type) ? optionsSourceEditor(field) : null,
-        field.type === 'button' ? null : h('div', { class: 'prop-field' },
+        (field.type === 'button' || field.type === 'image') ? null : h('div', { class: 'prop-field' },
           h('span', { class: 'prop-label' }, 'Help text'),
           h('textarea', { oninput: (e) => { field.helpText = e.target.value; } }, field.helpText || ''),
         ),
@@ -1529,6 +1652,44 @@
           'Include review screen before submit',
         ),
       ),
+      h('div', { class: 'prop-field' },
+        h('span', { class: 'prop-label' }, 'Header logo URL'),
+        h('input', {
+          type: 'text', placeholder: 'https://…/logo.png', value: state.headerLogoUrl || '',
+          oninput: (e) => { state.headerLogoUrl = e.target.value; renderCanvas(); },
+        }),
+        h('p', { class: 'prop-hint' }, 'Small logo shown next to the form title in the header bar, on every screen.'),
+      ),
+      state.headerLogoUrl ? h('div', { class: 'prop-field' },
+        h('span', { class: 'prop-label' }, 'Logo position'),
+        h('select', {
+          onchange: (e) => { state.headerLogoPosition = e.target.value; renderCanvas(); },
+        },
+          h('option', { value: 'left', selected: (state.headerLogoPosition || 'left') === 'left' }, 'Left of title'),
+          h('option', { value: 'right', selected: state.headerLogoPosition === 'right' }, 'Right of title'),
+        ),
+      ) : null,
+      state.headerLogoUrl ? (() => {
+        const logoSize = state.headerLogoSize || 22;
+        const label = h('span', { class: 'prop-label' }, 'Logo size ', h('span', { class: 'width-readout' }, `(${logoSize}px)`));
+        const slider = h('input', {
+          type: 'range', min: '14', max: '48', step: '2', value: String(logoSize),
+          oninput: (e) => {
+            state.headerLogoSize = Number(e.target.value);
+            label.lastChild.textContent = `(${state.headerLogoSize}px)`;
+            renderCanvas();
+          },
+        });
+        return h('div', { class: 'prop-field' }, label, slider);
+      })() : null,
+      h('div', { class: 'prop-field' },
+        h('span', { class: 'prop-label' }, 'Background image URL'),
+        h('input', {
+          type: 'text', placeholder: 'https://…/wallpaper.jpg', value: state.backgroundImageUrl || '',
+          oninput: (e) => { state.backgroundImageUrl = e.target.value; renderCanvas(); },
+        }),
+        h('p', { class: 'prop-hint' }, 'Optional wallpaper shown behind every screen of this form.'),
+      ),
       h('p', { class: 'prop-hint' }, 'Select a field on the canvas, or add one from the palette, to edit its properties.'),
     );
   }
@@ -1547,32 +1708,48 @@
       id: slug(state.title),
       title: state.title,
       includeReviewScreen: state.includeReviewScreen,
-      screens: state.screens.map((s) => ({
-        id: s.id,
-        title: s.title,
-        fields: s.fields.map((f) => ({
-          name: f.name,
-          label: f.label,
-          type: f.type,
-          required: f.required || undefined,
-          placeholder: f.placeholder || undefined,
-          options: (!f.sourceKind || f.sourceKind === 'static') ? f.options : undefined,
-          source: (usesOptions(f.type) && f.sourceKind && f.sourceKind !== 'static') ? {
-            kind: f.sourceKind,
-            query: f.sourceKind === 'sql' ? (f.sourceQuery || undefined) : undefined,
-            workbookId: f.sourceKind === 'excel' ? (f.sourceWorkbookId || undefined) : undefined,
-            sheet: f.sourceKind === 'excel' ? (f.sourceSheet || undefined) : undefined,
-          } : undefined,
-          helpText: f.helpText || undefined,
-          buttonStyle: f.buttonStyle,
-          buttonAction: f.type === 'button' ? (f.buttonAction || 'next') : undefined,
-          targetScreenId: (f.type === 'button' && f.buttonAction === 'goto') ? (f.buttonTargetScreenId || undefined) : undefined,
-          layout: (f.type === 'radio' && f.radioLayout === 'horizontal') ? 'horizontal' : undefined,
-          hideLabel: (f.type !== 'button' && f.hideLabel) ? true : undefined,
-          width: f.widthPct && f.widthPct < 100 ? f.widthPct : undefined,
-          disabled: f.disabled || undefined,
-        })),
-      })),
+      headerLogoUrl: state.headerLogoUrl || undefined,
+      headerLogoPosition: (state.headerLogoUrl && state.headerLogoPosition === 'right') ? 'right' : undefined,
+      headerLogoSize: (state.headerLogoUrl && state.headerLogoSize && state.headerLogoSize !== 22) ? state.headerLogoSize : undefined,
+      backgroundImageUrl: state.backgroundImageUrl || undefined,
+      screens: state.screens.map((s) => {
+        const buttons = s.fields.filter((f) => f.type === 'button');
+        const fields = s.fields.filter((f) => f.type !== 'button');
+        return {
+          id: s.id,
+          title: s.title,
+          fields: fields.map((f) => ({
+            name: f.name,
+            label: f.label,
+            type: f.type,
+            required: f.required || undefined,
+            placeholder: f.placeholder || undefined,
+            options: (!f.sourceKind || f.sourceKind === 'static') ? f.options : undefined,
+            source: (usesOptions(f.type) && f.sourceKind && f.sourceKind !== 'static') ? {
+              kind: f.sourceKind,
+              query: f.sourceKind === 'sql' ? (f.sourceQuery || undefined) : undefined,
+              workbookId: f.sourceKind === 'excel' ? (f.sourceWorkbookId || undefined) : undefined,
+              sheet: f.sourceKind === 'excel' ? (f.sourceSheet || undefined) : undefined,
+            } : undefined,
+            helpText: f.helpText || undefined,
+            layout: (f.type === 'radio' && f.radioLayout === 'horizontal') ? 'horizontal' : undefined,
+            hideLabel: f.hideLabel || undefined,
+            width: f.widthPct && f.widthPct < 100 ? f.widthPct : undefined,
+            disabled: f.disabled || undefined,
+            src: f.type === 'image' ? (f.imageUrl || undefined) : undefined,
+            alt: f.type === 'image' ? (f.imageAlt || undefined) : undefined,
+            align: (f.type === 'image' && f.imageAlign && f.imageAlign !== 'center') ? f.imageAlign : undefined,
+          })),
+          actions: buttons.length ? buttons.map((f) => ({
+            id: f.id,
+            label: f.label,
+            style: f.buttonStyle === 'outline' ? 'outline' : 'primary',
+            action: f.buttonAction || 'next',
+            targetScreenId: f.buttonAction === 'goto' ? (f.buttonTargetScreenId || undefined) : undefined,
+            disabled: f.disabled || undefined,
+          })) : undefined,
+        };
+      }),
     };
   }
 
