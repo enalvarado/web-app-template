@@ -1,0 +1,35 @@
+{
+  "id": "_actions-test",
+  "title": "Actions Test",
+  "includeReviewScreen": true,
+  "screens": [
+    {
+      "id": "menu",
+      "title": "Where to?",
+      "fields": [
+        { "name": "note", "label": "Note", "type": "text", "placeholder": "Optional" }
+      ],
+      "actions": [
+        { "id": "a1", "label": "Skip to Step 3", "style": "outline", "action": "goto", "targetScreenId": "step-3" },
+        { "id": "a2", "label": "Reset", "style": "outline", "action": "reset" }
+      ]
+    },
+    {
+      "id": "step-2",
+      "title": "Step 2",
+      "fields": [
+        { "name": "step2Field", "label": "Step 2 field", "type": "text" }
+      ]
+    },
+    {
+      "id": "step-3",
+      "title": "Step 3",
+      "fields": [
+        { "name": "step3Field", "label": "Step 3 field", "type": "text" }
+      ],
+      "actions": [
+        { "id": "a3", "label": "Submit from here", "style": "primary", "action": "submit" }
+      ]
+    }
+  ]
+}

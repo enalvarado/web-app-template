@@ -38,11 +38,23 @@ export interface FieldConfig {
   lookupEndpoint?: string
 }
 
+export type ActionKind = 'next' | 'back' | 'submit' | 'reset' | 'goto' | 'none'
+
+export interface ActionConfig {
+  id: string
+  label: string
+  style?: 'primary' | 'outline'
+  action: ActionKind
+  targetScreenId?: string
+  disabled?: boolean
+}
+
 export interface ScreenConfig {
   id: string
   title: string
   description?: string
   fields: FieldConfig[]
+  actions?: ActionConfig[]
 }
 
 export interface FormConfig {

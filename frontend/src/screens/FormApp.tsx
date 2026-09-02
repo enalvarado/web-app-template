@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { FormConfig } from '../types/config'
+import { ActionConfig, FormConfig } from '../types/config'
 import { FormProvider, useFormValues } from '../context/FormContext'
 import ProgressIndicator from '../components/ProgressIndicator'
 import NavButtons from '../components/NavButtons'
+import ScreenActions from '../components/ScreenActions'
 import ScreenRenderer from './ScreenRenderer'
 import ReviewScreen from './ReviewScreen'
 import { submitForm } from '../lib/api'
@@ -31,25 +32,63 @@ function FormFlow({ config }: Props) {
   const isReviewStep = includeReview && step === config.screens.length
   const isLastScreen = step === config.screens.length - 1 && !includeReview
 
+  const doSubmit = async () => {
+    setSubmitting(true)
+    setSubmitError(null)
+    try {
+      await submitForm(config.id, values)
+      reset()
+      setSubmitted(true)
+    } catch {
+      setSubmitError('Something went wrong submitting your form. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   const handleNext = async () => {
     if (isReviewStep || isLastScreen) {
-      setSubmitting(true)
-      setSubmitError(null)
-      try {
-        await submitForm(config.id, values)
-        reset()
-        setSubmitted(true)
-      } catch {
-        setSubmitError('Something went wrong submitting your form. Please try again.')
-      } finally {
-        setSubmitting(false)
-      }
+      await doSubmit()
       return
     }
     setStep((s) => s + 1)
   }
 
   const handleBack = () => setStep((s) => Math.max(0, s - 1))
+
+  const handleReset = () => {
+    reset()
+    setSubmitError(null)
+    setStep(0)
+  }
+
+  const handleGoto = (targetScreenId?: string) => {
+    const idx = config.screens.findIndex((s) => s.id === targetScreenId)
+    if (idx !== -1) setStep(idx)
+  }
+
+  const handleAction = (action: ActionConfig) => {
+    switch (action.action) {
+      case 'back':
+        handleBack()
+        return
+      case 'submit':
+        void doSubmit()
+        return
+      case 'reset':
+        handleReset()
+        return
+      case 'goto':
+        handleGoto(action.targetScreenId)
+        return
+      case 'next':
+        void handleNext()
+        return
+      case 'none':
+      default:
+        return
+    }
+  }
 
   if (submitted) {
     return (
@@ -74,6 +113,9 @@ function FormFlow({ config }: Props) {
           <ScreenRenderer screen={config.screens[step]} formId={config.id} />
         )}
         {submitError && <p className="text-rosado-deep font-body text-sm mt-4">{submitError}</p>}
+        {!isReviewStep && config.screens[step].actions?.length ? (
+          <ScreenActions actions={config.screens[step].actions ?? []} onAction={handleAction} />
+        ) : null}
         <NavButtons
           onBack={handleBack}
           onNext={handleNext}
