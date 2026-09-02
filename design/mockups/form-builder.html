@@ -22,6 +22,8 @@
 
   * { box-sizing: border-box; }
 
+  [hidden] { display: none !important; }
+
   html, body { height: 100%; }
 
   body {
@@ -39,23 +41,141 @@
     flex-direction: column;
   }
 
+  /* ---- app-level ribbon: identity of the form being built, not the tool ---- */
+
+  .app-ribbon {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    column-gap: 14px;
+    padding: 0 18px;
+    height: 52px;
+    flex: 0 0 auto;
+    background: var(--morado);
+  }
+
+  .app-ribbon-spacer { min-width: 0; }
+
+  .app-ribbon-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    justify-self: end;
+  }
+
+  .app-ribbon-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-self: center;
+    max-width: 34vw;
+    overflow: hidden;
+    padding: 5px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+  }
+
+  .app-ribbon-title:hover { background: rgba(255, 255, 255, .08); }
+  .app-ribbon-title.selected { border-color: var(--rosado); }
+
+  .app-ribbon-title h1 {
+    margin: 0;
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 14px;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .lang-toggle {
+    display: flex;
+    gap: 2px;
+    background: rgba(255, 255, 255, .14);
+    border-radius: 999px;
+    padding: 3px;
+    flex: 0 0 auto;
+  }
+
+  .lang-chip {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, .78);
+    font-family: var(--font-head);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  .lang-chip.active { background: #fff; color: var(--morado); }
+
+  .ribbon-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, .85);
+    font-family: var(--font-head);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 7px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
+  .ribbon-link:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    appearance: none;
+    border: none;
+    background: rgba(255, 255, 255, .1);
+    padding: 5px 10px 5px 5px;
+    border-radius: 999px;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+
+  .user-chip:hover { background: rgba(255, 255, 255, .16); }
+
+  .avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--rosado);
+    color: var(--rosado-deep);
+    font-family: var(--font-head);
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .user-chip span { font-family: var(--font-head); font-size: 12.5px; font-weight: 600; color: #fff; }
+
+  /* ---- functional toolbar: screens, add screen, export ---- */
+
   .topbar {
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 16px;
     padding: 0 18px;
-    height: 56px;
+    height: 52px;
     flex: 0 0 auto;
     background: var(--surface);
     border-bottom: 1px solid var(--beige);
-  }
-
-  .tool-name {
-    font-family: var(--font-head);
-    font-weight: 700;
-    font-size: 14.5px;
-    color: var(--morado);
-    white-space: nowrap;
   }
 
   .tabs {
@@ -135,6 +255,26 @@
   }
 
   .export-btn:hover { background: var(--morado-dark); }
+
+  .fb-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    transform: translate(-50%, 12px);
+    background: var(--gris);
+    color: #fff;
+    font-size: 12.5px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    box-shadow: 0 10px 24px -8px rgba(56, 58, 53, .4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+    z-index: 20;
+    white-space: nowrap;
+  }
+
+  .fb-toast.show { opacity: 1; transform: translate(-50%, 0); }
 
   .workspace {
     flex: 1;
@@ -217,6 +357,7 @@
   }
 
   .canvas-wrap {
+    position: relative;
     flex: 1;
     min-width: 0;
     overflow-y: auto;
@@ -227,6 +368,8 @@
   }
 
   .width-switcher {
+    position: relative;
+    z-index: 1;
     display: inline-flex;
     gap: 4px;
     padding: 4px;
@@ -256,9 +399,45 @@
   .w-chip.active { background: var(--morado); color: #fff; }
 
   .canvas-col {
+    position: relative;
+    z-index: 1;
     width: min(var(--canvas-w, 390px), 100%);
     flex: 0 0 auto;
     transition: width .3s cubic-bezier(.4, 0, .2, 1);
+    container-type: inline-size;
+    container-name: canvas;
+  }
+
+  /* ---- responsive typography: scales with the Phone/Tablet/Desktop preview width ---- */
+
+  @container canvas (min-width: 600px) {
+    .canvas-screen-title { font-size: 18px; }
+    .canvas-progress-row { font-size: 12.5px; }
+    .cf-label { font-size: 13.5px; }
+    .cf-preview input, .cf-preview select, .cf-preview textarea { font-size: 14.5px; padding: 9px 12px; }
+    .cf-btn { font-size: 14px; padding: 10px 16px; }
+    .cf-accordion-head { font-size: 14px; }
+    .cf-accordion-text, .cf-dashed { font-size: 13.5px; }
+    .review-title { font-size: 17px; }
+    .review-heading { font-size: 14px; }
+    .review-row { font-size: 14px; }
+    .confirm-view h2 { font-size: 19px; }
+    .confirm-view p { font-size: 14px; }
+  }
+
+  @container canvas (min-width: 900px) {
+    .canvas-screen-title { font-size: 21px; }
+    .canvas-progress-row { font-size: 13.5px; }
+    .cf-label { font-size: 14.5px; }
+    .cf-preview input, .cf-preview select, .cf-preview textarea { font-size: 15.5px; padding: 10px 13px; }
+    .cf-btn { font-size: 15px; padding: 11px 18px; }
+    .cf-accordion-head { font-size: 15px; }
+    .cf-accordion-text, .cf-dashed { font-size: 14.5px; }
+    .review-title { font-size: 19px; }
+    .review-heading { font-size: 15px; }
+    .review-row { font-size: 15px; }
+    .confirm-view h2 { font-size: 21px; }
+    .confirm-view p { font-size: 15px; }
   }
 
   .canvas {
@@ -268,31 +447,6 @@
     border-radius: 16px;
     box-shadow: 0 1px 2px rgba(56, 58, 53, .06), 0 16px 36px -18px rgba(56, 58, 53, .28);
     overflow: hidden;
-  }
-
-  .canvas-titlebar {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 9px;
-    background: var(--morado);
-    padding: 15px 20px;
-    cursor: pointer;
-    border: 2px solid transparent;
-  }
-
-  .canvas-titlebar:hover { filter: brightness(1.06); }
-  .canvas-titlebar.selected { border-color: var(--rosado); }
-
-  .canvas-titlebar h1 {
-    margin: 0;
-    font-family: var(--font-head);
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: .03em;
-    text-transform: uppercase;
-    text-align: center;
-    color: #fff;
   }
 
   .titlebar-logo {
@@ -446,6 +600,26 @@
     font-weight: 400;
   }
 
+  .bg-swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .bg-swatch {
+    appearance: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--beige);
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .bg-swatch.selected { border-color: var(--morado); box-shadow: 0 0 0 2px var(--morado-tint); }
+
+  .bg-swatch.none {
+    background:
+      linear-gradient(to top left, transparent 46%, var(--rosado-deep) 48%, var(--rosado-deep) 52%, transparent 54%),
+      var(--surface);
+  }
+
   .canvas-field:hover { background: var(--backdrop); }
 
   .canvas-field.selected {
@@ -548,6 +722,20 @@
     color: var(--gris-faint);
   }
 
+  .cf-btn {
+    appearance: none;
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 9px 14px;
+    border-radius: 9px;
+    width: 100%;
+    cursor: default;
+  }
+
+  .cf-btn.primary { background: var(--morado); border: none; color: #fff; }
+  .cf-btn.outline { background: transparent; border: 1.5px solid var(--morado); color: var(--morado); }
+
   .cf-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--gris-soft); }
   .cf-row input[type="checkbox"], .cf-row input[type="radio"] { accent-color: var(--beige); width: 16px; height: 16px; }
   .cf-radio-list { display: flex; flex-direction: column; gap: 6px; }
@@ -583,6 +771,93 @@
     border-radius: 6px;
     display: block;
   }
+
+  .cf-accordion {
+    border: 1.3px solid var(--beige);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--surface);
+  }
+
+  .cf-accordion-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--backdrop);
+    font-family: var(--font-head);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gris);
+  }
+
+  .cf-accordion-head svg { flex: 0 0 auto; color: var(--gris-soft); }
+
+  .cf-accordion-body {
+    padding: 12px;
+    border-top: 1px solid var(--beige);
+  }
+
+  .cf-accordion-text {
+    margin: 0 0 12px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--gris-soft);
+    white-space: pre-wrap;
+  }
+
+  .cf-accordion-children { display: flex; flex-direction: column; gap: 8px; }
+
+  .cf-accordion-empty {
+    font-size: 12px;
+    color: var(--gris-faint);
+    text-align: center;
+    padding: 6px 0;
+  }
+
+  .cf-accordion-child {
+    position: relative;
+    padding: 10px 10px 12px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    background: var(--surface);
+  }
+
+  .cf-accordion-child:hover { background: var(--backdrop); }
+
+  .cf-accordion-child.selected {
+    border-color: var(--morado);
+    background: var(--morado-tint);
+  }
+
+  .cf-accordion-child.cf-disabled { opacity: .5; }
+  .cf-accordion-child.cf-disabled:hover { opacity: .7; }
+
+  .cf-accordion-add-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--beige);
+  }
+
+  .cf-accordion-add-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--beige);
+    background: var(--surface);
+    color: var(--morado);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .cf-accordion-add-btn:hover { background: var(--morado-tint); border-color: var(--morado); }
 
   .empty-canvas {
     flex: 1 1 100%;
@@ -826,25 +1101,42 @@
 </style>
 
 <div class="app">
-  <div class="topbar">
-    <span class="tool-name">Form Builder</span>
-    <div class="tabs" id="tabs"></div>
-    <button class="add-screen" id="addScreenBtn">+ Screen</button>
-    <button class="export-btn" id="exportBtn">Export JSON</button>
+  <div class="app-ribbon">
+    <div class="app-ribbon-spacer"></div>
+    <div class="app-ribbon-title" id="appRibbonTitle">Untitled Form</div>
+    <div class="app-ribbon-actions">
+      <div class="lang-toggle">
+        <button class="lang-chip" type="button" data-lang="ES">ES</button>
+        <button class="lang-chip active" type="button" data-lang="EN">EN</button>
+      </div>
+      <button class="ribbon-link" id="homeBtn" type="button">
+        <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l7-6 7 6"/><path d="M5 9v7a1 1 0 0 0 1 1h3v-4h2v4h3a1 1 0 0 0 1-1V9"/></svg>
+        <span data-i18n="home">Home</span>
+      </button>
+      <button class="user-chip" id="userBtn" type="button">
+        <span class="avatar">U</span>
+        <span data-i18n="user">User</span>
+      </button>
+    </div>
   </div>
-  <div class="workspace">
+  <div class="topbar" id="builderToolbar">
+    <div class="tabs" id="tabs"></div>
+    <button class="add-screen" id="addScreenBtn" data-i18n="addScreen">+ Screen</button>
+    <button class="export-btn" id="exportBtn" data-i18n="exportJson">Export JSON</button>
+  </div>
+  <div class="workspace" id="workspace">
     <aside class="palette" id="palette"></aside>
     <main class="canvas-wrap">
       <div class="width-switcher" id="viewSwitcher" role="group" aria-label="Canvas preview mode">
-        <button class="w-chip active" data-view="screens">Screens</button>
-        <button class="w-chip" data-view="review">Review summary</button>
-        <button class="w-chip" data-view="success">Success screen</button>
-        <button class="w-chip" data-view="failure">Failure screen</button>
+        <button class="w-chip active" data-view="screens" data-i18n="view_screens">Screens</button>
+        <button class="w-chip" data-view="review" data-i18n="view_review">Review summary</button>
+        <button class="w-chip" data-view="success" data-i18n="view_success">Success screen</button>
+        <button class="w-chip" data-view="failure" data-i18n="view_failure">Failure screen</button>
       </div>
       <div class="width-switcher" id="widthSwitcher" role="group" aria-label="Preview width">
-        <button class="w-chip active" data-w="390">Phone</button>
-        <button class="w-chip" data-w="768">Tablet</button>
-        <button class="w-chip" data-w="1080">Desktop</button>
+        <button class="w-chip active" data-w="390" data-i18n="w_phone">Phone</button>
+        <button class="w-chip" data-w="768" data-i18n="w_tablet">Tablet</button>
+        <button class="w-chip" data-w="1080" data-i18n="w_desktop">Desktop</button>
       </div>
       <div class="canvas-col" id="canvasCol" style="--canvas-w:390px">
         <div class="canvas" id="canvas"></div>
@@ -857,20 +1149,22 @@
 <div class="export-overlay" id="exportOverlay">
   <div class="export-panel">
     <div class="export-panel-head">
-      <h2>Form config</h2>
-      <button class="export-close" id="exportClose" aria-label="Close">✕</button>
+      <h2 data-i18n="formConfig">Form config</h2>
+      <button class="export-close" id="exportClose" data-i18n-aria="close" aria-label="Close">✕</button>
     </div>
     <div class="export-body">
-      <p>Save this as <code>frontend/src/forms/&lt;id&gt;/config.json</code> in the template repo — <code>FieldRenderer</code> renders every field type below, and screen-level <code>actions</code> (your Button fields) are rendered by <code>ScreenActions</code>, above the automatic Back/Next row.</p>
-      <p id="sourceWarning" class="export-warning" hidden>Heads up: one or more dropdowns pull options from SQL or Excel via <code>source</code>. The backend endpoint that resolves those queries isn't built yet — it currently throws <code>NotImplementedError</code> — so wire that up before this config works end-to-end.</p>
+      <p id="exportBodyIntro" data-i18n-html="exportBodyIntroHtml">Save this as <code>frontend/src/forms/&lt;id&gt;/config.json</code> in the template repo — <code>FieldRenderer</code> renders every field type below, and screen-level <code>actions</code> (your Button fields) are rendered by <code>ScreenActions</code>, above the automatic Back/Next row.</p>
+      <p id="sourceWarning" class="export-warning" data-i18n-html="sourceWarningHtml" hidden>Heads up: one or more dropdowns pull options from SQL or Excel via <code>source</code>. The backend endpoint that resolves those queries isn't built yet — it currently throws <code>NotImplementedError</code> — so wire that up before this config works end-to-end.</p>
       <pre id="exportJson"></pre>
     </div>
     <div class="export-panel-foot">
       <span class="copy-status" id="copyStatus"></span>
-      <button class="export-btn" id="copyBtn">Copy JSON</button>
+      <button class="export-btn" id="copyBtn" data-i18n="copyJson">Copy JSON</button>
     </div>
   </div>
 </div>
+
+<div class="fb-toast" id="fbToast"></div>
 
 <script>
   const ICONS = {
@@ -892,11 +1186,13 @@
     slider: '<line x1="3" y1="10" x2="17" y2="10"/><circle cx="11" cy="10" r="2.5" fill="currentColor" stroke="none"/>',
     button: '<rect x="2.5" y="7" width="15" height="6.5" rx="2" fill="currentColor" stroke="none"/>',
     image: '<rect x="3" y="4" width="14" height="12" rx="1.5"/><circle cx="7.5" cy="8.5" r="1.5"/><path d="M4 14l4-4 3 3 2-2 3 3"/>',
+    accordion: '<rect x="3" y="3.5" width="14" height="5" rx="1.3"/><polyline points="7,6 8.5,7.5 10,6"/><line x1="5" y1="12" x2="15" y2="12"/><line x1="5" y1="15.5" x2="12" y2="15.5"/>',
   };
 
   const FIELD_TYPES = [
     { type: 'button', label: 'Button', group: 'hidden' },
     { type: 'image', label: 'Image', group: 'Core' },
+    { type: 'accordion', label: 'Collapsible section', group: 'Core' },
     { type: 'text', label: 'Text', group: 'Core' },
     { type: 'textarea', label: 'Textarea', group: 'Core' },
     { type: 'number', label: 'Number', group: 'Core' },
@@ -922,7 +1218,190 @@
     { presetAction: 'goto', paletteLabel: 'Skip to step…', buttonLabel: 'Skip ahead', buttonStyle: 'outline' },
   ];
 
+  const STRINGS = {
+    en: {
+      home: 'Home', user: 'User',
+      addScreen: '+ Screen', exportJson: 'Export JSON',
+      groupCore: 'Core', groupAdvanced: 'Advanced', groupLater: 'Later phase', soon: 'Soon',
+      preset_next: 'Next', preset_back: 'Back', preset_submit: 'Submit', preset_goto: 'Skip to step…',
+      ft_button: 'Button', ft_image: 'Image', ft_accordion: 'Collapsible section', ft_text: 'Text',
+      ft_textarea: 'Textarea', ft_number: 'Number', ft_select: 'Dropdown', ft_date: 'Date',
+      ft_datetime: 'Date/Time', ft_checkbox: 'Checkbox', ft_radio: 'Radio', ft_toggle: 'Toggle',
+      ft_signature: 'Signature', ft_rating: 'Rating', ft_photo: 'Photo', ft_qrscan: 'QR / Barcode Scan',
+      ft_combobox: 'Combobox', ft_listbox: 'Listbox', ft_slider: 'Slider',
+      addFieldTitle: 'Add {label}',
+      view_screens: 'Screens', view_review: 'Review summary', view_success: 'Success screen', view_failure: 'Failure screen',
+      w_phone: 'Phone', w_tablet: 'Tablet', w_desktop: 'Desktop',
+      addFieldsHint: 'Add fields from the palette on the left.',
+      ph_select: 'Select…', ph_date: 'mm/dd/yyyy', ph_datetime: 'mm/dd/yyyy --:--',
+      cameraUpload: 'Camera / file upload', signaturePad: 'Signature pad', qrOpensCamera: 'Opens camera to scan',
+      noImageSet: 'No image set — add an Image URL in properties', accordionDefaultLabel: 'Section',
+      noFieldsYetAddBelow: 'No fields yet — add one below.',
+      stepOf: 'Step {n} of {total}', untitledForm: 'Untitled Form',
+      actionHint_back: '← Returns to the previous screen', actionHint_submit: '✓ Submits the form',
+      actionHint_reset: '↺ Clears all fields on this screen',
+      actionHint_gotoUnset: '⇥ Jumps to a screen (pick which one in the properties panel)',
+      actionHint_gotoSet: '⇥ Jumps to Screen {n}: {title}', actionHint_next: '→ Advances to the next screen',
+      thankYou: 'Thank you!', submissionReceived: 'Your submission was received.', startAnother: 'Start Another',
+      submissionFailed: 'Submission failed',
+      submissionFailedBody: "We couldn't save your submission. Your answers are still here — check your connection and try again.",
+      startOver: 'Start Over', tryAgain: 'Try Again',
+      reviewYourAnswers: 'Review your answers', reviewEmptyHint: 'Add fields to a screen to see them listed here.',
+      reviewPreviewHeading: 'Review preview',
+      reviewPreviewHint: "Lists every field from every screen, right before Submit, so people can double-check their answers. Values shown here are placeholders — the builder doesn't collect real input.",
+      includeReviewScreen: 'Include review screen before submit',
+      reviewOffHint: "Currently off — this screen won't appear in the exported form until you turn it on.",
+      confirmPreviewHeading: 'Confirmation preview',
+      confirmPreviewHint_success: 'This is what people see after they hit Submit, if it goes through. It\'s fixed template copy — not editable per form — so there\'s nothing to configure here. Switch back to "Screens" above to keep building.',
+      confirmPreviewHint_failure: 'This is what people see after they hit Submit, if it fails. It\'s fixed template copy — not editable per form — so there\'s nothing to configure here. Switch back to "Screens" above to keep building.',
+      fieldPropertiesHeading: 'Field properties', label: 'Label', fieldKey: 'Field key', width: 'Width ',
+      widthHint: 'Drag below 100% to place this next to the following field on the same row.',
+      disabledOnScreen: 'Disabled on this screen', disabledBadge: 'Disabled', labelHidden: 'Label hidden',
+      disabledHint: 'Greyed out and not usable, without removing it — use this to restrict a field.',
+      hideLabel: 'Hide label',
+      hideLabelHint: 'Hides the visible label on this screen — e.g. when the placeholder already makes it obvious. Keep the label filled in for screen readers.',
+      action: 'Action', actionOpt_next: 'Go to next screen', actionOpt_back: 'Go to previous screen',
+      actionOpt_goto: 'Jump to a specific screen', actionOpt_submit: 'Submit form', actionOpt_reset: 'Reset form',
+      actionOpt_none: 'None (decorative only)', targetScreen: 'Target screen', screenOption: 'Screen {n}: {title}',
+      style: 'Style', stylePrimary: 'Primary (filled)', styleOutline: 'Outline',
+      buttonStyleHint: "In the real app, all of a screen's buttons render together in one row above Back/Next — their order here (relative to other buttons) carries over, but their position among regular fields doesn't.",
+      required: 'Required', placeholder: 'Placeholder',
+      imageUrl: 'Image URL', imageUrlHint: "There's no file upload yet — paste a hosted URL (e.g. the company logo).",
+      altText: 'Alt text', altTextHint: 'Describes the image for screen readers.',
+      alignment: 'Alignment', alignLeft: 'Left', alignCenter: 'Center', alignRight: 'Right',
+      introText: 'Intro text (optional)',
+      introTextHint: 'Shown above the fields inside this section when expanded; hidden while collapsed. Add fields to the section itself from the canvas.',
+      expandedByDefault: 'Expanded by default',
+      expandedByDefaultHint: 'Whether people see it open or closed when the screen first loads. The builder preview always shows it open so you can edit the content.',
+      layout: 'Layout', layoutVertical: 'Vertical (stacked)', layoutHorizontal: 'Horizontal (side by side)',
+      helpText: 'Help text', deleteField: 'Delete field',
+      bgColorLabel: 'Background color', bgColorHint: "Fills this field's card with a color from the app's brand palette.",
+      bgNone: 'None', bgBeige: 'Beige', bgAzul: 'Blue', bgRosado: 'Pink', bgMorado: 'Purple', bgWhite: 'White',
+      options: 'Options', removeOption: 'Remove option', addOption: '+ Add option',
+      optionsSource: 'Options source', staticList: 'Static list', sqlQuery: 'SQL query', excelWorkbook: 'Excel workbook',
+      sqlHint: 'Runs against the shared SQL Server connection — the first column becomes the option list.',
+      workbookId: 'Workbook ID', workbookIdPlaceholder: 'OneDrive/SharePoint workbook ID or path',
+      sheetName: 'Sheet name', excelHint: "Reads the sheet's first column as the option list.",
+      sqlPrefix: 'SQL: ', sqlNoQuery: '(no query set yet)',
+      excelPrefix: 'Excel: ', excelNoWorkbook: ' (no workbook set yet)',
+      screenPropertiesHeading: 'Screen properties', screenTitle: 'Screen title', deleteScreen: 'Delete screen',
+      formSettingsHeading: 'Form settings', formTitle: 'Form title',
+      headerLogoUrl: 'Header logo URL',
+      headerLogoUrlHint: 'Small logo shown next to the form title in the header bar, on every screen.',
+      logoPosition: 'Logo position', leftOfTitle: 'Left of title', rightOfTitle: 'Right of title', logoSize: 'Logo size ',
+      backgroundImageUrl: 'Background image URL',
+      backgroundImageUrlHint: 'Optional wallpaper shown behind every screen of this form.',
+      selectFieldHint: 'Select a field on the canvas, or add one from the palette, to edit its properties.',
+      formConfig: 'Form config', close: 'Close',
+      exportBodyIntroHtml: 'Save this as <code>frontend/src/forms/&lt;id&gt;/config.json</code> in the template repo — <code>FieldRenderer</code> renders every field type below, and screen-level <code>actions</code> (your Button fields) are rendered by <code>ScreenActions</code>, above the automatic Back/Next row.',
+      sourceWarningHtml: "Heads up: one or more dropdowns pull options from SQL or Excel via <code>source</code>. The backend endpoint that resolves those queries isn't built yet — it currently throws <code>NotImplementedError</code> — so wire that up before this config works end-to-end.",
+      copyJson: 'Copy JSON', copied: 'Copied!', selectToCopy: 'Select the text above to copy.',
+      userMenuToast: 'Would open the user menu (not wired up in this mockup)',
+      moveUp: 'Move up', moveDown: 'Move down', delete: 'Delete',
+    },
+    es: {
+      home: 'Inicio', user: 'Usuario',
+      addScreen: '+ Pantalla', exportJson: 'Exportar JSON',
+      groupCore: 'Básico', groupAdvanced: 'Avanzado', groupLater: 'Próximamente', soon: 'Pronto',
+      preset_next: 'Siguiente', preset_back: 'Atrás', preset_submit: 'Enviar', preset_goto: 'Saltar a paso…',
+      ft_button: 'Botón', ft_image: 'Imagen', ft_accordion: 'Sección plegable', ft_text: 'Texto',
+      ft_textarea: 'Área de texto', ft_number: 'Número', ft_select: 'Menú desplegable', ft_date: 'Fecha',
+      ft_datetime: 'Fecha/Hora', ft_checkbox: 'Casilla', ft_radio: 'Opción única', ft_toggle: 'Interruptor',
+      ft_signature: 'Firma', ft_rating: 'Calificación', ft_photo: 'Foto', ft_qrscan: 'Escaneo QR / código de barras',
+      ft_combobox: 'Combo', ft_listbox: 'Lista', ft_slider: 'Deslizador',
+      addFieldTitle: 'Agregar {label}',
+      view_screens: 'Pantallas', view_review: 'Resumen de revisión', view_success: 'Pantalla de éxito', view_failure: 'Pantalla de error',
+      w_phone: 'Teléfono', w_tablet: 'Tableta', w_desktop: 'Escritorio',
+      addFieldsHint: 'Agrega campos desde la paleta de la izquierda.',
+      ph_select: 'Seleccionar…', ph_date: 'dd/mm/aaaa', ph_datetime: 'dd/mm/aaaa --:--',
+      cameraUpload: 'Cámara / subir archivo', signaturePad: 'Panel de firma', qrOpensCamera: 'Abre la cámara para escanear',
+      noImageSet: 'No se ha definido una imagen — agrega una URL en propiedades', accordionDefaultLabel: 'Sección',
+      noFieldsYetAddBelow: 'Aún no hay campos — agrega uno abajo.',
+      stepOf: 'Paso {n} de {total}', untitledForm: 'Formulario sin título',
+      actionHint_back: '← Regresa a la pantalla anterior', actionHint_submit: '✓ Envía el formulario',
+      actionHint_reset: '↺ Borra todos los campos de esta pantalla',
+      actionHint_gotoUnset: '⇥ Salta a una pantalla (elígela en el panel de propiedades)',
+      actionHint_gotoSet: '⇥ Salta a la Pantalla {n}: {title}', actionHint_next: '→ Avanza a la siguiente pantalla',
+      thankYou: '¡Gracias!', submissionReceived: 'Tu envío fue recibido.', startAnother: 'Empezar otra',
+      submissionFailed: 'Error al enviar',
+      submissionFailedBody: 'No pudimos guardar tu envío. Tus respuestas siguen aquí — revisa tu conexión e inténtalo de nuevo.',
+      startOver: 'Empezar de nuevo', tryAgain: 'Reintentar',
+      reviewYourAnswers: 'Revisa tus respuestas', reviewEmptyHint: 'Agrega campos a una pantalla para verlos listados aquí.',
+      reviewPreviewHeading: 'Vista previa de revisión',
+      reviewPreviewHint: 'Lista todos los campos de todas las pantallas, justo antes de Enviar, para que la gente pueda revisar sus respuestas. Los valores mostrados aquí son marcadores de posición — el creador no recopila datos reales.',
+      includeReviewScreen: 'Incluir pantalla de revisión antes de enviar',
+      reviewOffHint: 'Actualmente desactivado — esta pantalla no aparecerá en el formulario exportado hasta que la actives.',
+      confirmPreviewHeading: 'Vista previa de confirmación',
+      confirmPreviewHint_success: 'Esto es lo que la gente ve después de presionar Enviar, si el envío se realiza con éxito. Es texto fijo de la plantilla — no editable por formulario — así que no hay nada que configurar aquí. Vuelve a "Pantallas" arriba para seguir construyendo.',
+      confirmPreviewHint_failure: 'Esto es lo que la gente ve después de presionar Enviar, si el envío falla. Es texto fijo de la plantilla — no editable por formulario — así que no hay nada que configurar aquí. Vuelve a "Pantallas" arriba para seguir construyendo.',
+      fieldPropertiesHeading: 'Propiedades del campo', label: 'Etiqueta', fieldKey: 'Clave del campo', width: 'Ancho ',
+      widthHint: 'Arrastra por debajo de 100% para colocarlo junto al siguiente campo en la misma fila.',
+      disabledOnScreen: 'Deshabilitado en esta pantalla', disabledBadge: 'Deshabilitado', labelHidden: 'Etiqueta oculta',
+      disabledHint: 'Se muestra en gris y no se puede usar, sin eliminarlo — úsalo para restringir un campo.',
+      hideLabel: 'Ocultar etiqueta',
+      hideLabelHint: 'Oculta la etiqueta visible en esta pantalla — por ejemplo, cuando el marcador de posición ya lo deja claro. Mantén la etiqueta completa para lectores de pantalla.',
+      action: 'Acción', actionOpt_next: 'Ir a la siguiente pantalla', actionOpt_back: 'Ir a la pantalla anterior',
+      actionOpt_goto: 'Saltar a una pantalla específica', actionOpt_submit: 'Enviar formulario', actionOpt_reset: 'Reiniciar formulario',
+      actionOpt_none: 'Ninguna (solo decorativo)', targetScreen: 'Pantalla de destino', screenOption: 'Pantalla {n}: {title}',
+      style: 'Estilo', stylePrimary: 'Primario (relleno)', styleOutline: 'Contorno',
+      buttonStyleHint: 'En la app real, todos los botones de una pantalla se muestran juntos en una fila arriba de Atrás/Siguiente — su orden aquí (respecto a otros botones) se conserva, pero su posición entre los campos normales no.',
+      required: 'Obligatorio', placeholder: 'Marcador de posición',
+      imageUrl: 'URL de la imagen', imageUrlHint: 'Todavía no hay subida de archivos — pega una URL alojada (por ejemplo, el logo de la empresa).',
+      altText: 'Texto alternativo', altTextHint: 'Describe la imagen para lectores de pantalla.',
+      alignment: 'Alineación', alignLeft: 'Izquierda', alignCenter: 'Centro', alignRight: 'Derecha',
+      introText: 'Texto introductorio (opcional)',
+      introTextHint: 'Se muestra arriba de los campos dentro de esta sección cuando está expandida; se oculta cuando está colapsada. Agrega campos a la sección desde el lienzo.',
+      expandedByDefault: 'Expandido de forma predeterminada',
+      expandedByDefaultHint: 'Si la gente la ve abierta o cerrada al cargar la pantalla por primera vez. La vista previa del creador siempre la muestra abierta para que puedas editar el contenido.',
+      layout: 'Diseño', layoutVertical: 'Vertical (apilado)', layoutHorizontal: 'Horizontal (uno al lado del otro)',
+      helpText: 'Texto de ayuda', deleteField: 'Eliminar campo',
+      bgColorLabel: 'Color de fondo', bgColorHint: 'Rellena la tarjeta de este campo con un color de la paleta de marca de la app.',
+      bgNone: 'Ninguno', bgBeige: 'Beige', bgAzul: 'Azul', bgRosado: 'Rosado', bgMorado: 'Morado', bgWhite: 'Blanco',
+      options: 'Opciones', removeOption: 'Eliminar opción', addOption: '+ Agregar opción',
+      optionsSource: 'Fuente de las opciones', staticList: 'Lista estática', sqlQuery: 'Consulta SQL', excelWorkbook: 'Libro de Excel',
+      sqlHint: 'Se ejecuta contra la conexión compartida de SQL Server — la primera columna se convierte en la lista de opciones.',
+      workbookId: 'ID del libro', workbookIdPlaceholder: 'ID o ruta del libro en OneDrive/SharePoint',
+      sheetName: 'Nombre de la hoja', excelHint: 'Lee la primera columna de la hoja como la lista de opciones.',
+      sqlPrefix: 'SQL: ', sqlNoQuery: '(sin consulta definida)',
+      excelPrefix: 'Excel: ', excelNoWorkbook: ' (sin libro definido)',
+      screenPropertiesHeading: 'Propiedades de la pantalla', screenTitle: 'Título de la pantalla', deleteScreen: 'Eliminar pantalla',
+      formSettingsHeading: 'Configuración del formulario', formTitle: 'Título del formulario',
+      headerLogoUrl: 'URL del logo del encabezado',
+      headerLogoUrlHint: 'Pequeño logo que se muestra junto al título del formulario en la barra de encabezado, en cada pantalla.',
+      logoPosition: 'Posición del logo', leftOfTitle: 'Izquierda del título', rightOfTitle: 'Derecha del título', logoSize: 'Tamaño del logo ',
+      backgroundImageUrl: 'URL de la imagen de fondo',
+      backgroundImageUrlHint: 'Fondo opcional que se muestra detrás de cada pantalla de este formulario.',
+      selectFieldHint: 'Selecciona un campo en el lienzo, o agrega uno desde la paleta, para editar sus propiedades.',
+      formConfig: 'Configuración del formulario', close: 'Cerrar',
+      exportBodyIntroHtml: 'Guarda esto como <code>frontend/src/forms/&lt;id&gt;/config.json</code> en el repositorio de la plantilla — <code>FieldRenderer</code> renderiza cada tipo de campo de abajo, y las <code>actions</code> a nivel de pantalla (tus campos de Botón) son renderizadas por <code>ScreenActions</code>, arriba de la fila automática Atrás/Siguiente.',
+      sourceWarningHtml: 'Aviso: uno o más menús desplegables obtienen sus opciones de SQL o Excel mediante <code>source</code>. El endpoint del backend que resuelve esas consultas aún no está construido — actualmente lanza <code>NotImplementedError</code> — así que conéctalo antes de que esta configuración funcione de principio a fin.',
+      copyJson: 'Copiar JSON', copied: '¡Copiado!', selectToCopy: 'Selecciona el texto de arriba para copiarlo.',
+      userMenuToast: 'Abriría el menú de usuario (no implementado en este mockup)',
+      moveUp: 'Subir', moveDown: 'Bajar', delete: 'Eliminar',
+    },
+  };
+
+  function t(key) {
+    return (STRINGS[state.lang] && STRINGS[state.lang][key]) || STRINGS.en[key] || key;
+  }
+
+  function tf(key, vars) {
+    let s = t(key);
+    for (const [k, v] of Object.entries(vars)) s = s.split('{' + k + '}').join(v);
+    return s;
+  }
+
+  function typeLabel(type) {
+    return t('ft_' + type);
+  }
+
+  function fieldsOnScreenText(count) {
+    if (state.lang === 'es') return `${count} campo${count === 1 ? '' : 's'} en esta pantalla.`;
+    return `${count} field${count === 1 ? '' : 's'} on this screen.`;
+  }
+
   const state = {
+    lang: 'en',
     title: 'Untitled Form',
     includeReviewScreen: true,
     backgroundImageUrl: '',
@@ -931,13 +1410,14 @@
     headerLogoSize: 22,
     activeScreen: 0,
     nextFieldId: 3,
-    nextScreenId: 2,
-    panel: 'form',
+    nextScreenId: 3,
+    panel: 'screen',
     selectedFieldId: null,
     canvasView: 'screens',
     screens: [
+      { id: 'screen-1', title: 'Home', fields: [] },
       {
-        id: 'screen-1', title: 'Screen 1', fields: [
+        id: 'screen-2', title: 'Screen 1', fields: [
           { id: 'f1', type: 'text', label: 'Full Name', name: 'full_name', required: true, placeholder: 'Full name', helpText: '', widthPct: 100, disabled: false, hideLabel: false },
           { id: 'f2', type: 'select', label: 'Category', name: 'category', required: false, placeholder: 'Select…', options: ['Option 1', 'Option 2'], helpText: '', widthPct: 100, disabled: false, hideLabel: false, sourceKind: 'static', sourceQuery: '', sourceWorkbookId: '', sourceSheet: '' },
         ]
@@ -960,6 +1440,13 @@
     return el;
   }
 
+  function appendAll(el, ...nodes) {
+    for (const n of nodes.flat()) {
+      if (n === null || n === undefined) continue;
+      el.append(n);
+    }
+  }
+
   function icon(type) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svg.setAttribute('viewBox', '0 0 20 20');
@@ -980,10 +1467,40 @@
 
   function activeScreen() { return state.screens[state.activeScreen]; }
 
+  function findInList(list, id) {
+    for (const f of list) {
+      if (f.id === id) return f;
+      if (f.type === 'accordion' && f.children) {
+        const found = findInList(f.children, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
   function findField(id) {
     for (const screen of state.screens) {
-      const f = screen.fields.find((x) => x.id === id);
-      if (f) return f;
+      const found = findInList(screen.fields, id);
+      if (found) return found;
+    }
+    return null;
+  }
+
+  function findFieldContainer(id) {
+    function search(list) {
+      const index = list.findIndex((f) => f.id === id);
+      if (index !== -1) return { list, index };
+      for (const f of list) {
+        if (f.type === 'accordion' && f.children) {
+          const found = search(f.children);
+          if (found) return found;
+        }
+      }
+      return null;
+    }
+    for (const screen of state.screens) {
+      const found = search(screen.fields);
+      if (found) return found;
     }
     return null;
   }
@@ -991,17 +1508,17 @@
   function actionHint(field) {
     const action = field.buttonAction;
     switch (action) {
-      case 'back': return '← Returns to the previous screen';
-      case 'submit': return '✓ Submits the form';
-      case 'reset': return '↺ Clears all fields on this screen';
+      case 'back': return t('actionHint_back');
+      case 'submit': return t('actionHint_submit');
+      case 'reset': return t('actionHint_reset');
       case 'none': return '';
       case 'goto': {
         const idx = state.screens.findIndex((s) => s.id === field.buttonTargetScreenId);
-        if (idx === -1) return '⇥ Jumps to a screen (pick which one in the properties panel)';
-        return `⇥ Jumps to Screen ${idx + 1}: ${state.screens[idx].title}`;
+        if (idx === -1) return t('actionHint_gotoUnset');
+        return tf('actionHint_gotoSet', { n: idx + 1, title: state.screens[idx].title });
       }
       case 'next':
-      default: return '→ Advances to the next screen';
+      default: return t('actionHint_next');
     }
   }
 
@@ -1015,11 +1532,11 @@
 
   // ---- actions ----
 
-  function addField(type) {
+  function makeField(type, list) {
     const meta = FIELD_TYPES.find((f) => f.type === type);
     const id = 'f' + state.nextFieldId++;
-    const count = activeScreen().fields.length + 1;
-    const field = {
+    const count = list.length + 1;
+    return {
       id, type, label: meta.label, name: slug(meta.label) + '_' + count,
       required: false, placeholder: '', helpText: '', widthPct: 100, disabled: false, hideLabel: false,
       options: usesOptions(type) ? ['Option 1', 'Option 2'] : undefined,
@@ -1032,9 +1549,28 @@
       imageUrl: type === 'image' ? '' : undefined,
       imageAlt: type === 'image' ? '' : undefined,
       imageAlign: type === 'image' ? 'center' : undefined,
+      bodyText: type === 'accordion' ? '' : undefined,
+      defaultOpen: type === 'accordion' ? false : undefined,
+      children: type === 'accordion' ? [] : undefined,
+      bgColor: '',
     };
-    activeScreen().fields.push(field);
-    state.selectedFieldId = id;
+  }
+
+  function addField(type) {
+    const list = activeScreen().fields;
+    const field = makeField(type, list);
+    list.push(field);
+    state.selectedFieldId = field.id;
+    state.panel = 'field';
+    state.canvasView = 'screens';
+    render();
+  }
+
+  function addChildField(parentField, type) {
+    parentField.children = parentField.children || [];
+    const field = makeField(type, parentField.children);
+    parentField.children.push(field);
+    state.selectedFieldId = field.id;
     state.panel = 'field';
     state.canvasView = 'screens';
     render();
@@ -1051,6 +1587,7 @@
       buttonStyle: preset.buttonStyle,
       buttonAction: preset.presetAction,
       buttonTargetScreenId: undefined,
+      bgColor: '',
     };
     activeScreen().fields.push(field);
     state.selectedFieldId = id;
@@ -1060,18 +1597,20 @@
   }
 
   function deleteField(id) {
-    const screen = activeScreen();
-    screen.fields = screen.fields.filter((f) => f.id !== id);
+    const container = findFieldContainer(id);
+    if (!container) return;
+    container.list.splice(container.index, 1);
     if (state.selectedFieldId === id) { state.selectedFieldId = null; state.panel = 'screen'; }
     render();
   }
 
   function moveField(id, dir) {
-    const fields = activeScreen().fields;
-    const i = fields.findIndex((f) => f.id === id);
-    const j = i + dir;
-    if (j < 0 || j >= fields.length) return;
-    [fields[i], fields[j]] = [fields[j], fields[i]];
+    const container = findFieldContainer(id);
+    if (!container) return;
+    const { list, index } = container;
+    const j = index + dir;
+    if (j < 0 || j >= list.length) return;
+    [list[index], list[j]] = [list[j], list[index]];
     render();
   }
 
@@ -1113,19 +1652,23 @@
   function renderPalette() {
     const el = document.getElementById('palette');
     el.innerHTML = '';
-    const groups = ['Core', 'Advanced', 'Later phase'];
+    const groups = [
+      { key: 'Core', label: t('groupCore') },
+      { key: 'Advanced', label: t('groupAdvanced') },
+      { key: 'Later phase', label: t('groupLater') },
+    ];
     for (const g of groups) {
-      const items = FIELD_TYPES.filter((f) => f.group === g);
-      const presetButtons = g === 'Core' ? BUTTON_PRESETS.map((preset) => h('button', {
+      const items = FIELD_TYPES.filter((f) => f.group === g.key);
+      const presetButtons = g.key === 'Core' ? BUTTON_PRESETS.map((preset) => h('button', {
         class: 'palette-item',
         type: 'button',
         onclick: () => addButtonPreset(preset),
       },
         h('span', { class: 'pi-icon' }, icon('button')),
-        h('span', {}, preset.paletteLabel),
+        h('span', {}, t('preset_' + preset.presetAction)),
       )) : [];
       const group = h('div', { class: 'palette-group' },
-        h('span', { class: 'palette-group-label' }, g),
+        h('span', { class: 'palette-group-label' }, g.label),
         ...presetButtons,
         ...items.map((meta) => h('button', {
           class: 'palette-item' + (meta.disabled ? ' disabled' : ''),
@@ -1134,8 +1677,8 @@
           onclick: () => addField(meta.type),
         },
           h('span', { class: 'pi-icon' }, icon(meta.type)),
-          h('span', {}, meta.label),
-          meta.disabled ? h('span', { class: 'soon-badge' }, 'Soon') : null,
+          h('span', {}, typeLabel(meta.type)),
+          meta.disabled ? h('span', { class: 'soon-badge' }, t('soon')) : null,
         )),
       );
       el.append(group);
@@ -1164,39 +1707,52 @@
 
   // ---- render: canvas field preview ----
 
-  function buttonPreviewStyle(styleName) {
-    if (styleName === 'outline') {
-      return 'background:transparent;border:1.5px solid var(--morado);color:var(--morado);font-family:var(--font-head);font-weight:600;font-size:13px;padding:9px 14px;border-radius:9px;width:100%;';
-    }
-    return 'background:var(--morado);border:none;color:#fff;font-family:var(--font-head);font-weight:600;font-size:13px;padding:9px 14px;border-radius:9px;width:100%;';
+  function btnClass(styleName) {
+    return 'cf-btn ' + (styleName === 'outline' ? 'outline' : 'primary');
   }
 
   function fieldPreview(field) {
     switch (field.type) {
       case 'button':
-        return h('button', { type: 'button', disabled: true, style: buttonPreviewStyle(field.buttonStyle) }, field.label || 'Button');
+        return h('button', { type: 'button', disabled: true, class: btnClass(field.buttonStyle) }, field.label || 'Button');
       case 'image':
         if (!field.imageUrl) {
-          return h('div', { class: 'cf-dashed' }, 'No image set — add an Image URL in properties');
+          return h('div', { class: 'cf-dashed' }, t('noImageSet'));
         }
         return h('div', { class: 'cf-image-wrap align-' + (field.imageAlign || 'center') },
           h('img', { src: field.imageUrl, alt: field.imageAlt || '' }),
         );
+      case 'accordion': {
+        const kids = field.children || [];
+        const childrenList = h('div', { class: 'cf-accordion-children' },
+          kids.length
+            ? kids.map((child, idx) => renderChildField(child, field, idx))
+            : h('div', { class: 'cf-accordion-empty' }, t('noFieldsYetAddBelow')),
+        );
+        return h('div', { class: 'cf-accordion' },
+          h('div', { class: 'cf-accordion-head' }, h('span', {}, field.label || t('accordionDefaultLabel')), chevronDownIcon()),
+          h('div', { class: 'cf-accordion-body' },
+            field.bodyText ? h('p', { class: 'cf-accordion-text' }, field.bodyText) : null,
+            childrenList,
+            accordionAddRow(field),
+          ),
+        );
+      }
       case 'text':
         return h('input', { type: 'text', disabled: true, placeholder: field.placeholder || '' });
       case 'number':
         return h('input', { type: 'text', disabled: true, placeholder: field.placeholder || '0' });
       case 'date':
-        return h('input', { type: 'text', disabled: true, placeholder: 'mm/dd/yyyy' });
+        return h('input', { type: 'text', disabled: true, placeholder: t('ph_date') });
       case 'datetime':
-        return h('input', { type: 'text', disabled: true, placeholder: 'mm/dd/yyyy --:--' });
+        return h('input', { type: 'text', disabled: true, placeholder: t('ph_datetime') });
       case 'textarea':
         return h('textarea', { disabled: true, placeholder: field.placeholder || '' });
       case 'select':
         if (field.sourceKind && field.sourceKind !== 'static') {
           return h('div', { class: 'cf-dashed' }, sourceHint(field));
         }
-        return h('select', { disabled: true }, h('option', {}, field.placeholder || 'Select…'));
+        return h('select', { disabled: true }, h('option', {}, field.placeholder || t('ph_select')));
       case 'checkbox':
         return h('div', { class: 'cf-row' }, h('input', { type: 'checkbox', disabled: true }), field.placeholder || field.label);
       case 'radio':
@@ -1211,18 +1767,18 @@
       case 'rating':
         return h('div', { class: 'cf-stars' }, '★★★★★');
       case 'photo':
-        return h('div', { class: 'cf-dashed' }, 'Camera / file upload');
+        return h('div', { class: 'cf-dashed' }, t('cameraUpload'));
       case 'signature':
-        return h('div', { class: 'cf-dashed' }, 'Signature pad');
+        return h('div', { class: 'cf-dashed' }, t('signaturePad'));
       case 'qrscan':
-        return h('div', { class: 'cf-dashed' }, 'Opens camera to scan');
+        return h('div', { class: 'cf-dashed' }, t('qrOpensCamera'));
       default:
         return h('div', { class: 'cf-dashed' }, field.type);
     }
   }
 
   function titlebarContent() {
-    const title = h('h1', {}, state.title || 'Untitled Form');
+    const title = h('h1', {}, state.title || t('untitledForm'));
     if (!state.headerLogoUrl) return [title];
     const size = state.headerLogoSize || 22;
     const logo = h('img', {
@@ -1242,6 +1798,58 @@
       el.style.backgroundImage = '';
       el.style.backgroundColor = '';
     }
+  }
+
+  function chevronDownIcon() {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('viewBox', '0 0 20 20');
+    svg.setAttribute('width', '14');
+    svg.setAttribute('height', '14');
+    svg.setAttribute('fill', 'none');
+    svg.setAttribute('stroke', 'currentColor');
+    svg.setAttribute('stroke-width', '1.8');
+    svg.setAttribute('stroke-linecap', 'round');
+    svg.setAttribute('stroke-linejoin', 'round');
+    svg.innerHTML = '<polyline points="5,7.5 10,12.5 15,7.5"/>';
+    return svg;
+  }
+
+  const NESTABLE_TYPES = ['text', 'textarea', 'number', 'select', 'date', 'datetime', 'checkbox', 'radio', 'toggle', 'button', 'photo', 'signature', 'rating', 'qrscan', 'image']
+    .map((t) => FIELD_TYPES.find((f) => f.type === t));
+
+  function accordionAddRow(field) {
+    const row = h('div', { class: 'cf-accordion-add-row' });
+    NESTABLE_TYPES.forEach((meta) => {
+      row.append(h('button', {
+        class: 'cf-accordion-add-btn', type: 'button', title: tf('addFieldTitle', { label: typeLabel(meta.type) }),
+        onclick: (e) => { e.stopPropagation(); addChildField(field, meta.type); },
+      }, icon(meta.type)));
+    });
+    return row;
+  }
+
+  function renderChildField(field, parentField, idx) {
+    const siblings = parentField.children;
+    return h('div', {
+      class: 'cf-accordion-child' + (field.disabled ? ' cf-disabled' : '') + (field.id === state.selectedFieldId ? ' selected' : ''),
+      style: fieldContainerStyle(field, field.widthPct || 100),
+      onclick: (e) => { e.stopPropagation(); selectField(field.id); },
+    },
+      h('div', { class: 'cf-toolbar' },
+        h('button', { type: 'button', title: t('moveUp'), disabled: idx === 0, onclick: (e) => { e.stopPropagation(); moveField(field.id, -1); } }, '↑'),
+        h('button', { type: 'button', title: t('moveDown'), disabled: idx === siblings.length - 1, onclick: (e) => { e.stopPropagation(); moveField(field.id, 1); } }, '↓'),
+        h('button', { type: 'button', class: 'danger', title: t('delete'), onclick: (e) => { e.stopPropagation(); deleteField(field.id); } }, '✕'),
+      ),
+      (field.type === 'button' || field.type === 'image')
+        ? (field.disabled ? h('div', { class: 'cf-label' }, h('span', { class: 'cf-disabled-badge' }, t('disabledBadge'))) : null)
+        : h('label', { class: 'cf-label' + (field.hideLabel ? ' cf-label-hidden-note' : '') },
+            field.hideLabel ? t('labelHidden') : field.label,
+            (!field.hideLabel && field.required) ? h('span', { class: 'cf-req' }, ' *') : null,
+            field.disabled ? h('span', { class: 'cf-disabled-badge' }, t('disabledBadge')) : null,
+          ),
+      h('div', { class: 'cf-preview' }, fieldPreview(field)),
+      field.type === 'button' && actionHint(field) ? h('p', { class: 'cf-action-hint' }, actionHint(field)) : null,
+    );
   }
 
   function confirmIcon(pathD, stroke) {
@@ -1266,36 +1874,33 @@
     applyCanvasBackground(el);
     const isSuccess = state.canvasView === 'success';
 
-    const titlebar = h('div', { class: 'canvas-titlebar' }, ...titlebarContent());
-
     const body = isSuccess
       ? h('div', { class: 'confirm-view' },
           h('div', { class: 'confirm-badge' }, confirmIcon('M5 13l4 4L19 7', '#545386')),
-          h('h2', {}, 'Thank you!'),
-          h('p', {}, 'Your submission was received.'),
-          h('button', { type: 'button', disabled: true, style: buttonPreviewStyle('outline') }, 'Start Another'),
+          h('h2', {}, t('thankYou')),
+          h('p', {}, t('submissionReceived')),
+          h('button', { type: 'button', disabled: true, class: btnClass('outline') }, t('startAnother')),
         )
       : h('div', { class: 'confirm-view' },
           h('div', { class: 'confirm-badge error' }, confirmIcon('M8 8l8 8M16 8l-8 8', '#C24C64')),
-          h('h2', { class: 'error' }, 'Submission failed'),
-          h('p', {}, "We couldn't save your submission. Your answers are still here — check your connection and try again."),
+          h('h2', { class: 'error' }, t('submissionFailed')),
+          h('p', {}, t('submissionFailedBody')),
           h('div', { class: 'confirm-actions' },
-            h('button', { type: 'button', disabled: true, style: buttonPreviewStyle('outline') }, 'Start Over'),
-            h('button', { type: 'button', disabled: true, style: buttonPreviewStyle('primary') }, 'Try Again'),
+            h('button', { type: 'button', disabled: true, class: btnClass('outline') }, t('startOver')),
+            h('button', { type: 'button', disabled: true, class: btnClass('primary') }, t('tryAgain')),
           ),
         );
 
-    el.append(titlebar, body);
+    el.append(body);
   }
 
   function renderReviewPreview() {
     const el = document.getElementById('canvas');
     el.innerHTML = '';
     applyCanvasBackground(el);
-    const titlebar = h('div', { class: 'canvas-titlebar' }, ...titlebarContent());
 
     const groups = state.screens
-      .map((s) => ({ screen: s, fields: s.fields.filter((f) => f.type !== 'button' && f.type !== 'image') }))
+      .map((s) => ({ screen: s, fields: s.fields.filter((f) => f.type !== 'button' && f.type !== 'image' && f.type !== 'accordion') }))
       .filter((g) => g.fields.length > 0)
       .map((g) => h('div', { class: 'review-group' },
         h('h3', { class: 'review-heading' }, g.screen.title),
@@ -1308,11 +1913,11 @@
       ));
 
     const body = h('div', { class: 'review-preview' },
-      h('h2', { class: 'review-title' }, 'Review your answers'),
-      groups.length ? groups : h('p', { class: 'empty-canvas' }, 'Add fields to a screen to see them listed here.'),
+      h('h2', { class: 'review-title' }, t('reviewYourAnswers')),
+      groups.length ? groups : h('p', { class: 'empty-canvas' }, t('reviewEmptyHint')),
     );
 
-    el.append(titlebar, body);
+    el.append(body);
   }
 
   function renderCanvas() {
@@ -1331,13 +1936,8 @@
     const totalSteps = state.screens.length + (state.includeReviewScreen ? 1 : 0);
     const pct = Math.round(((state.activeScreen + 1) / totalSteps) * 100);
 
-    const titlebar = h('div', {
-      class: 'canvas-titlebar' + (state.panel === 'form' ? ' selected' : ''),
-      onclick: () => { state.panel = 'form'; state.selectedFieldId = null; render(); },
-    }, ...titlebarContent());
-
     const progress = h('div', { class: 'canvas-progress' },
-      h('div', { class: 'canvas-progress-row' }, h('span', {}, `Step ${state.activeScreen + 1} of ${totalSteps}`), h('span', {}, `${pct}%`)),
+      h('div', { class: 'canvas-progress-row' }, h('span', {}, tf('stepOf', { n: state.activeScreen + 1, total: totalSteps })), h('span', {}, `${pct}%`)),
       h('div', { class: 'canvas-progress-track' }, h('div', { class: 'canvas-progress-fill', style: `width:${pct}%` })),
     );
 
@@ -1348,26 +1948,26 @@
 
     const fieldsWrap = h('div', { class: 'fields-wrap' });
     if (screen.fields.length === 0) {
-      fieldsWrap.append(h('div', { class: 'empty-canvas' }, 'Add fields from the palette on the left.'));
+      fieldsWrap.append(h('div', { class: 'empty-canvas' }, t('addFieldsHint')));
     } else {
       screen.fields.forEach((field, idx) => {
         const pct = field.widthPct || 100;
         fieldsWrap.append(h('div', {
           class: 'canvas-field' + (field.disabled ? ' cf-disabled' : '') + (field.id === state.selectedFieldId ? ' selected' : ''),
-          style: pct < 100 ? `flex: 1 1 calc(${pct}% - 6px); min-width: 0;` : undefined,
+          style: fieldContainerStyle(field, pct),
           onclick: () => selectField(field.id),
         },
           h('div', { class: 'cf-toolbar' },
-            h('button', { type: 'button', title: 'Move up', disabled: idx === 0, onclick: (e) => { e.stopPropagation(); moveField(field.id, -1); } }, '↑'),
-            h('button', { type: 'button', title: 'Move down', disabled: idx === screen.fields.length - 1, onclick: (e) => { e.stopPropagation(); moveField(field.id, 1); } }, '↓'),
-            h('button', { type: 'button', class: 'danger', title: 'Delete', onclick: (e) => { e.stopPropagation(); deleteField(field.id); } }, '✕'),
+            h('button', { type: 'button', title: t('moveUp'), disabled: idx === 0, onclick: (e) => { e.stopPropagation(); moveField(field.id, -1); } }, '↑'),
+            h('button', { type: 'button', title: t('moveDown'), disabled: idx === screen.fields.length - 1, onclick: (e) => { e.stopPropagation(); moveField(field.id, 1); } }, '↓'),
+            h('button', { type: 'button', class: 'danger', title: t('delete'), onclick: (e) => { e.stopPropagation(); deleteField(field.id); } }, '✕'),
           ),
-          (field.type === 'button' || field.type === 'image')
-            ? (field.disabled ? h('div', { class: 'cf-label' }, h('span', { class: 'cf-disabled-badge' }, 'Disabled')) : null)
+          (field.type === 'button' || field.type === 'image' || field.type === 'accordion')
+            ? (field.disabled ? h('div', { class: 'cf-label' }, h('span', { class: 'cf-disabled-badge' }, t('disabledBadge'))) : null)
             : h('label', { class: 'cf-label' + (field.hideLabel ? ' cf-label-hidden-note' : '') },
-                field.hideLabel ? 'Label hidden' : field.label,
+                field.hideLabel ? t('labelHidden') : field.label,
                 (!field.hideLabel && field.required) ? h('span', { class: 'cf-req' }, ' *') : null,
-                field.disabled ? h('span', { class: 'cf-disabled-badge' }, 'Disabled') : null,
+                field.disabled ? h('span', { class: 'cf-disabled-badge' }, t('disabledBadge')) : null,
               ),
           h('div', { class: 'cf-preview' }, fieldPreview(field)),
           field.type === 'button' && actionHint(field) ? h('p', { class: 'cf-action-hint' }, actionHint(field)) : null,
@@ -1375,13 +1975,13 @@
       });
     }
 
-    el.append(titlebar, h('div', { class: 'canvas-body' }, progress, screenTitle, fieldsWrap));
+    el.append(h('div', { class: 'canvas-body' }, progress, screenTitle, fieldsWrap));
   }
 
   // ---- render: properties panel ----
 
   function optionsEditor(field) {
-    const wrap = h('div', { class: 'prop-field' }, h('span', { class: 'prop-label' }, 'Options'));
+    const wrap = h('div', { class: 'prop-field' }, h('span', { class: 'prop-label' }, t('options')));
     (field.options || []).forEach((opt, idx) => {
       wrap.append(h('div', { class: 'option-row' },
         h('input', {
@@ -1389,7 +1989,7 @@
           oninput: (e) => { field.options[idx] = e.target.value; renderCanvas(); },
         }),
         h('button', {
-          type: 'button', title: 'Remove option',
+          type: 'button', title: t('removeOption'),
           onclick: () => { field.options.splice(idx, 1); render(); },
         }, '✕'),
       ));
@@ -1397,7 +1997,7 @@
     wrap.append(h('button', {
       class: 'add-option', type: 'button',
       onclick: () => { field.options.push('Option ' + (field.options.length + 1)); render(); },
-    }, '+ Add option'));
+    }, t('addOption')));
     return wrap;
   }
 
@@ -1406,41 +2006,41 @@
     const wrap = h('div', {});
 
     wrap.append(h('div', { class: 'prop-field' },
-      h('span', { class: 'prop-label' }, 'Options source'),
+      h('span', { class: 'prop-label' }, t('optionsSource')),
       h('select', {
         onchange: (e) => { field.sourceKind = e.target.value; renderProperties(); renderCanvas(); },
       },
-        h('option', { value: 'static', selected: kind === 'static' }, 'Static list'),
-        h('option', { value: 'sql', selected: kind === 'sql' }, 'SQL query'),
-        h('option', { value: 'excel', selected: kind === 'excel' }, 'Excel workbook'),
+        h('option', { value: 'static', selected: kind === 'static' }, t('staticList')),
+        h('option', { value: 'sql', selected: kind === 'sql' }, t('sqlQuery')),
+        h('option', { value: 'excel', selected: kind === 'excel' }, t('excelWorkbook')),
       ),
     ));
 
     if (kind === 'sql') {
       wrap.append(h('div', { class: 'prop-field' },
-        h('span', { class: 'prop-label' }, 'SQL query'),
+        h('span', { class: 'prop-label' }, t('sqlQuery')),
         h('textarea', {
           placeholder: 'SELECT DISTINCT name FROM dbo.Warehouses ORDER BY name',
           oninput: (e) => { field.sourceQuery = e.target.value; },
         }, field.sourceQuery || ''),
-        h('p', { class: 'prop-hint' }, 'Runs against the shared SQL Server connection — the first column becomes the option list.'),
+        h('p', { class: 'prop-hint' }, t('sqlHint')),
       ));
     } else if (kind === 'excel') {
       wrap.append(
         h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, 'Workbook ID'),
+          h('span', { class: 'prop-label' }, t('workbookId')),
           h('input', {
-            type: 'text', placeholder: 'OneDrive/SharePoint workbook ID or path', value: field.sourceWorkbookId || '',
+            type: 'text', placeholder: t('workbookIdPlaceholder'), value: field.sourceWorkbookId || '',
             oninput: (e) => { field.sourceWorkbookId = e.target.value; },
           }),
         ),
         h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, 'Sheet name'),
+          h('span', { class: 'prop-label' }, t('sheetName')),
           h('input', {
             type: 'text', placeholder: 'Sheet1', value: field.sourceSheet || '',
             oninput: (e) => { field.sourceSheet = e.target.value; },
           }),
-          h('p', { class: 'prop-hint' }, "Reads the sheet's first column as the option list."),
+          h('p', { class: 'prop-hint' }, t('excelHint')),
         ),
       );
     } else {
@@ -1453,18 +2053,18 @@
   function sourceHint(field) {
     if (field.sourceKind === 'sql') {
       const q = (field.sourceQuery || '').trim();
-      return 'SQL: ' + (q ? (q.length > 46 ? q.slice(0, 46) + '…' : q) : '(no query set yet)');
+      return t('sqlPrefix') + (q ? (q.length > 46 ? q.slice(0, 46) + '…' : q) : t('sqlNoQuery'));
     }
     if (field.sourceKind === 'excel') {
       const sheet = field.sourceSheet || 'sheet';
-      return 'Excel: ' + sheet + (field.sourceWorkbookId ? ' — ' + field.sourceWorkbookId : ' (no workbook set yet)');
+      return t('excelPrefix') + sheet + (field.sourceWorkbookId ? ' — ' + field.sourceWorkbookId : t('excelNoWorkbook'));
     }
     return '';
   }
 
   function widthField(field) {
     const pct = field.widthPct || 100;
-    const label = h('span', { class: 'prop-label' }, 'Width ', h('span', { class: 'width-readout' }, `(${pct}%)`));
+    const label = h('span', { class: 'prop-label' }, t('width'), h('span', { class: 'width-readout' }, `(${pct}%)`));
     const slider = h('input', {
       type: 'range', min: '20', max: '100', step: '5', value: String(pct),
       oninput: (e) => {
@@ -1474,7 +2074,50 @@
       },
     });
     return h('div', { class: 'prop-field' }, label, slider,
-      h('p', { class: 'prop-hint' }, 'Drag below 100% to place this next to the following field on the same row.'),
+      h('p', { class: 'prop-hint' }, t('widthHint')),
+    );
+  }
+
+  const BG_SWATCHES = [
+    { key: 'none', value: null, labelKey: 'bgNone' },
+    { key: 'white', value: 'var(--surface)', labelKey: 'bgWhite' },
+    { key: 'beige', value: 'var(--beige)', labelKey: 'bgBeige' },
+    { key: 'azul', value: 'var(--azul)', labelKey: 'bgAzul' },
+    { key: 'rosado', value: 'var(--rosado)', labelKey: 'bgRosado' },
+    { key: 'morado', value: 'rgba(84, 83, 134, .16)', labelKey: 'bgMorado' },
+  ];
+
+  function bgColorValue(key) {
+    if (!key) return null;
+    const sw = BG_SWATCHES.find((s) => s.key === key);
+    return sw ? sw.value : null;
+  }
+
+  function fieldContainerStyle(field, pct) {
+    const parts = [];
+    if (pct < 100) parts.push(`flex: 1 1 calc(${pct}% - 6px); min-width: 0;`);
+    const bg = bgColorValue(field.bgColor);
+    if (bg) parts.push(`background: ${bg};`);
+    return parts.length ? parts.join(' ') : undefined;
+  }
+
+  function bgSwatchPicker(field) {
+    const current = field.bgColor || 'none';
+    const row = h('div', { class: 'bg-swatches' });
+    BG_SWATCHES.forEach((sw) => {
+      const isNone = sw.key === 'none';
+      row.append(h('button', {
+        type: 'button',
+        class: 'bg-swatch' + (isNone ? ' none' : '') + (current === sw.key ? ' selected' : ''),
+        style: isNone ? undefined : `background:${sw.value};`,
+        title: t(sw.labelKey),
+        onclick: () => { field.bgColor = isNone ? '' : sw.key; renderCanvas(); renderProperties(); },
+      }));
+    });
+    return h('div', { class: 'prop-field' },
+      h('span', { class: 'prop-label' }, t('bgColorLabel')),
+      row,
+      h('p', { class: 'prop-hint' }, t('bgColorHint')),
     );
   }
 
@@ -1483,28 +2126,28 @@
     el.innerHTML = '';
 
     if (state.canvasView === 'review') {
-      el.append(
-        h('p', { class: 'prop-heading' }, 'Review preview'),
-        h('p', { class: 'prop-hint' }, "Lists every field from every screen, right before Submit, so people can double-check their answers. Values shown here are placeholders — the builder doesn't collect real input."),
+      appendAll(el,
+        h('p', { class: 'prop-heading' }, t('reviewPreviewHeading')),
+        h('p', { class: 'prop-hint' }, t('reviewPreviewHint')),
         h('div', { class: 'prop-field' },
           h('label', { class: 'prop-check' },
             h('input', {
               type: 'checkbox', checked: state.includeReviewScreen,
               onchange: (e) => { state.includeReviewScreen = e.target.checked; renderCanvas(); renderProperties(); },
             }),
-            'Include review screen before submit',
+            t('includeReviewScreen'),
           ),
         ),
-        !state.includeReviewScreen ? h('p', { class: 'prop-hint' }, "Currently off — this screen won't appear in the exported form until you turn it on.") : null,
+        !state.includeReviewScreen ? h('p', { class: 'prop-hint' }, t('reviewOffHint')) : null,
       );
       return;
     }
 
     if (state.canvasView !== 'screens') {
-      const label = state.canvasView === 'success' ? 'success' : 'failure';
-      el.append(
-        h('p', { class: 'prop-heading' }, 'Confirmation preview'),
-        h('p', { class: 'prop-hint' }, `This is what people see after they hit Submit, if it ${label === 'success' ? 'goes through' : 'fails'}. It's fixed template copy — not editable per form — so there's nothing to configure here. Switch back to "Screens" above to keep building.`),
+      const isSuccess = state.canvasView === 'success';
+      appendAll(el,
+        h('p', { class: 'prop-heading' }, t('confirmPreviewHeading')),
+        h('p', { class: 'prop-hint' }, t(isSuccess ? 'confirmPreviewHint_success' : 'confirmPreviewHint_failure')),
       );
       return;
     }
@@ -1514,164 +2157,177 @@
       if (!field) { state.panel = 'screen'; renderProperties(); return; }
       const meta = FIELD_TYPES.find((f) => f.type === field.type);
 
-      el.append(
-        h('p', { class: 'prop-heading' }, 'Field properties'),
-        h('span', { class: 'type-chip' }, icon(field.type), meta.label),
+      appendAll(el,
+        h('p', { class: 'prop-heading' }, t('fieldPropertiesHeading')),
+        h('span', { class: 'type-chip' }, icon(field.type), typeLabel(field.type)),
         h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, 'Label'),
+          h('span', { class: 'prop-label' }, t('label')),
           h('input', { type: 'text', value: field.label, oninput: (e) => { field.label = e.target.value; renderCanvas(); } }),
         ),
         h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, 'Field key'),
+          h('span', { class: 'prop-label' }, t('fieldKey')),
           h('input', { type: 'text', value: field.name, oninput: (e) => { field.name = e.target.value; } }),
         ),
         widthField(field),
+        bgSwatchPicker(field),
         h('div', { class: 'prop-field' },
           h('label', { class: 'prop-check' },
             h('input', { type: 'checkbox', checked: !!field.disabled, onchange: (e) => { field.disabled = e.target.checked; renderCanvas(); } }),
-            'Disabled on this screen',
+            t('disabledOnScreen'),
           ),
-          h('p', { class: 'prop-hint' }, 'Greyed out and not usable, without removing it — use this to restrict a field.'),
+          h('p', { class: 'prop-hint' }, t('disabledHint')),
         ),
-        (field.type === 'button' || field.type === 'image') ? null : h('div', { class: 'prop-field' },
+        (field.type === 'button' || field.type === 'image' || field.type === 'accordion') ? null : h('div', { class: 'prop-field' },
           h('label', { class: 'prop-check' },
             h('input', { type: 'checkbox', checked: !!field.hideLabel, onchange: (e) => { field.hideLabel = e.target.checked; renderCanvas(); } }),
-            'Hide label',
+            t('hideLabel'),
           ),
-          h('p', { class: 'prop-hint' }, 'Hides the visible label on this screen — e.g. when the placeholder already makes it obvious. Keep the label filled in for screen readers.'),
+          h('p', { class: 'prop-hint' }, t('hideLabelHint')),
         ),
         field.type === 'button' ? h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, 'Action'),
+          h('span', { class: 'prop-label' }, t('action')),
           h('select', {
             onchange: (e) => { field.buttonAction = e.target.value; renderCanvas(); },
           },
-            h('option', { value: 'next', selected: (field.buttonAction || 'next') === 'next' }, 'Go to next screen'),
-            h('option', { value: 'back', selected: field.buttonAction === 'back' }, 'Go to previous screen'),
-            h('option', { value: 'goto', selected: field.buttonAction === 'goto' }, 'Jump to a specific screen'),
-            h('option', { value: 'submit', selected: field.buttonAction === 'submit' }, 'Submit form'),
-            h('option', { value: 'reset', selected: field.buttonAction === 'reset' }, 'Reset form'),
-            h('option', { value: 'none', selected: field.buttonAction === 'none' }, 'None (decorative only)'),
+            h('option', { value: 'next', selected: (field.buttonAction || 'next') === 'next' }, t('actionOpt_next')),
+            h('option', { value: 'back', selected: field.buttonAction === 'back' }, t('actionOpt_back')),
+            h('option', { value: 'goto', selected: field.buttonAction === 'goto' }, t('actionOpt_goto')),
+            h('option', { value: 'submit', selected: field.buttonAction === 'submit' }, t('actionOpt_submit')),
+            h('option', { value: 'reset', selected: field.buttonAction === 'reset' }, t('actionOpt_reset')),
+            h('option', { value: 'none', selected: field.buttonAction === 'none' }, t('actionOpt_none')),
           ),
         ) : null,
         field.type === 'button' && field.buttonAction === 'goto' ? h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, 'Target screen'),
+          h('span', { class: 'prop-label' }, t('targetScreen')),
           h('select', {
             onchange: (e) => { field.buttonTargetScreenId = e.target.value; renderCanvas(); },
           },
             ...state.screens.map((s, i) => h('option', {
               value: s.id, selected: (field.buttonTargetScreenId || state.screens[0].id) === s.id,
-            }, `Screen ${i + 1}: ${s.title}`)),
+            }, tf('screenOption', { n: i + 1, title: s.title }))),
           ),
         ) : null,
         field.type === 'button' ? h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, 'Style'),
+          h('span', { class: 'prop-label' }, t('style')),
           h('select', {
             onchange: (e) => { field.buttonStyle = e.target.value; renderCanvas(); },
           },
-            h('option', { value: 'primary', selected: field.buttonStyle !== 'outline' }, 'Primary (filled)'),
-            h('option', { value: 'outline', selected: field.buttonStyle === 'outline' }, 'Outline'),
+            h('option', { value: 'primary', selected: field.buttonStyle !== 'outline' }, t('stylePrimary')),
+            h('option', { value: 'outline', selected: field.buttonStyle === 'outline' }, t('styleOutline')),
           ),
-          h('p', { class: 'prop-hint' }, "In the real app, all of a screen's buttons render together in one row above Back/Next — their order here (relative to other buttons) carries over, but their position among regular fields doesn't."),
+          h('p', { class: 'prop-hint' }, t('buttonStyleHint')),
         ) : null,
-        (field.type === 'button' || field.type === 'image') ? null : h('div', { class: 'prop-field' },
+        (field.type === 'button' || field.type === 'image' || field.type === 'accordion') ? null : h('div', { class: 'prop-field' },
           h('label', { class: 'prop-check' },
             h('input', { type: 'checkbox', checked: field.required, onchange: (e) => { field.required = e.target.checked; renderCanvas(); } }),
-            'Required',
+            t('required'),
           ),
         ),
         usesPlaceholder(field.type) ? h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, 'Placeholder'),
+          h('span', { class: 'prop-label' }, t('placeholder')),
           h('input', { type: 'text', value: field.placeholder || '', oninput: (e) => { field.placeholder = e.target.value; renderCanvas(); } }),
         ) : null,
         field.type === 'image' ? h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, 'Image URL'),
+          h('span', { class: 'prop-label' }, t('imageUrl')),
           h('input', { type: 'text', placeholder: 'https://…/logo.png', value: field.imageUrl || '', oninput: (e) => { field.imageUrl = e.target.value; renderCanvas(); } }),
-          h('p', { class: 'prop-hint' }, 'There\'s no file upload yet — paste a hosted URL (e.g. the company logo).'),
+          h('p', { class: 'prop-hint' }, t('imageUrlHint')),
         ) : null,
         field.type === 'image' ? h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, 'Alt text'),
+          h('span', { class: 'prop-label' }, t('altText')),
           h('input', { type: 'text', value: field.imageAlt || '', oninput: (e) => { field.imageAlt = e.target.value; } }),
-          h('p', { class: 'prop-hint' }, 'Describes the image for screen readers.'),
+          h('p', { class: 'prop-hint' }, t('altTextHint')),
         ) : null,
         field.type === 'image' ? h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, 'Alignment'),
+          h('span', { class: 'prop-label' }, t('alignment')),
           h('select', {
             onchange: (e) => { field.imageAlign = e.target.value; renderCanvas(); },
           },
-            h('option', { value: 'left', selected: field.imageAlign === 'left' }, 'Left'),
-            h('option', { value: 'center', selected: (field.imageAlign || 'center') === 'center' }, 'Center'),
-            h('option', { value: 'right', selected: field.imageAlign === 'right' }, 'Right'),
+            h('option', { value: 'left', selected: field.imageAlign === 'left' }, t('alignLeft')),
+            h('option', { value: 'center', selected: (field.imageAlign || 'center') === 'center' }, t('alignCenter')),
+            h('option', { value: 'right', selected: field.imageAlign === 'right' }, t('alignRight')),
           ),
         ) : null,
+        field.type === 'accordion' ? h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, t('introText')),
+          h('textarea', { oninput: (e) => { field.bodyText = e.target.value; renderCanvas(); } }, field.bodyText || ''),
+          h('p', { class: 'prop-hint' }, t('introTextHint')),
+        ) : null,
+        field.type === 'accordion' ? h('div', { class: 'prop-field' },
+          h('label', { class: 'prop-check' },
+            h('input', { type: 'checkbox', checked: !!field.defaultOpen, onchange: (e) => { field.defaultOpen = e.target.checked; } }),
+            t('expandedByDefault'),
+          ),
+          h('p', { class: 'prop-hint' }, t('expandedByDefaultHint')),
+        ) : null,
         field.type === 'radio' ? h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, 'Layout'),
+          h('span', { class: 'prop-label' }, t('layout')),
           h('select', {
             onchange: (e) => { field.radioLayout = e.target.value; renderCanvas(); },
           },
-            h('option', { value: 'vertical', selected: (field.radioLayout || 'vertical') === 'vertical' }, 'Vertical (stacked)'),
-            h('option', { value: 'horizontal', selected: field.radioLayout === 'horizontal' }, 'Horizontal (side by side)'),
+            h('option', { value: 'vertical', selected: (field.radioLayout || 'vertical') === 'vertical' }, t('layoutVertical')),
+            h('option', { value: 'horizontal', selected: field.radioLayout === 'horizontal' }, t('layoutHorizontal')),
           ),
         ) : null,
         usesOptions(field.type) ? optionsSourceEditor(field) : null,
-        (field.type === 'button' || field.type === 'image') ? null : h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, 'Help text'),
+        (field.type === 'button' || field.type === 'image' || field.type === 'accordion') ? null : h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, t('helpText')),
           h('textarea', { oninput: (e) => { field.helpText = e.target.value; } }, field.helpText || ''),
         ),
-        h('button', { class: 'delete-field-btn', type: 'button', onclick: () => deleteField(field.id) }, 'Delete field'),
+        h('button', { class: 'delete-field-btn', type: 'button', onclick: () => deleteField(field.id) }, t('deleteField')),
       );
       return;
     }
 
     if (state.panel === 'screen') {
       const screen = activeScreen();
-      el.append(
-        h('p', { class: 'prop-heading' }, 'Screen properties'),
+      appendAll(el,
+        h('p', { class: 'prop-heading' }, t('screenPropertiesHeading')),
         h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, 'Screen title'),
+          h('span', { class: 'prop-label' }, t('screenTitle')),
           h('input', { type: 'text', value: screen.title, oninput: (e) => { screen.title = e.target.value; renderCanvas(); renderTabs(); } }),
         ),
-        h('p', { class: 'prop-hint' }, `${screen.fields.length} field${screen.fields.length === 1 ? '' : 's'} on this screen.`),
+        h('p', { class: 'prop-hint' }, fieldsOnScreenText(screen.fields.length)),
         h('button', {
           class: 'delete-screen-btn', type: 'button', disabled: state.screens.length <= 1,
           onclick: () => deleteScreen(state.activeScreen),
-        }, 'Delete screen'),
+        }, t('deleteScreen')),
       );
       return;
     }
 
     // form settings (default)
-    el.append(
-      h('p', { class: 'prop-heading' }, 'Form settings'),
+    appendAll(el,
+      h('p', { class: 'prop-heading' }, t('formSettingsHeading')),
       h('div', { class: 'prop-field' },
-        h('span', { class: 'prop-label' }, 'Form title'),
-        h('input', { type: 'text', value: state.title, oninput: (e) => { state.title = e.target.value; renderCanvas(); } }),
+        h('span', { class: 'prop-label' }, t('formTitle')),
+        h('input', { type: 'text', value: state.title, oninput: (e) => { state.title = e.target.value; renderCanvas(); renderAppRibbonTitle(); } }),
       ),
       h('div', { class: 'prop-field' },
         h('label', { class: 'prop-check' },
           h('input', { type: 'checkbox', checked: state.includeReviewScreen, onchange: (e) => { state.includeReviewScreen = e.target.checked; renderCanvas(); } }),
-          'Include review screen before submit',
+          t('includeReviewScreen'),
         ),
       ),
       h('div', { class: 'prop-field' },
-        h('span', { class: 'prop-label' }, 'Header logo URL'),
+        h('span', { class: 'prop-label' }, t('headerLogoUrl')),
         h('input', {
           type: 'text', placeholder: 'https://…/logo.png', value: state.headerLogoUrl || '',
           oninput: (e) => { state.headerLogoUrl = e.target.value; renderCanvas(); },
         }),
-        h('p', { class: 'prop-hint' }, 'Small logo shown next to the form title in the header bar, on every screen.'),
+        h('p', { class: 'prop-hint' }, t('headerLogoUrlHint')),
       ),
       state.headerLogoUrl ? h('div', { class: 'prop-field' },
-        h('span', { class: 'prop-label' }, 'Logo position'),
+        h('span', { class: 'prop-label' }, t('logoPosition')),
         h('select', {
           onchange: (e) => { state.headerLogoPosition = e.target.value; renderCanvas(); },
         },
-          h('option', { value: 'left', selected: (state.headerLogoPosition || 'left') === 'left' }, 'Left of title'),
-          h('option', { value: 'right', selected: state.headerLogoPosition === 'right' }, 'Right of title'),
+          h('option', { value: 'left', selected: (state.headerLogoPosition || 'left') === 'left' }, t('leftOfTitle')),
+          h('option', { value: 'right', selected: state.headerLogoPosition === 'right' }, t('rightOfTitle')),
         ),
       ) : null,
       state.headerLogoUrl ? (() => {
         const logoSize = state.headerLogoSize || 22;
-        const label = h('span', { class: 'prop-label' }, 'Logo size ', h('span', { class: 'width-readout' }, `(${logoSize}px)`));
+        const label = h('span', { class: 'prop-label' }, t('logoSize'), h('span', { class: 'width-readout' }, `(${logoSize}px)`));
         const slider = h('input', {
           type: 'range', min: '14', max: '48', step: '2', value: String(logoSize),
           oninput: (e) => {
@@ -1683,25 +2339,80 @@
         return h('div', { class: 'prop-field' }, label, slider);
       })() : null,
       h('div', { class: 'prop-field' },
-        h('span', { class: 'prop-label' }, 'Background image URL'),
+        h('span', { class: 'prop-label' }, t('backgroundImageUrl')),
         h('input', {
           type: 'text', placeholder: 'https://…/wallpaper.jpg', value: state.backgroundImageUrl || '',
           oninput: (e) => { state.backgroundImageUrl = e.target.value; renderCanvas(); },
         }),
-        h('p', { class: 'prop-hint' }, 'Optional wallpaper shown behind every screen of this form.'),
+        h('p', { class: 'prop-hint' }, t('backgroundImageUrlHint')),
       ),
-      h('p', { class: 'prop-hint' }, 'Select a field on the canvas, or add one from the palette, to edit its properties.'),
+      h('p', { class: 'prop-hint' }, t('selectFieldHint')),
     );
   }
 
+  function renderAppRibbonTitle() {
+    const el = document.getElementById('appRibbonTitle');
+    el.className = 'app-ribbon-title' + (state.panel === 'form' ? ' selected' : '');
+    el.innerHTML = '';
+    el.append(...titlebarContent());
+    el.onclick = () => { state.panel = 'form'; state.selectedFieldId = null; render(); };
+  }
+
+  function goHome() {
+    selectScreen(0);
+  }
+
+  function applyStaticI18n() {
+    document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-html]').forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
+    document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+    document.querySelectorAll('.app-ribbon .lang-chip').forEach((chip) => {
+      chip.classList.toggle('active', chip.dataset.lang.toLowerCase() === state.lang);
+    });
+  }
+
   function render() {
+    applyStaticI18n();
     renderPalette();
     renderTabs();
     renderCanvas();
     renderProperties();
+    renderAppRibbonTitle();
   }
 
   // ---- export ----
+
+  function mapChildField(f) {
+    const out = {
+      name: f.name,
+      label: f.label,
+      type: f.type,
+      required: f.required || undefined,
+      placeholder: f.placeholder || undefined,
+      options: (!f.sourceKind || f.sourceKind === 'static') ? f.options : undefined,
+      source: (usesOptions(f.type) && f.sourceKind && f.sourceKind !== 'static') ? {
+        kind: f.sourceKind,
+        query: f.sourceKind === 'sql' ? (f.sourceQuery || undefined) : undefined,
+        workbookId: f.sourceKind === 'excel' ? (f.sourceWorkbookId || undefined) : undefined,
+        sheet: f.sourceKind === 'excel' ? (f.sourceSheet || undefined) : undefined,
+      } : undefined,
+      helpText: f.helpText || undefined,
+      layout: (f.type === 'radio' && f.radioLayout === 'horizontal') ? 'horizontal' : undefined,
+      hideLabel: f.hideLabel || undefined,
+      width: f.widthPct && f.widthPct < 100 ? f.widthPct : undefined,
+      disabled: f.disabled || undefined,
+      src: f.type === 'image' ? (f.imageUrl || undefined) : undefined,
+      alt: f.type === 'image' ? (f.imageAlt || undefined) : undefined,
+      align: (f.type === 'image' && f.imageAlign && f.imageAlign !== 'center') ? f.imageAlign : undefined,
+      background: f.bgColor || undefined,
+    };
+    if (f.type === 'button') {
+      out.style = f.buttonStyle === 'outline' ? 'outline' : 'primary';
+      out.action = f.buttonAction || 'next';
+      out.targetScreenId = f.buttonAction === 'goto' ? (f.buttonTargetScreenId || undefined) : undefined;
+    }
+    return out;
+  }
 
   function buildConfig() {
     return {
@@ -1739,6 +2450,10 @@
             src: f.type === 'image' ? (f.imageUrl || undefined) : undefined,
             alt: f.type === 'image' ? (f.imageAlt || undefined) : undefined,
             align: (f.type === 'image' && f.imageAlign && f.imageAlign !== 'center') ? f.imageAlign : undefined,
+            content: f.type === 'accordion' ? (f.bodyText || undefined) : undefined,
+            defaultOpen: (f.type === 'accordion' && f.defaultOpen) ? true : undefined,
+            children: (f.type === 'accordion' && f.children && f.children.length) ? f.children.map(mapChildField) : undefined,
+            background: f.bgColor || undefined,
           })),
           actions: buttons.length ? buttons.map((f) => ({
             id: f.id,
@@ -1772,10 +2487,10 @@
     const status = document.getElementById('copyStatus');
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text)
-        .then(() => { status.textContent = 'Copied!'; })
-        .catch(() => { status.textContent = 'Select the text above to copy.'; });
+        .then(() => { status.textContent = t('copied'); })
+        .catch(() => { status.textContent = t('selectToCopy'); });
     } else {
-      status.textContent = 'Select the text above to copy.';
+      status.textContent = t('selectToCopy');
     }
   });
   document.getElementById('addScreenBtn').addEventListener('click', addScreen);
@@ -1797,6 +2512,24 @@
       renderProperties();
     });
   });
+
+  let fbToastTimer;
+  function fbToast(msg) {
+    const el = document.getElementById('fbToast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(fbToastTimer);
+    fbToastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+
+  document.querySelectorAll('.app-ribbon .lang-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      state.lang = chip.dataset.lang.toLowerCase();
+      render();
+    });
+  });
+  document.getElementById('homeBtn').addEventListener('click', goHome);
+  document.getElementById('userBtn').addEventListener('click', () => fbToast(t('userMenuToast')));
 
   render();
 </script>
