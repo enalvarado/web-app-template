@@ -1,0 +1,651 @@
+<title>Portal Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --morado: #545386;
+    --morado-dark: #454371;
+    --morado-tint: rgba(84, 83, 134, .07);
+    --rosado: #F4C7CE;
+    --rosado-deep: #C24C64;
+    --azul: #C2DFEA;
+    --gris: #383A35;
+    --gris-soft: rgba(56, 58, 53, .62);
+    --gris-faint: rgba(56, 58, 53, .38);
+    --beige: #D8D2C4;
+    --surface: #FFFFFF;
+    --backdrop: #F3F1F6;
+    --font-head: 'Montserrat', sans-serif;
+    --font-body: 'Roboto', sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+
+  body {
+    background: var(--backdrop);
+    color: var(--gris);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app { min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* ---- topbar ---- */
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 11px 26px;
+    background: var(--morado);
+    flex: 0 0 auto;
+  }
+
+  .topbar-icon {
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, .16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+  }
+
+  .topbar-titles { margin-right: auto; }
+
+  .topbar-titles h1 {
+    margin: 0;
+    font-family: var(--font-head);
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.25;
+  }
+
+  .topbar-titles p {
+    margin: 1px 0 0;
+    font-size: 11px;
+    color: rgba(255, 255, 255, .72);
+  }
+
+  .lang-toggle {
+    display: flex;
+    gap: 2px;
+    background: rgba(255, 255, 255, .14);
+    border-radius: 999px;
+    padding: 3px;
+    flex: 0 0 auto;
+  }
+
+  .lang-chip {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, .78);
+    font-family: var(--font-head);
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+
+  .lang-chip.active { background: #fff; color: var(--morado); }
+
+  .topnav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex: 0 0 auto;
+  }
+
+  .topnav-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, .85);
+    font-family: var(--font-head);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px 11px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .topnav-link:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+
+  .user-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    appearance: none;
+    border: none;
+    background: rgba(255, 255, 255, .1);
+    padding: 5px 10px 5px 5px;
+    border-radius: 999px;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+
+  .user-chip:hover { background: rgba(255, 255, 255, .16); }
+
+  .avatar {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: var(--rosado);
+    color: var(--rosado-deep);
+    font-family: var(--font-head);
+    font-size: 10.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .user-chip span { font-family: var(--font-head); font-size: 12.5px; font-weight: 600; color: #fff; }
+  .user-chip svg { color: rgba(255, 255, 255, .7); }
+
+  /* ---- stage ---- */
+
+  .stage {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px;
+  }
+
+  .decor { position: absolute; pointer-events: none; color: var(--gris-faint); }
+  .decor.corner-tl { top: 44px; left: 18px; width: min(30vw, 320px); opacity: .8; }
+  .decor.corner-tr { top: 55px; right: 70px; width: 120px; opacity: .75; }
+  .decor.corner-br { right: -10px; bottom: -10px; width: min(34vw, 380px); opacity: .75; }
+  .decor.corner-bl { left: 40px; bottom: 20px; width: 210px; opacity: .7; }
+
+  @media (max-width: 720px) {
+    .decor { display: none; }
+  }
+
+  /* ---- scenario switcher (mockup tooling, not part of the real UI) ---- */
+
+  .qa-bar {
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(56, 58, 53, .82);
+    backdrop-filter: blur(2px);
+    border-radius: 999px;
+    padding: 5px 6px 5px 12px;
+    z-index: 5;
+  }
+
+  .qa-label {
+    font-family: var(--font-head);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, .55);
+    white-space: nowrap;
+  }
+
+  .qa-chip {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: rgba(255, 255, 255, .75);
+    font-family: var(--font-head);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 11px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .qa-chip.active { background: #fff; color: var(--gris); }
+
+  /* ---- modal ---- */
+
+  .modal {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 440px;
+    background: var(--surface);
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(56, 58, 53, .06), 0 24px 50px -20px rgba(56, 58, 53, .32);
+    padding: 30px 30px 26px;
+  }
+
+  .modal h2 {
+    margin: 0 0 8px;
+    font-family: var(--font-head);
+    font-size: 19px;
+    font-weight: 700;
+    color: var(--gris);
+    text-align: center;
+  }
+
+  .modal .lead {
+    margin: 0 0 22px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--gris-soft);
+    text-align: center;
+  }
+
+  .draft-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 4px; }
+
+  .draft-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: var(--backdrop);
+    border: 1px solid var(--beige);
+    border-radius: 12px;
+    padding: 13px 14px;
+  }
+
+  .draft-icon {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--morado-tint);
+    color: var(--morado);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .draft-info { flex: 1; min-width: 0; }
+
+  .draft-info h3 {
+    margin: 0 0 3px;
+    font-family: var(--font-head);
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--morado);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .draft-info .meta {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--gris-soft);
+    line-height: 1.4;
+  }
+
+  .draft-actions {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+  }
+
+  .btn-continue {
+    appearance: none;
+    border: none;
+    background: var(--morado);
+    color: #fff;
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 12px;
+    padding: 8px 13px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-continue:hover { background: var(--morado-dark); }
+
+  .btn-delete {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--gris-faint);
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-delete:hover { color: var(--rosado-deep); }
+
+  .modal-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 1px solid var(--beige);
+  }
+
+  .btn-back {
+    appearance: none;
+    border: 1.3px solid var(--beige);
+    background: transparent;
+    color: var(--gris-soft);
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 18px;
+    border-radius: 9px;
+    cursor: pointer;
+  }
+
+  .btn-back:hover { border-color: var(--gris-faint); color: var(--gris); }
+
+  .btn-new {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    appearance: none;
+    border: none;
+    background: var(--morado);
+    color: #fff;
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 16px;
+    border-radius: 9px;
+    cursor: pointer;
+  }
+
+  .btn-new:hover { background: var(--morado-dark); }
+
+  .empty-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    appearance: none;
+    border: none;
+    background: var(--morado);
+    color: #fff;
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 12px 18px;
+    border-radius: 9px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+
+  .empty-cta:hover { background: var(--morado-dark); }
+
+  .empty-badge {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: var(--azul);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ---- toast ---- */
+
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    transform: translate(-50%, 12px);
+    background: var(--gris);
+    color: #fff;
+    font-size: 12.5px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    box-shadow: 0 10px 24px -8px rgba(56, 58, 53, .4);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .18s ease, transform .18s ease;
+    z-index: 10;
+  }
+
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="topbar-icon">
+      <svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="10" width="3" height="7" rx="1"/><rect x="9" y="6" width="3" height="11" rx="1"/><rect x="14" y="2" width="3" height="15" rx="1"/>
+      </svg>
+    </div>
+    <div class="topbar-titles">
+      <h1>Portal de Requerimientos de Datos</h1>
+      <p>Equipo de Análisis de Datos</p>
+    </div>
+    <div class="lang-toggle">
+      <button class="lang-chip active" type="button">ES</button>
+      <button class="lang-chip" type="button">EN</button>
+    </div>
+    <nav class="topnav">
+      <button class="topnav-link" type="button">
+        <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l7-6 7 6"/><path d="M5 9v7a1 1 0 0 0 1 1h3v-4h2v4h3a1 1 0 0 0 1-1V9"/></svg>
+        Inicio
+      </button>
+      <button class="topnav-link" type="button">
+        <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="10" height="14" rx="1.5"/><rect x="7.5" y="1.5" width="5" height="3" rx="1"/><line x1="7" y1="8" x2="13" y2="8"/><line x1="7" y1="11" x2="13" y2="11"/><line x1="7" y1="14" x2="11" y2="14"/></svg>
+        Mis solicitudes
+      </button>
+    </nav>
+    <button class="user-chip" type="button">
+      <span class="avatar">CA</span>
+      <span>Catalina</span>
+      <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="5,7.5 10,12.5 15,7.5"/></svg>
+    </button>
+  </header>
+
+  <main class="stage" id="stage">
+    <svg class="decor corner-tl" viewBox="0 0 300 220" fill="none" stroke="currentColor">
+      <line x1="14" y1="14" x2="14" y2="196" stroke-width="1.3"/>
+      <line x1="14" y1="196" x2="284" y2="196" stroke-width="1.3"/>
+      <g stroke-width="1.4" stroke-dasharray="3 5">
+        <line x1="30" y1="185" x2="205" y2="45"/>
+      </g>
+      <g fill="currentColor" stroke="none">
+        <circle cx="34" cy="182" r="4.5"/>
+        <circle cx="58" cy="163" r="4.5"/>
+        <circle cx="70" cy="176" r="4.5"/>
+        <circle cx="92" cy="150" r="4.5"/>
+        <circle cx="108" cy="142" r="4.5"/>
+        <circle cx="122" cy="158" r="4.5"/>
+        <circle cx="146" cy="120" r="4.5"/>
+        <circle cx="168" cy="110" r="4.5"/>
+        <circle cx="192" cy="86" r="4.5"/>
+      </g>
+      <text x="10" y="216" font-family="Roboto, sans-serif" font-size="15" fill="currentColor">r = 0.82</text>
+    </svg>
+
+    <svg class="decor corner-tr" viewBox="0 0 120 120" fill="none" stroke="currentColor">
+      <circle cx="60" cy="60" r="55" stroke-width="1.4"/>
+      <text x="60" y="67" font-family="Montserrat, sans-serif" font-weight="700" font-size="21" fill="currentColor" stroke="none" text-anchor="middle">94%</text>
+    </svg>
+
+    <svg class="decor corner-br" viewBox="0 0 380 300" fill="none" stroke="currentColor">
+      <path d="M0 210c60 20 90 -55 140 -20s70 20 110 -50s90 -30 130 10" stroke-width="1.4"/>
+      <g fill="currentColor" stroke="none">
+        <circle cx="140" cy="190" r="4.5"/>
+        <circle cx="250" cy="160" r="4.5"/>
+        <circle cx="310" cy="130" r="4.5"/>
+      </g>
+      <text x="270" y="70" font-family="Montserrat, sans-serif" font-weight="700" font-size="20" fill="currentColor" stroke="none">+18%</text>
+      <g stroke="none" fill="currentColor" opacity=".9">
+        <rect x="20" y="230" width="26" height="65"/>
+        <rect x="66" y="205" width="26" height="90"/>
+        <rect x="112" y="245" width="26" height="50"/>
+        <rect x="158" y="180" width="26" height="115"/>
+        <rect x="204" y="150" width="26" height="145"/>
+        <rect x="250" y="120" width="26" height="175"/>
+        <rect x="296" y="95" width="26" height="200"/>
+      </g>
+    </svg>
+
+    <svg class="decor corner-bl" viewBox="0 0 220 180" fill="none" stroke="currentColor" stroke-width="1.3">
+      <line x1="30" y1="130" x2="70" y2="90"/>
+      <line x1="70" y1="90" x2="130" y2="115"/>
+      <line x1="70" y1="90" x2="60" y2="40"/>
+      <line x1="70" y1="90" x2="20" y2="70"/>
+      <line x1="130" y1="115" x2="175" y2="150"/>
+      <g fill="currentColor" stroke="none">
+        <circle cx="30" cy="130" r="4.5"/>
+        <circle cx="70" cy="90" r="4.5"/>
+        <circle cx="130" cy="115" r="4.5"/>
+        <circle cx="60" cy="40" r="4.5"/>
+        <circle cx="20" cy="70" r="4.5"/>
+        <circle cx="175" cy="150" r="4.5"/>
+      </g>
+    </svg>
+
+    <div class="qa-bar" id="qaBar"></div>
+
+    <div id="modalMount"></div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const SCENARIOS = {
+    one: {
+      label: '1 borrador',
+      drafts: [
+        { id: 'd1', name: 'Solicitud sin nombre', answered: 1, total: 8, started: '26 de agosto de 2026' },
+      ],
+    },
+    multi: {
+      label: 'Varios borradores',
+      drafts: [
+        { id: 'd1', name: 'Registro de Temperatura', answered: 3, total: 6, started: '24 de agosto de 2026' },
+        { id: 'd2', name: 'Check-in de Carga', answered: 5, total: 9, started: '20 de agosto de 2026' },
+        { id: 'd3', name: 'Chequeo de Seguridad', answered: 1, total: 5, started: '18 de agosto de 2026' },
+      ],
+    },
+    empty: { label: 'Sin borradores', drafts: [] },
+  };
+
+  let scenario = 'one';
+  let drafts = SCENARIOS.one.drafts.map((d) => ({ ...d }));
+
+  function setScenario(key) {
+    scenario = key;
+    drafts = SCENARIOS[key].drafts.map((d) => ({ ...d }));
+    render();
+  }
+
+  function deleteDraft(id) {
+    drafts = drafts.filter((d) => d.id !== id);
+    toast('Borrador eliminado');
+    render();
+  }
+
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+
+  function draftIcon() {
+    return '<svg viewBox="0 0 20 20" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="10" height="14" rx="1.5"/><rect x="7.5" y="1.5" width="5" height="3" rx="1"/><line x1="7" y1="8" x2="13" y2="8"/><line x1="7" y1="11" x2="13" y2="11"/><line x1="7" y1="14" x2="11" y2="14"/></svg>';
+  }
+
+  function renderQaBar() {
+    const el = document.getElementById('qaBar');
+    el.innerHTML = '<span class="qa-label">Mockup — estado</span>' +
+      Object.entries(SCENARIOS).map(([key, s]) =>
+        `<button class="qa-chip${key === scenario ? ' active' : ''}" data-scenario="${key}" type="button">${s.label}</button>`
+      ).join('');
+    el.querySelectorAll('.qa-chip').forEach((btn) => {
+      btn.addEventListener('click', () => setScenario(btn.dataset.scenario));
+    });
+  }
+
+  function renderModal() {
+    const mount = document.getElementById('modalMount');
+
+    if (drafts.length === 0) {
+      mount.innerHTML = `
+        <div class="modal">
+          <div class="empty-badge">
+            <svg viewBox="0 0 20 20" width="22" height="22" fill="none" stroke="#545386" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="10" y1="4" x2="10" y2="16"/><line x1="4" y1="10" x2="16" y2="10"/></svg>
+          </div>
+          <h2>¿Listo para empezar?</h2>
+          <p class="lead">No tienes solicitudes en curso. Elige un tipo de solicitud para comenzar.</p>
+          <button class="empty-cta" id="btnEmptyNew" type="button">
+            Empezar una solicitud
+            <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7,4 13,10 7,16"/></svg>
+          </button>
+        </div>`;
+      document.getElementById('btnEmptyNew').addEventListener('click', () => toast('Abriría el catálogo de solicitudes (no implementado en el mockup)'));
+      return;
+    }
+
+    const rows = drafts.map((d) => `
+      <div class="draft-row">
+        <div class="draft-icon">${draftIcon()}</div>
+        <div class="draft-info">
+          <h3>${d.name}</h3>
+          <p class="meta">${d.answered} de ${d.total} respuestas &middot; empezada ${d.started}</p>
+        </div>
+        <div class="draft-actions">
+          <button class="btn-continue" data-continue="${d.id}" type="button">Seguir con esta</button>
+          <button class="btn-delete" data-delete="${d.id}" type="button">Eliminar</button>
+        </div>
+      </div>
+    `).join('');
+
+    mount.innerHTML = `
+      <div class="modal">
+        <h2>Tienes una conversación a medias</h2>
+        <p class="lead">Puedes seguir donde la dejaste o empezar una solicitud nueva. Si sigues, no se pierde nada de lo que ya contaste.</p>
+        <div class="draft-list">${rows}</div>
+        <div class="modal-footer">
+          <button class="btn-back" id="btnBack" type="button">Volver</button>
+          <button class="btn-new" id="btnNew" type="button">
+            Empezar una nueva
+            <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7,4 13,10 7,16"/></svg>
+          </button>
+        </div>
+      </div>`;
+
+    mount.querySelectorAll('[data-continue]').forEach((btn) => {
+      btn.addEventListener('click', () => toast('Abriría el formulario donde lo dejaste (no implementado en el mockup)'));
+    });
+    mount.querySelectorAll('[data-delete]').forEach((btn) => {
+      btn.addEventListener('click', () => deleteDraft(btn.dataset.delete));
+    });
+    document.getElementById('btnBack').addEventListener('click', () => toast('Cerraría el modal sin decidir (no implementado en el mockup)'));
+    document.getElementById('btnNew').addEventListener('click', () => toast('Abriría el catálogo de solicitudes (no implementado en el mockup)'));
+  }
+
+  function render() {
+    renderQaBar();
+    renderModal();
+  }
+
+  render();
+</script>
