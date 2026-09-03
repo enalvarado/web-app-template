@@ -51,6 +51,8 @@ The template will be hosted on **GitHub** so any team member can clone/download 
 - Navigation via **Next / Back arrow buttons** (◀ Back / Next ▶), not just text links
 - **Fully responsive** across desktop, tablet, and phone — this means adaptive rearrangement (fields stack vertically on mobile, touch-friendly tap targets, readable text without zooming), NOT the same fixed layout simply scaled down. This is a hard requirement — the team has had bad past experiences with Power Apps screens becoming unusable on mobile.
 
+> **Status note (2026-09-02):** the Form Builder authoring tool now has a full EN/ES UI toggle (all builder chrome re-renders on switch). This brief never specified whether the *published, end-user* forms need to be bilingual too — that's a separate, unaddressed question from localizing the builder tool itself, and it would touch `FieldRenderer`/`FormApp.tsx` and the config schema (e.g. per-locale labels) if required. Flag with the team before assuming either way.
+
 ### 4.2 Field Types
 
 **Core (build first):**
@@ -64,6 +66,13 @@ The template will be hosted on **GitHub** so any team member can clone/download 
 
 **Enhanced (later phase):**
 `combobox`, `listbox`, `slider`
+
+**Layout / content field types (emerged from Form Builder design work, not in the original spec):**
+- `button` — a screen-level action control (Next / Back / Submit / Reset / Jump-to-screen), rendered above the automatic Back/Next row. **Implemented** in the real frontend: `ActionConfig` in `frontend/src/types/config.ts`, dispatched by `ScreenActions`/`FormApp.tsx`.
+- `image` — a decorative image/logo block (URL, alt text, alignment, width). Explored only in the Form Builder mockup (`design/mockups/form-builder.html`) — not yet added to the real `FieldRenderer`.
+- `accordion` (Collapsible section) — an expandable header with optional intro text and nested fields (any core/high-priority type, including nested buttons, one level deep). Explored only in the Form Builder mockup — not yet added to the real `FieldRenderer`. Note this introduces field *nesting* into the config schema, which Section 8's flat `fields: FieldConfig[]` doesn't currently support — confirm the nested shape before implementing for real.
+
+> **Status note (2026-09-02):** the three types above, plus a per-field background-color swatch (see Section 5) and a form-level header logo/background wallpaper, came out of iterating on the Form Builder authoring tool itself, not from a Power Apps use case in Section 2. Worth a pass to decide which of these are genuinely needed by the real forms vs. builder-tool scope creep before they're built into `FieldRenderer`.
 
 ### 4.3 Dynamic Dropdown Data Sources
 Dropdown options can be:
@@ -99,6 +108,8 @@ Note: Excel/SharePoint List connectors reintroduce tenant dependency for that sp
 Status colors intentionally stay within the brand palette rather than introducing generic red/green:
 - Success → Azul Claro
 - Error/Warning → Rosado Claro (consider a deepened/higher-contrast derivative for text/icons/borders on error states so they read as sufficiently urgent — flag this as a design detail to refine during implementation)
+
+> **Status note (2026-09-02):** the Form Builder mockup adds a per-field background-color picker (swatch choices: None, White, Beige, Azul, Rosado, Morado — constrained to this palette, not a free color input) so a builder can tint an individual field's card. This is a step beyond "builders should not need to touch this" at the top of this section — worth confirming whether that level of per-field customization is actually wanted in the real app, or whether it should stay a Form-Builder-only preview affordance.
 
 **Fonts:**
 - Primary: **Montserrat** (headings, buttons, emphasis)
