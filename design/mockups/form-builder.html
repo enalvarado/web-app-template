@@ -1277,6 +1277,10 @@
       helpText: 'Help text', deleteField: 'Delete field',
       bgColorLabel: 'Background color', bgColorHint: "Fills this field's card with a color from the app's brand palette.",
       bgNone: 'None', bgBeige: 'Beige', bgAzul: 'Blue', bgRosado: 'Pink', bgMorado: 'Purple', bgWhite: 'White',
+      textColorLabel: 'Text color', textColorHint: "Colors this field's label (and button/section text). Doesn't affect input values.",
+      txNone: 'Default', txBlack: 'Black', txGray: 'Gray', txRed: 'Red', txBlue: 'Blue',
+      fontSizeLabel: 'Font size', fontSizeHint: "Resizes this field's label (and button/section text).",
+      fsSmall: 'Small', fsMedium: 'Medium', fsLarge: 'Large',
       options: 'Options', removeOption: 'Remove option', addOption: '+ Add option',
       optionsSource: 'Options source', staticList: 'Static list', sqlQuery: 'SQL query', excelWorkbook: 'Excel workbook',
       sqlHint: 'Runs against the shared SQL Server connection — the first column becomes the option list.',
@@ -1357,6 +1361,10 @@
       helpText: 'Texto de ayuda', deleteField: 'Eliminar campo',
       bgColorLabel: 'Color de fondo', bgColorHint: 'Rellena la tarjeta de este campo con un color de la paleta de marca de la app.',
       bgNone: 'Ninguno', bgBeige: 'Beige', bgAzul: 'Azul', bgRosado: 'Rosado', bgMorado: 'Morado', bgWhite: 'Blanco',
+      textColorLabel: 'Color del texto', textColorHint: 'Colorea la etiqueta de este campo (y el texto de botones/secciones). No afecta el valor ingresado.',
+      txNone: 'Predeterminado', txBlack: 'Negro', txGray: 'Gris', txRed: 'Rojo', txBlue: 'Azul',
+      fontSizeLabel: 'Tamaño de fuente', fontSizeHint: 'Cambia el tamaño de la etiqueta de este campo (y el texto de botones/secciones).',
+      fsSmall: 'Pequeño', fsMedium: 'Mediano', fsLarge: 'Grande',
       options: 'Opciones', removeOption: 'Eliminar opción', addOption: '+ Agregar opción',
       optionsSource: 'Fuente de las opciones', staticList: 'Lista estática', sqlQuery: 'Consulta SQL', excelWorkbook: 'Libro de Excel',
       sqlHint: 'Se ejecuta contra la conexión compartida de SQL Server — la primera columna se convierte en la lista de opciones.',
@@ -1553,6 +1561,8 @@
       defaultOpen: type === 'accordion' ? false : undefined,
       children: type === 'accordion' ? [] : undefined,
       bgColor: '',
+      textColor: '',
+      fontSize: '',
     };
   }
 
@@ -1588,6 +1598,8 @@
       buttonAction: preset.presetAction,
       buttonTargetScreenId: undefined,
       bgColor: '',
+      textColor: '',
+      fontSize: '',
     };
     activeScreen().fields.push(field);
     state.selectedFieldId = id;
@@ -1714,7 +1726,7 @@
   function fieldPreview(field) {
     switch (field.type) {
       case 'button':
-        return h('button', { type: 'button', disabled: true, class: btnClass(field.buttonStyle) }, field.label || 'Button');
+        return h('button', { type: 'button', disabled: true, class: btnClass(field.buttonStyle), style: labelStyle(field) }, field.label || 'Button');
       case 'image':
         if (!field.imageUrl) {
           return h('div', { class: 'cf-dashed' }, t('noImageSet'));
@@ -1730,7 +1742,7 @@
             : h('div', { class: 'cf-accordion-empty' }, t('noFieldsYetAddBelow')),
         );
         return h('div', { class: 'cf-accordion' },
-          h('div', { class: 'cf-accordion-head' }, h('span', {}, field.label || t('accordionDefaultLabel')), chevronDownIcon()),
+          h('div', { class: 'cf-accordion-head' }, h('span', { style: labelStyle(field) }, field.label || t('accordionDefaultLabel')), chevronDownIcon()),
           h('div', { class: 'cf-accordion-body' },
             field.bodyText ? h('p', { class: 'cf-accordion-text' }, field.bodyText) : null,
             childrenList,
@@ -1842,7 +1854,7 @@
       ),
       (field.type === 'button' || field.type === 'image')
         ? (field.disabled ? h('div', { class: 'cf-label' }, h('span', { class: 'cf-disabled-badge' }, t('disabledBadge'))) : null)
-        : h('label', { class: 'cf-label' + (field.hideLabel ? ' cf-label-hidden-note' : '') },
+        : h('label', { class: 'cf-label' + (field.hideLabel ? ' cf-label-hidden-note' : ''), style: labelStyle(field) },
             field.hideLabel ? t('labelHidden') : field.label,
             (!field.hideLabel && field.required) ? h('span', { class: 'cf-req' }, ' *') : null,
             field.disabled ? h('span', { class: 'cf-disabled-badge' }, t('disabledBadge')) : null,
@@ -1964,7 +1976,7 @@
           ),
           (field.type === 'button' || field.type === 'image' || field.type === 'accordion')
             ? (field.disabled ? h('div', { class: 'cf-label' }, h('span', { class: 'cf-disabled-badge' }, t('disabledBadge'))) : null)
-            : h('label', { class: 'cf-label' + (field.hideLabel ? ' cf-label-hidden-note' : '') },
+            : h('label', { class: 'cf-label' + (field.hideLabel ? ' cf-label-hidden-note' : ''), style: labelStyle(field) },
                 field.hideLabel ? t('labelHidden') : field.label,
                 (!field.hideLabel && field.required) ? h('span', { class: 'cf-req' }, ' *') : null,
                 field.disabled ? h('span', { class: 'cf-disabled-badge' }, t('disabledBadge')) : null,
@@ -2093,6 +2105,21 @@
     return sw ? sw.value : null;
   }
 
+  const FONT_SIZES = { small: 11, large: 17 };
+
+  function fontSizeValue(key) {
+    return FONT_SIZES[key] || null;
+  }
+
+  function labelStyle(field) {
+    const parts = [];
+    const c = textColorValue(field.textColor);
+    if (c) parts.push(`color:${c};`);
+    const fs = fontSizeValue(field.fontSize);
+    if (fs) parts.push(`font-size:${fs}px;`);
+    return parts.length ? parts.join(' ') : undefined;
+  }
+
   function fieldContainerStyle(field, pct) {
     const parts = [];
     if (pct < 100) parts.push(`flex: 1 1 calc(${pct}% - 6px); min-width: 0;`);
@@ -2118,6 +2145,55 @@
       h('span', { class: 'prop-label' }, t('bgColorLabel')),
       row,
       h('p', { class: 'prop-hint' }, t('bgColorHint')),
+    );
+  }
+
+  const TEXT_SWATCHES = [
+    { key: 'none', value: null, labelKey: 'txNone' },
+    { key: 'black', value: '#000000', labelKey: 'txBlack' },
+    { key: 'gray', value: '#6b7280', labelKey: 'txGray' },
+    { key: 'red', value: '#dc2626', labelKey: 'txRed' },
+    { key: 'blue', value: '#2563eb', labelKey: 'txBlue' },
+  ];
+
+  function textColorValue(key) {
+    if (!key) return null;
+    const sw = TEXT_SWATCHES.find((s) => s.key === key);
+    return sw ? sw.value : null;
+  }
+
+  function textColorSwatchPicker(field) {
+    const current = field.textColor || 'none';
+    const row = h('div', { class: 'bg-swatches' });
+    TEXT_SWATCHES.forEach((sw) => {
+      const isNone = sw.key === 'none';
+      row.append(h('button', {
+        type: 'button',
+        class: 'bg-swatch' + (isNone ? ' none' : '') + (current === sw.key ? ' selected' : ''),
+        style: isNone ? undefined : `background:${sw.value};`,
+        title: t(sw.labelKey),
+        onclick: () => { field.textColor = isNone ? '' : sw.key; renderCanvas(); renderProperties(); },
+      }));
+    });
+    return h('div', { class: 'prop-field' },
+      h('span', { class: 'prop-label' }, t('textColorLabel')),
+      row,
+      h('p', { class: 'prop-hint' }, t('textColorHint')),
+    );
+  }
+
+  function fontSizePicker(field) {
+    const current = field.fontSize || '';
+    return h('div', { class: 'prop-field' },
+      h('span', { class: 'prop-label' }, t('fontSizeLabel')),
+      h('select', {
+        onchange: (e) => { field.fontSize = e.target.value; renderCanvas(); },
+      },
+        h('option', { value: 'small', selected: current === 'small' }, t('fsSmall')),
+        h('option', { value: '', selected: current === '' }, t('fsMedium')),
+        h('option', { value: 'large', selected: current === 'large' }, t('fsLarge')),
+      ),
+      h('p', { class: 'prop-hint' }, t('fontSizeHint')),
     );
   }
 
@@ -2170,6 +2246,8 @@
         ),
         widthField(field),
         bgSwatchPicker(field),
+        field.type === 'image' ? null : textColorSwatchPicker(field),
+        field.type === 'image' ? null : fontSizePicker(field),
         h('div', { class: 'prop-field' },
           h('label', { class: 'prop-check' },
             h('input', { type: 'checkbox', checked: !!field.disabled, onchange: (e) => { field.disabled = e.target.checked; renderCanvas(); } }),
@@ -2405,6 +2483,8 @@
       alt: f.type === 'image' ? (f.imageAlt || undefined) : undefined,
       align: (f.type === 'image' && f.imageAlign && f.imageAlign !== 'center') ? f.imageAlign : undefined,
       background: f.bgColor || undefined,
+      textColor: f.textColor || undefined,
+      fontSize: f.fontSize || undefined,
     };
     if (f.type === 'button') {
       out.style = f.buttonStyle === 'outline' ? 'outline' : 'primary';
@@ -2454,6 +2534,8 @@
             defaultOpen: (f.type === 'accordion' && f.defaultOpen) ? true : undefined,
             children: (f.type === 'accordion' && f.children && f.children.length) ? f.children.map(mapChildField) : undefined,
             background: f.bgColor || undefined,
+            textColor: f.textColor || undefined,
+            fontSize: f.fontSize || undefined,
           })),
           actions: buttons.length ? buttons.map((f) => ({
             id: f.id,
