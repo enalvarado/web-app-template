@@ -61,6 +61,7 @@ class ScreenConfig(BaseModel):
     id: str
     title: LocalizedString
     description: Optional[LocalizedString] = None
+    background: Optional[str] = None
     fields: list[FieldConfig]
 
 

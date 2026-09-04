@@ -1282,6 +1282,7 @@
       layout: 'Layout', layoutVertical: 'Vertical (stacked)', layoutHorizontal: 'Horizontal (side by side)',
       helpText: 'Help text', deleteField: 'Delete field',
       bgColorLabel: 'Background color', bgColorHint: "Fills this field's card with a color from the app's brand palette.",
+      screenBgColorLabel: 'Background tint', screenBgColorHint: 'Applies a soft, 80% transparent tint behind this screen only, overriding the form-wide background image for this screen.',
       bgNone: 'None', bgBeige: 'Beige', bgAzul: 'Blue', bgRosado: 'Pink', bgMorado: 'Purple', bgWhite: 'White',
       textColorLabel: 'Text color', textColorHint: "Colors this field's label (and button/section text). Doesn't affect input values.",
       txNone: 'Default', txBlack: 'Black', txGray: 'Gray', txRed: 'Red', txBlue: 'Blue',
@@ -1297,7 +1298,7 @@
       headerLogoUrlHint: 'Small logo shown next to the form title in the header bar, on every screen.',
       logoPosition: 'Logo position', leftOfTitle: 'Left of title', rightOfTitle: 'Right of title', logoSize: 'Logo size ',
       backgroundImageUrl: 'Background image URL',
-      backgroundImageUrlHint: 'Optional wallpaper shown behind every screen of this form.',
+      backgroundImageUrlHint: "Optional wallpaper shown behind every screen of this form, unless a screen sets its own background tint (Screen properties), which overrides it for that screen.",
       selectFieldHint: 'Select a field on the canvas, or add one from the palette, to edit its properties.',
       formConfig: 'Form config', close: 'Close',
       exportBodyIntroHtml: 'Save this as <code>frontend/src/forms/&lt;id&gt;/config.json</code> in the template repo — <code>FieldRenderer</code> renders every field type below, and screen-level <code>actions</code> (your Button fields) are rendered by <code>ScreenActions</code>, above the automatic Back/Next row.',
@@ -1363,6 +1364,7 @@
       layout: 'Diseño', layoutVertical: 'Vertical (apilado)', layoutHorizontal: 'Horizontal (uno al lado del otro)',
       helpText: 'Texto de ayuda', deleteField: 'Eliminar campo',
       bgColorLabel: 'Color de fondo', bgColorHint: 'Rellena la tarjeta de este campo con un color de la paleta de marca de la app.',
+      screenBgColorLabel: 'Tono de fondo', screenBgColorHint: 'Aplica un tono suave, con 80% de transparencia, detrás de esta pantalla únicamente, reemplazando la imagen de fondo del formulario para esta pantalla.',
       bgNone: 'Ninguno', bgBeige: 'Beige', bgAzul: 'Azul', bgRosado: 'Rosado', bgMorado: 'Morado', bgWhite: 'Blanco',
       textColorLabel: 'Color del texto', textColorHint: 'Colorea la etiqueta de este campo (y el texto de botones/secciones). No afecta el valor ingresado.',
       txNone: 'Predeterminado', txBlack: 'Negro', txGray: 'Gris', txRed: 'Rojo', txBlue: 'Azul',
@@ -1378,7 +1380,7 @@
       headerLogoUrlHint: 'Pequeño logo que se muestra junto al título del formulario en la barra de encabezado, en cada pantalla.',
       logoPosition: 'Posición del logo', leftOfTitle: 'Izquierda del título', rightOfTitle: 'Derecha del título', logoSize: 'Tamaño del logo ',
       backgroundImageUrl: 'URL de la imagen de fondo',
-      backgroundImageUrlHint: 'Fondo opcional que se muestra detrás de cada pantalla de este formulario.',
+      backgroundImageUrlHint: 'Fondo opcional que se muestra detrás de cada pantalla de este formulario, a menos que una pantalla tenga su propio tono de fondo (Propiedades de la pantalla), que lo reemplaza para esa pantalla.',
       selectFieldHint: 'Selecciona un campo en el lienzo, o agrega uno desde la paleta, para editar sus propiedades.',
       formConfig: 'Configuración del formulario', close: 'Cerrar',
       exportBodyIntroHtml: 'Guarda esto como <code>frontend/src/forms/&lt;id&gt;/config.json</code> en el repositorio de la plantilla — <code>FieldRenderer</code> renderiza cada tipo de campo de abajo, y las <code>actions</code> a nivel de pantalla (tus campos de Botón) son renderizadas por <code>ScreenActions</code>, arriba de la fila automática Atrás/Siguiente.',
@@ -1423,9 +1425,9 @@
     selectedFieldId: null,
     canvasView: 'screens',
     screens: [
-      { id: 'screen-1', title: { en: 'Home', es: 'Inicio' }, fields: [] },
+      { id: 'screen-1', title: { en: 'Home', es: 'Inicio' }, fields: [], bgColor: '' },
       {
-        id: 'screen-2', title: { en: 'Screen 1', es: 'Pantalla 1' }, fields: [
+        id: 'screen-2', title: { en: 'Screen 1', es: 'Pantalla 1' }, bgColor: '', fields: [
           { id: 'f1', type: 'text', label: { en: 'Full Name', es: 'Nombre Completo' }, name: 'full_name', required: true, placeholder: { en: 'Full name', es: 'Nombre completo' }, helpText: emptyLoc(), widthPct: 100, disabled: false, hideLabel: false },
           { id: 'f2', type: 'select', label: { en: 'Category', es: 'Categoría' }, name: 'category', required: false, placeholder: { en: 'Select…', es: 'Seleccionar…' }, options: [{ en: 'Option 1', es: 'Opción 1' }, { en: 'Option 2', es: 'Opción 2' }], helpText: emptyLoc(), widthPct: 100, disabled: false, hideLabel: false, sourceKind: 'static', sourceQuery: '' },
         ]
@@ -1656,7 +1658,12 @@
 
   function addScreen() {
     const id = 'screen-' + state.nextScreenId;
-    state.screens.push({ id, title: 'Screen ' + state.nextScreenId, fields: [] });
+    state.screens.push({
+      id,
+      title: { en: 'Screen ' + state.nextScreenId, es: 'Pantalla ' + state.nextScreenId },
+      bgColor: '',
+      fields: [],
+    });
     state.nextScreenId++;
     state.activeScreen = state.screens.length - 1;
     state.selectedFieldId = null;
@@ -1814,8 +1821,12 @@
     return state.headerLogoPosition === 'right' ? [title, logo] : [logo, title];
   }
 
-  function applyCanvasBackground(el) {
-    if (state.backgroundImageUrl) {
+  function applyCanvasBackground(el, screen) {
+    const screenTint = screen && bgColorValue(screen.bgColor, SCREEN_BG_SWATCHES);
+    if (screenTint) {
+      el.style.backgroundImage = '';
+      el.style.backgroundColor = screenTint;
+    } else if (state.backgroundImageUrl) {
       el.style.backgroundImage = `url("${state.backgroundImageUrl}")`;
       el.style.backgroundSize = 'cover';
       el.style.backgroundPosition = 'center';
@@ -1957,8 +1968,8 @@
     }
     const el = document.getElementById('canvas');
     el.innerHTML = '';
-    applyCanvasBackground(el);
     const screen = activeScreen();
+    applyCanvasBackground(el, screen);
     const totalSteps = state.screens.length + (state.includeReviewScreen ? 1 : 0);
     const pct = Math.round(((state.activeScreen + 1) / totalSteps) * 100);
 
@@ -2115,9 +2126,20 @@
     { key: 'morado', value: 'rgba(84, 83, 134, .16)', labelKey: 'bgMorado' },
   ];
 
-  function bgColorValue(key) {
+  // Same brand palette as BG_SWATCHES, but at 80% transparency (.2 alpha) — a full-screen wash
+  // needs to stay a subtle tint rather than a solid color block, unlike a single field's card.
+  const SCREEN_BG_SWATCHES = [
+    { key: 'none', value: null, labelKey: 'bgNone' },
+    { key: 'white', value: 'rgba(255, 255, 255, .2)', labelKey: 'bgWhite' },
+    { key: 'beige', value: 'rgba(216, 210, 196, .2)', labelKey: 'bgBeige' },
+    { key: 'azul', value: 'rgba(194, 223, 234, .2)', labelKey: 'bgAzul' },
+    { key: 'rosado', value: 'rgba(244, 199, 206, .2)', labelKey: 'bgRosado' },
+    { key: 'morado', value: 'rgba(84, 83, 134, .2)', labelKey: 'bgMorado' },
+  ];
+
+  function bgColorValue(key, swatches) {
     if (!key) return null;
-    const sw = BG_SWATCHES.find((s) => s.key === key);
+    const sw = (swatches || BG_SWATCHES).find((s) => s.key === key);
     return sw ? sw.value : null;
   }
 
@@ -2144,23 +2166,25 @@
     return parts.length ? parts.join(' ') : undefined;
   }
 
-  function bgSwatchPicker(field) {
-    const current = field.bgColor || 'none';
+  function bgSwatchPicker(obj, opts) {
+    opts = opts || {};
+    const swatches = opts.swatches || BG_SWATCHES;
+    const current = obj.bgColor || 'none';
     const row = h('div', { class: 'bg-swatches' });
-    BG_SWATCHES.forEach((sw) => {
+    swatches.forEach((sw) => {
       const isNone = sw.key === 'none';
       row.append(h('button', {
         type: 'button',
         class: 'bg-swatch' + (isNone ? ' none' : '') + (current === sw.key ? ' selected' : ''),
         style: isNone ? undefined : `background:${sw.value};`,
         title: t(sw.labelKey),
-        onclick: () => { field.bgColor = isNone ? '' : sw.key; renderCanvas(); renderProperties(); },
+        onclick: () => { obj.bgColor = isNone ? '' : sw.key; renderCanvas(); renderProperties(); },
       }));
     });
     return h('div', { class: 'prop-field' },
-      h('span', { class: 'prop-label' }, t('bgColorLabel')),
+      h('span', { class: 'prop-label' }, t(opts.labelKey || 'bgColorLabel')),
       row,
-      h('p', { class: 'prop-hint' }, t('bgColorHint')),
+      h('p', { class: 'prop-hint' }, t(opts.hintKey || 'bgColorHint')),
     );
   }
 
@@ -2383,6 +2407,7 @@
       appendAll(el,
         h('p', { class: 'prop-heading' }, t('screenPropertiesHeading')),
         bilingualField('screenTitle', screen, 'title', { onInput: () => { renderCanvas(); renderTabs(); } }),
+        bgSwatchPicker(screen, { swatches: SCREEN_BG_SWATCHES, labelKey: 'screenBgColorLabel', hintKey: 'screenBgColorHint' }),
         h('p', { class: 'prop-hint' }, fieldsOnScreenText(screen.fields.length)),
         h('button', {
           class: 'delete-screen-btn', type: 'button', disabled: state.screens.length <= 1,
@@ -2523,6 +2548,7 @@
         return {
           id: s.id,
           title: s.title,
+          background: s.bgColor || undefined,
           fields: fields.map((f) => ({
             name: f.name,
             label: f.label,

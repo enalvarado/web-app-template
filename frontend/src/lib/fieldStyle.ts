@@ -22,8 +22,22 @@ const FONT_SIZES: Record<string, string> = {
   large: '17px',
 }
 
+// Same palette as BACKGROUND_COLORS, but at 80% transparency (.2 alpha) — a screen-wide wash
+// needs to stay a subtle tint rather than a solid color block, unlike a single field's card.
+const SCREEN_TINT_COLORS: Record<string, string> = {
+  white: 'rgba(255, 255, 255, .2)',
+  beige: 'rgba(216, 210, 196, .2)',
+  azul: 'rgba(194, 223, 234, .2)',
+  rosado: 'rgba(244, 199, 206, .2)',
+  morado: 'rgba(84, 83, 134, .2)',
+}
+
 export function fieldBackground(key?: string): string | undefined {
   return key ? BACKGROUND_COLORS[key] : undefined
+}
+
+export function screenBackgroundTint(key?: string): string | undefined {
+  return key ? SCREEN_TINT_COLORS[key] : undefined
 }
 
 export function fieldTextColor(key?: string): string | undefined {

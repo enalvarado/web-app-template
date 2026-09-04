@@ -72,6 +72,7 @@
     {
       "id": "screen-2",
       "title": { "en": "Collapsible Section", "es": "Sección Plegable" },
+      "background": "morado",
       "fields": [
         {
           "name": "moreInfo",

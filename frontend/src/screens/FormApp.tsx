@@ -3,6 +3,7 @@ import { ActionTrigger, FormConfig } from '../types/config'
 import { FormProvider, useFormValues } from '../context/FormContext'
 import { useLocale } from '../context/LocaleContext'
 import { resolveLocalized, uiText } from '../lib/i18n'
+import { screenBackgroundTint } from '../lib/fieldStyle'
 import ProgressIndicator from '../components/ProgressIndicator'
 import NavButtons from '../components/NavButtons'
 import ScreenActions from '../components/ScreenActions'
@@ -94,13 +95,19 @@ function FormFlow({ config }: Props) {
     }
   }
 
-  const wallpaperStyle: CSSProperties = config.backgroundImageUrl
-    ? {
-        backgroundImage: `url("${config.backgroundImageUrl}")`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }
-    : {}
+  // The active screen's own background tint overrides the form-wide wallpaper for that screen
+  // only — review/submitted have no single screen, so they always fall back to the wallpaper.
+  const currentScreen = !submitted && !isReviewStep ? config.screens[step] : undefined
+  const screenTint = screenBackgroundTint(currentScreen?.background)
+  const wallpaperStyle: CSSProperties = screenTint
+    ? { backgroundColor: screenTint }
+    : config.backgroundImageUrl
+      ? {
+          backgroundImage: `url("${config.backgroundImageUrl}")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }
+      : {}
 
   if (submitted) {
     return (

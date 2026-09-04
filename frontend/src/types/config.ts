@@ -106,6 +106,9 @@ export interface ScreenConfig {
   id: string
   title: LocalizedString
   description?: LocalizedString
+  // A brand-palette swatch key (see lib/fieldStyle.ts's screenBackgroundTint) applied as an 80%
+  // transparent tint behind this screen only, overriding the form's backgroundImageUrl for it.
+  background?: string
   fields: FieldConfig[]
   actions?: ActionConfig[]
 }
