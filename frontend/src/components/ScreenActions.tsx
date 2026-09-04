@@ -1,4 +1,6 @@
 import { ActionConfig } from '../types/config'
+import { useLocale } from '../context/LocaleContext'
+import { resolveLocalized } from '../lib/i18n'
 
 interface Props {
   actions: ActionConfig[]
@@ -6,6 +8,7 @@ interface Props {
 }
 
 export default function ScreenActions({ actions, onAction }: Props) {
+  const { locale } = useLocale()
   if (!actions.length) return null
   return (
     <div className="flex flex-wrap gap-3 mt-6">
@@ -21,7 +24,7 @@ export default function ScreenActions({ actions, onAction }: Props) {
               : 'px-4 py-2.5 rounded-lg font-heading font-semibold text-sm text-white bg-morado disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition'
           }
         >
-          {action.label}
+          {resolveLocalized(action.label, locale)}
         </button>
       ))}
     </div>

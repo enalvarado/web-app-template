@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { Html5Qrcode } from 'html5-qrcode'
-import { FieldConfig } from '../../types/config'
+import { ResolvedFieldConfig } from '../../types/config'
+import { useLocale } from '../../context/LocaleContext'
+import { uiText } from '../../lib/i18n'
 
 interface Props {
-  field: FieldConfig
+  field: ResolvedFieldConfig
   value: string | undefined
   onChange: (value: string) => void
   onScanned?: (code: string) => void
@@ -12,6 +14,7 @@ interface Props {
 const REGION_ID = 'qr-scan-region'
 
 export default function QrScanField({ field, value, onChange, onScanned }: Props) {
+  const { locale } = useLocale()
   const [scanning, setScanning] = useState(false)
   const scannerRef = useRef<Html5Qrcode | null>(null)
 
@@ -47,12 +50,16 @@ export default function QrScanField({ field, value, onChange, onScanned }: Props
 
   return (
     <div>
-      {value && <p className="mb-2 font-body text-sm text-gris">Scanned: {value}</p>}
+      {value && (
+        <p className="mb-2 font-body text-sm text-gris">
+          {uiText(locale, 'scanned')} {value}
+        </p>
+      )}
       {scanning ? (
         <div>
           <div id={REGION_ID} className="w-full max-w-sm rounded-lg overflow-hidden" />
           <button type="button" onClick={stopScan} className="mt-2 text-sm text-morado underline">
-            Cancel
+            {uiText(locale, 'cancel')}
           </button>
         </div>
       ) : (
@@ -61,7 +68,7 @@ export default function QrScanField({ field, value, onChange, onScanned }: Props
           onClick={startScan}
           className="px-4 py-2 rounded-lg bg-morado text-white font-heading font-semibold"
         >
-          {value ? 'Rescan' : `Scan ${field.label}`}
+          {value ? uiText(locale, 'rescan') : `${uiText(locale, 'scan')} ${field.label}`}
         </button>
       )}
     </div>

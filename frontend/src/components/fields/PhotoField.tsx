@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useLocale } from '../../context/LocaleContext'
+import { uiText } from '../../lib/i18n'
 
 interface Props {
   value: string | undefined
@@ -6,6 +8,7 @@ interface Props {
 }
 
 export default function PhotoField({ value, onChange }: Props) {
+  const { locale } = useLocale()
   const [preview, setPreview] = useState<string | undefined>(value)
 
   const handleFile = (file: File | undefined) => {
@@ -28,7 +31,9 @@ export default function PhotoField({ value, onChange }: Props) {
         onChange={(e) => handleFile(e.target.files?.[0])}
         className="block w-full text-sm font-body"
       />
-      {preview && <img src={preview} alt="Captured" className="mt-2 max-h-48 rounded-lg border border-beige" />}
+      {preview && (
+        <img src={preview} alt={uiText(locale, 'captured')} className="mt-2 max-h-48 rounded-lg border border-beige" />
+      )}
     </div>
   )
 }

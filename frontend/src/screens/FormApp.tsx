@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { ActionConfig, FormConfig } from '../types/config'
 import { FormProvider, useFormValues } from '../context/FormContext'
+import { useLocale } from '../context/LocaleContext'
+import { resolveLocalized, uiText } from '../lib/i18n'
 import ProgressIndicator from '../components/ProgressIndicator'
 import NavButtons from '../components/NavButtons'
 import ScreenActions from '../components/ScreenActions'
+import LanguageToggle from '../components/LanguageToggle'
 import ScreenRenderer from './ScreenRenderer'
 import ReviewScreen from './ReviewScreen'
 import { submitForm } from '../lib/api'
@@ -22,6 +25,7 @@ export default function FormApp({ config }: Props) {
 
 function FormFlow({ config }: Props) {
   const { values, reset } = useFormValues()
+  const { locale } = useLocale()
   const includeReview = config.includeReviewScreen ?? false
   const totalSteps = config.screens.length + (includeReview ? 1 : 0)
   const [step, setStep] = useState(0)
@@ -40,7 +44,7 @@ function FormFlow({ config }: Props) {
       reset()
       setSubmitted(true)
     } catch {
-      setSubmitError('Something went wrong submitting your form. Please try again.')
+      setSubmitError(uiText(locale, 'submitError'))
     } finally {
       setSubmitting(false)
     }
@@ -95,8 +99,8 @@ function FormFlow({ config }: Props) {
       <div className="max-w-lg mx-auto">
         <FormTitleBar title={config.title} />
         <div className="p-8 text-center">
-          <h2 className="text-xl font-heading font-semibold text-morado mb-2">Thank you!</h2>
-          <p className="font-body text-gris">Your submission was received.</p>
+          <h2 className="text-xl font-heading font-semibold text-morado mb-2">{uiText(locale, 'thankYou')}</h2>
+          <p className="font-body text-gris">{uiText(locale, 'submissionReceived')}</p>
         </div>
       </div>
     )
@@ -121,19 +125,29 @@ function FormFlow({ config }: Props) {
           onNext={handleNext}
           backDisabled={step === 0}
           nextDisabled={submitting}
-          nextLabel={isReviewStep || isLastScreen ? (submitting ? 'Submitting…' : 'Submit') : 'Next'}
+          backLabel={uiText(locale, 'back')}
+          nextLabel={
+            isReviewStep || isLastScreen
+              ? submitting
+                ? uiText(locale, 'submitting')
+                : uiText(locale, 'submit')
+              : uiText(locale, 'next')
+          }
         />
       </div>
     </div>
   )
 }
 
-function FormTitleBar({ title }: { title: string }) {
+function FormTitleBar({ title }: { title: FormConfig['title'] }) {
+  const { locale } = useLocale()
   return (
-    <div className="bg-morado py-4 px-4 sm:px-8">
-      <h1 className="text-center text-base sm:text-lg font-heading font-bold uppercase tracking-wide text-white">
-        {title}
+    <div className="bg-morado py-3 px-4 sm:px-8 flex items-center justify-between gap-3">
+      <span className="w-[52px]" aria-hidden />
+      <h1 className="flex-1 text-center text-base sm:text-lg font-heading font-bold uppercase tracking-wide text-white">
+        {resolveLocalized(title, locale)}
       </h1>
+      <LanguageToggle />
     </div>
   )
 }

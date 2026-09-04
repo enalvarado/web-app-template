@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react'
-import { FieldConfig } from '../../types/config'
+import { ResolvedFieldConfig } from '../../types/config'
+import { useLocale } from '../../context/LocaleContext'
+import { uiText } from '../../lib/i18n'
 import { fetchDropdownOptions } from '../../lib/api'
 
 interface Props {
-  field: FieldConfig
+  field: ResolvedFieldConfig
   formId: string
   value: string | undefined
   onChange: (value: string) => void
 }
 
 export default function SelectField({ field, formId, value, onChange }: Props) {
+  const { locale } = useLocale()
   const [options, setOptions] = useState<string[]>(field.options ?? [])
   const [loading, setLoading] = useState(false)
 
@@ -31,7 +34,7 @@ export default function SelectField({ field, formId, value, onChange }: Props) {
       className="w-full px-4 py-3 rounded-lg border border-beige focus:outline-none focus:ring-2 focus:ring-morado font-body text-base bg-white"
     >
       <option value="" disabled>
-        {loading ? 'Loading…' : (field.placeholder ?? 'Select…')}
+        {loading ? uiText(locale, 'loading') : (field.placeholder ?? uiText(locale, 'selectPlaceholder'))}
       </option>
       {options.map((opt) => (
         <option key={opt} value={opt}>

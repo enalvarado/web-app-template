@@ -1,5 +1,7 @@
 import { useRef } from 'react'
 import SignatureCanvas from 'react-signature-canvas'
+import { useLocale } from '../../context/LocaleContext'
+import { uiText } from '../../lib/i18n'
 
 interface Props {
   value: string | undefined
@@ -7,6 +9,7 @@ interface Props {
 }
 
 export default function SignatureField({ value, onChange }: Props) {
+  const { locale } = useLocale()
   const padRef = useRef<SignatureCanvas>(null)
 
   const handleEnd = () => {
@@ -32,9 +35,9 @@ export default function SignatureField({ value, onChange }: Props) {
         />
       </div>
       <button type="button" onClick={handleClear} className="mt-2 text-sm text-morado font-body underline">
-        Clear
+        {uiText(locale, 'clear')}
       </button>
-      {!value && <p className="text-xs text-rosado-deep mt-1">Signature required</p>}
+      {!value && <p className="text-xs text-rosado-deep mt-1">{uiText(locale, 'signatureRequired')}</p>}
     </div>
   )
 }

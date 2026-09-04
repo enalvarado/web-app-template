@@ -3,6 +3,11 @@ from typing import Literal, Optional
 from pydantic import BaseModel
 
 
+class LocalizedString(BaseModel):
+    en: str
+    es: str
+
+
 class DropdownSource(BaseModel):
     kind: Literal["static", "sql", "excel", "sharepoint"]
     options: Optional[list[str]] = None
@@ -15,12 +20,12 @@ class DropdownSource(BaseModel):
 
 class FieldConfig(BaseModel):
     name: str
-    label: str
+    label: LocalizedString
     type: str
     required: bool = False
-    placeholder: Optional[str] = None
-    helpText: Optional[str] = None
-    options: Optional[list[str]] = None
+    placeholder: Optional[LocalizedString] = None
+    helpText: Optional[LocalizedString] = None
+    options: Optional[list[LocalizedString]] = None
     source: Optional[DropdownSource] = None
     min: Optional[float] = None
     max: Optional[float] = None
@@ -30,15 +35,15 @@ class FieldConfig(BaseModel):
 
 class ScreenConfig(BaseModel):
     id: str
-    title: str
-    description: Optional[str] = None
+    title: LocalizedString
+    description: Optional[LocalizedString] = None
     fields: list[FieldConfig]
 
 
 class FormConfig(BaseModel):
     id: str
-    title: str
-    description: Optional[str] = None
+    title: LocalizedString
+    description: Optional[LocalizedString] = None
     includeReviewScreen: bool = False
     screens: list[ScreenConfig]
 

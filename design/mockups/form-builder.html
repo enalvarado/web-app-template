@@ -1410,7 +1410,7 @@
 
   const state = {
     lang: 'en',
-    title: 'Untitled Form',
+    title: { en: 'Untitled Form', es: 'Formulario sin título' },
     includeReviewScreen: true,
     backgroundImageUrl: '',
     headerLogoUrl: '',
@@ -1423,11 +1423,11 @@
     selectedFieldId: null,
     canvasView: 'screens',
     screens: [
-      { id: 'screen-1', title: 'Home', fields: [] },
+      { id: 'screen-1', title: { en: 'Home', es: 'Inicio' }, fields: [] },
       {
-        id: 'screen-2', title: 'Screen 1', fields: [
-          { id: 'f1', type: 'text', label: 'Full Name', name: 'full_name', required: true, placeholder: 'Full name', helpText: '', widthPct: 100, disabled: false, hideLabel: false },
-          { id: 'f2', type: 'select', label: 'Category', name: 'category', required: false, placeholder: 'Select…', options: ['Option 1', 'Option 2'], helpText: '', widthPct: 100, disabled: false, hideLabel: false, sourceKind: 'static', sourceQuery: '', sourceWorkbookId: '', sourceSheet: '' },
+        id: 'screen-2', title: { en: 'Screen 1', es: 'Pantalla 1' }, fields: [
+          { id: 'f1', type: 'text', label: { en: 'Full Name', es: 'Nombre Completo' }, name: 'full_name', required: true, placeholder: { en: 'Full name', es: 'Nombre completo' }, helpText: emptyLoc(), widthPct: 100, disabled: false, hideLabel: false },
+          { id: 'f2', type: 'select', label: { en: 'Category', es: 'Categoría' }, name: 'category', required: false, placeholder: { en: 'Select…', es: 'Seleccionar…' }, options: [{ en: 'Option 1', es: 'Opción 1' }, { en: 'Option 2', es: 'Opción 2' }], helpText: emptyLoc(), widthPct: 100, disabled: false, hideLabel: false, sourceKind: 'static', sourceQuery: '', sourceWorkbookId: '', sourceSheet: '' },
         ]
       },
     ],
@@ -1471,6 +1471,20 @@
 
   function slug(s) {
     return (s || '').toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'field';
+  }
+
+  // ---- bilingual (EN/ES) content: every author-facing string on a field/screen/form is
+  // { en, es } so the exported config can render either language, not just this tool's own UI ----
+
+  function emptyLoc() { return { en: '', es: '' }; }
+
+  function loc(value, lang) {
+    if (!value) return '';
+    return value[lang || state.lang] || value.en || value.es || '';
+  }
+
+  function locOrUndef(value) {
+    return (value && (value.en || value.es)) ? value : undefined;
   }
 
   function activeScreen() { return state.screens[state.activeScreen]; }
@@ -1523,7 +1537,7 @@
       case 'goto': {
         const idx = state.screens.findIndex((s) => s.id === field.buttonTargetScreenId);
         if (idx === -1) return t('actionHint_gotoUnset');
-        return tf('actionHint_gotoSet', { n: idx + 1, title: state.screens[idx].title });
+        return tf('actionHint_gotoSet', { n: idx + 1, title: loc(state.screens[idx].title) });
       }
       case 'next':
       default: return t('actionHint_next');
@@ -1545,9 +1559,9 @@
     const id = 'f' + state.nextFieldId++;
     const count = list.length + 1;
     return {
-      id, type, label: meta.label, name: slug(meta.label) + '_' + count,
-      required: false, placeholder: '', helpText: '', widthPct: 100, disabled: false, hideLabel: false,
-      options: usesOptions(type) ? ['Option 1', 'Option 2'] : undefined,
+      id, type, label: { en: meta.label, es: STRINGS.es['ft_' + type] || meta.label }, name: slug(meta.label) + '_' + count,
+      required: false, placeholder: emptyLoc(), helpText: emptyLoc(), widthPct: 100, disabled: false, hideLabel: false,
+      options: usesOptions(type) ? [{ en: 'Option 1', es: 'Opción 1' }, { en: 'Option 2', es: 'Opción 2' }] : undefined,
       sourceKind: usesOptions(type) ? 'static' : undefined,
       radioLayout: type === 'radio' ? 'vertical' : undefined,
       sourceQuery: '', sourceWorkbookId: '', sourceSheet: '',
@@ -1555,9 +1569,9 @@
       buttonAction: type === 'button' ? 'next' : undefined,
       buttonTargetScreenId: undefined,
       imageUrl: type === 'image' ? '' : undefined,
-      imageAlt: type === 'image' ? '' : undefined,
+      imageAlt: type === 'image' ? emptyLoc() : undefined,
       imageAlign: type === 'image' ? 'center' : undefined,
-      bodyText: type === 'accordion' ? '' : undefined,
+      bodyText: type === 'accordion' ? emptyLoc() : undefined,
       defaultOpen: type === 'accordion' ? false : undefined,
       children: type === 'accordion' ? [] : undefined,
       bgColor: '',
@@ -1590,8 +1604,8 @@
     const id = 'f' + state.nextFieldId++;
     const count = activeScreen().fields.length + 1;
     const field = {
-      id, type: 'button', label: preset.buttonLabel, name: slug(preset.buttonLabel) + '_' + count,
-      required: false, placeholder: '', helpText: '', widthPct: 100, disabled: false, hideLabel: false,
+      id, type: 'button', label: { en: preset.buttonLabel, es: STRINGS.es['preset_' + preset.presetAction] || preset.buttonLabel }, name: slug(preset.buttonLabel) + '_' + count,
+      required: false, placeholder: emptyLoc(), helpText: emptyLoc(), widthPct: 100, disabled: false, hideLabel: false,
       options: undefined, sourceKind: undefined, radioLayout: undefined,
       sourceQuery: '', sourceWorkbookId: '', sourceSheet: '',
       buttonStyle: preset.buttonStyle,
@@ -1706,7 +1720,7 @@
       const tab = h('button', {
         class: 'tab' + (idx === state.activeScreen ? ' active' : ''),
         onclick: () => selectScreen(idx),
-      }, screen.title);
+      }, loc(screen.title));
       if (state.screens.length > 1) {
         tab.append(h('span', {
           class: 'tab-close',
@@ -1726,13 +1740,13 @@
   function fieldPreview(field) {
     switch (field.type) {
       case 'button':
-        return h('button', { type: 'button', disabled: true, class: btnClass(field.buttonStyle), style: labelStyle(field) }, field.label || 'Button');
+        return h('button', { type: 'button', disabled: true, class: btnClass(field.buttonStyle), style: labelStyle(field) }, loc(field.label) || 'Button');
       case 'image':
         if (!field.imageUrl) {
           return h('div', { class: 'cf-dashed' }, t('noImageSet'));
         }
         return h('div', { class: 'cf-image-wrap align-' + (field.imageAlign || 'center') },
-          h('img', { src: field.imageUrl, alt: field.imageAlt || '' }),
+          h('img', { src: field.imageUrl, alt: loc(field.imageAlt) }),
         );
       case 'accordion': {
         const kids = field.children || [];
@@ -1742,37 +1756,37 @@
             : h('div', { class: 'cf-accordion-empty' }, t('noFieldsYetAddBelow')),
         );
         return h('div', { class: 'cf-accordion' },
-          h('div', { class: 'cf-accordion-head' }, h('span', { style: labelStyle(field) }, field.label || t('accordionDefaultLabel')), chevronDownIcon()),
+          h('div', { class: 'cf-accordion-head' }, h('span', { style: labelStyle(field) }, loc(field.label) || t('accordionDefaultLabel')), chevronDownIcon()),
           h('div', { class: 'cf-accordion-body' },
-            field.bodyText ? h('p', { class: 'cf-accordion-text' }, field.bodyText) : null,
+            loc(field.bodyText) ? h('p', { class: 'cf-accordion-text' }, loc(field.bodyText)) : null,
             childrenList,
             accordionAddRow(field),
           ),
         );
       }
       case 'text':
-        return h('input', { type: 'text', disabled: true, placeholder: field.placeholder || '' });
+        return h('input', { type: 'text', disabled: true, placeholder: loc(field.placeholder) });
       case 'number':
-        return h('input', { type: 'text', disabled: true, placeholder: field.placeholder || '0' });
+        return h('input', { type: 'text', disabled: true, placeholder: loc(field.placeholder) || '0' });
       case 'date':
         return h('input', { type: 'text', disabled: true, placeholder: t('ph_date') });
       case 'datetime':
         return h('input', { type: 'text', disabled: true, placeholder: t('ph_datetime') });
       case 'textarea':
-        return h('textarea', { disabled: true, placeholder: field.placeholder || '' });
+        return h('textarea', { disabled: true, placeholder: loc(field.placeholder) });
       case 'select':
         if (field.sourceKind && field.sourceKind !== 'static') {
           return h('div', { class: 'cf-dashed' }, sourceHint(field));
         }
-        return h('select', { disabled: true }, h('option', {}, field.placeholder || t('ph_select')));
+        return h('select', { disabled: true }, h('option', {}, loc(field.placeholder) || t('ph_select')));
       case 'checkbox':
-        return h('div', { class: 'cf-row' }, h('input', { type: 'checkbox', disabled: true }), field.placeholder || field.label);
+        return h('div', { class: 'cf-row' }, h('input', { type: 'checkbox', disabled: true }), loc(field.placeholder) || loc(field.label));
       case 'radio':
         if (field.sourceKind && field.sourceKind !== 'static') {
           return h('div', { class: 'cf-dashed' }, sourceHint(field));
         }
         return h('div', { class: 'cf-radio-list' + (field.radioLayout === 'horizontal' ? ' horizontal' : '') },
-          ...(field.options || []).map((opt) => h('label', { class: 'cf-row' }, h('input', { type: 'radio', disabled: true }), opt)),
+          ...(field.options || []).map((opt) => h('label', { class: 'cf-row' }, h('input', { type: 'radio', disabled: true }), loc(opt))),
         );
       case 'toggle':
         return h('div', { class: 'cf-toggle-static' });
@@ -1790,7 +1804,7 @@
   }
 
   function titlebarContent() {
-    const title = h('h1', {}, state.title || t('untitledForm'));
+    const title = h('h1', {}, loc(state.title) || t('untitledForm'));
     if (!state.headerLogoUrl) return [title];
     const size = state.headerLogoSize || 22;
     const logo = h('img', {
@@ -1855,7 +1869,7 @@
       (field.type === 'button' || field.type === 'image')
         ? (field.disabled ? h('div', { class: 'cf-label' }, h('span', { class: 'cf-disabled-badge' }, t('disabledBadge'))) : null)
         : h('label', { class: 'cf-label' + (field.hideLabel ? ' cf-label-hidden-note' : ''), style: labelStyle(field) },
-            field.hideLabel ? t('labelHidden') : field.label,
+            field.hideLabel ? t('labelHidden') : loc(field.label),
             (!field.hideLabel && field.required) ? h('span', { class: 'cf-req' }, ' *') : null,
             field.disabled ? h('span', { class: 'cf-disabled-badge' }, t('disabledBadge')) : null,
           ),
@@ -1915,10 +1929,10 @@
       .map((s) => ({ screen: s, fields: s.fields.filter((f) => f.type !== 'button' && f.type !== 'image' && f.type !== 'accordion') }))
       .filter((g) => g.fields.length > 0)
       .map((g) => h('div', { class: 'review-group' },
-        h('h3', { class: 'review-heading' }, g.screen.title),
+        h('h3', { class: 'review-heading' }, loc(g.screen.title)),
         h('dl', {},
           ...g.fields.map((f) => h('div', { class: 'review-row' },
-            h('dt', {}, f.label),
+            h('dt', {}, loc(f.label)),
             h('dd', {}, '—'),
           )),
         ),
@@ -1956,7 +1970,7 @@
     const screenTitle = h('h2', {
       class: 'canvas-screen-title' + (state.panel === 'screen' ? ' selected' : ''),
       onclick: () => { state.panel = 'screen'; state.selectedFieldId = null; render(); },
-    }, screen.title);
+    }, loc(screen.title));
 
     const fieldsWrap = h('div', { class: 'fields-wrap' });
     if (screen.fields.length === 0) {
@@ -1977,7 +1991,7 @@
           (field.type === 'button' || field.type === 'image' || field.type === 'accordion')
             ? (field.disabled ? h('div', { class: 'cf-label' }, h('span', { class: 'cf-disabled-badge' }, t('disabledBadge'))) : null)
             : h('label', { class: 'cf-label' + (field.hideLabel ? ' cf-label-hidden-note' : ''), style: labelStyle(field) },
-                field.hideLabel ? t('labelHidden') : field.label,
+                field.hideLabel ? t('labelHidden') : loc(field.label),
                 (!field.hideLabel && field.required) ? h('span', { class: 'cf-req' }, ' *') : null,
                 field.disabled ? h('span', { class: 'cf-disabled-badge' }, t('disabledBadge')) : null,
               ),
@@ -1995,20 +2009,32 @@
   function optionsEditor(field) {
     const wrap = h('div', { class: 'prop-field' }, h('span', { class: 'prop-label' }, t('options')));
     (field.options || []).forEach((opt, idx) => {
-      wrap.append(h('div', { class: 'option-row' },
-        h('input', {
-          type: 'text', value: opt,
-          oninput: (e) => { field.options[idx] = e.target.value; renderCanvas(); },
-        }),
-        h('button', {
-          type: 'button', title: t('removeOption'),
-          onclick: () => { field.options.splice(idx, 1); render(); },
-        }, '✕'),
-      ));
+      wrap.append(
+        h('div', { class: 'option-row' },
+          h('input', {
+            type: 'text', value: opt.en, placeholder: 'EN',
+            oninput: (e) => { opt.en = e.target.value; renderCanvas(); },
+          }),
+        ),
+        h('div', { class: 'option-row' },
+          h('input', {
+            type: 'text', value: opt.es, placeholder: 'ES',
+            oninput: (e) => { opt.es = e.target.value; renderCanvas(); },
+          }),
+          h('button', {
+            type: 'button', title: t('removeOption'),
+            onclick: () => { field.options.splice(idx, 1); render(); },
+          }, '✕'),
+        ),
+      );
     });
     wrap.append(h('button', {
       class: 'add-option', type: 'button',
-      onclick: () => { field.options.push('Option ' + (field.options.length + 1)); render(); },
+      onclick: () => {
+        const n = field.options.length + 1;
+        field.options.push({ en: 'Option ' + n, es: 'Opción ' + n });
+        render();
+      },
     }, t('addOption')));
     return wrap;
   }
@@ -2197,6 +2223,28 @@
     );
   }
 
+  // Renders a Label(EN)/Label(ES) input pair bound to obj[key].en / obj[key].es — used for every
+  // author-facing string (field label, placeholder, screen title, form title, etc.) so both
+  // languages are always edited side by side rather than one hidden behind the other.
+  function bilingualField(labelKey, obj, key, opts) {
+    opts = opts || {};
+    const onInput = opts.onInput || (() => renderCanvas());
+    const row = (lang) => opts.textarea
+      ? h('textarea', { oninput: (e) => { obj[key][lang] = e.target.value; onInput(); } }, obj[key][lang] || '')
+      : h('input', { type: 'text', value: obj[key][lang] || '', oninput: (e) => { obj[key][lang] = e.target.value; onInput(); } });
+    return h('div', {},
+      h('div', { class: 'prop-field' },
+        h('span', { class: 'prop-label' }, t(labelKey) + ' (EN)'),
+        row('en'),
+      ),
+      h('div', { class: 'prop-field' },
+        h('span', { class: 'prop-label' }, t(labelKey) + ' (ES)'),
+        row('es'),
+        opts.hint ? h('p', { class: 'prop-hint' }, t(opts.hint)) : null,
+      ),
+    );
+  }
+
   function renderProperties() {
     const el = document.getElementById('properties');
     el.innerHTML = '';
@@ -2236,10 +2284,7 @@
       appendAll(el,
         h('p', { class: 'prop-heading' }, t('fieldPropertiesHeading')),
         h('span', { class: 'type-chip' }, icon(field.type), typeLabel(field.type)),
-        h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, t('label')),
-          h('input', { type: 'text', value: field.label, oninput: (e) => { field.label = e.target.value; renderCanvas(); } }),
-        ),
+        bilingualField('label', field, 'label'),
         h('div', { class: 'prop-field' },
           h('span', { class: 'prop-label' }, t('fieldKey')),
           h('input', { type: 'text', value: field.name, oninput: (e) => { field.name = e.target.value; } }),
@@ -2282,7 +2327,7 @@
           },
             ...state.screens.map((s, i) => h('option', {
               value: s.id, selected: (field.buttonTargetScreenId || state.screens[0].id) === s.id,
-            }, tf('screenOption', { n: i + 1, title: s.title }))),
+            }, tf('screenOption', { n: i + 1, title: loc(s.title) }))),
           ),
         ) : null,
         field.type === 'button' ? h('div', { class: 'prop-field' },
@@ -2301,20 +2346,13 @@
             t('required'),
           ),
         ),
-        usesPlaceholder(field.type) ? h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, t('placeholder')),
-          h('input', { type: 'text', value: field.placeholder || '', oninput: (e) => { field.placeholder = e.target.value; renderCanvas(); } }),
-        ) : null,
+        usesPlaceholder(field.type) ? bilingualField('placeholder', field, 'placeholder') : null,
         field.type === 'image' ? h('div', { class: 'prop-field' },
           h('span', { class: 'prop-label' }, t('imageUrl')),
           h('input', { type: 'text', placeholder: 'https://…/logo.png', value: field.imageUrl || '', oninput: (e) => { field.imageUrl = e.target.value; renderCanvas(); } }),
           h('p', { class: 'prop-hint' }, t('imageUrlHint')),
         ) : null,
-        field.type === 'image' ? h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, t('altText')),
-          h('input', { type: 'text', value: field.imageAlt || '', oninput: (e) => { field.imageAlt = e.target.value; } }),
-          h('p', { class: 'prop-hint' }, t('altTextHint')),
-        ) : null,
+        field.type === 'image' ? bilingualField('altText', field, 'imageAlt', { onInput: () => {}, hint: 'altTextHint' }) : null,
         field.type === 'image' ? h('div', { class: 'prop-field' },
           h('span', { class: 'prop-label' }, t('alignment')),
           h('select', {
@@ -2325,11 +2363,7 @@
             h('option', { value: 'right', selected: field.imageAlign === 'right' }, t('alignRight')),
           ),
         ) : null,
-        field.type === 'accordion' ? h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, t('introText')),
-          h('textarea', { oninput: (e) => { field.bodyText = e.target.value; renderCanvas(); } }, field.bodyText || ''),
-          h('p', { class: 'prop-hint' }, t('introTextHint')),
-        ) : null,
+        field.type === 'accordion' ? bilingualField('introText', field, 'bodyText', { textarea: true, hint: 'introTextHint' }) : null,
         field.type === 'accordion' ? h('div', { class: 'prop-field' },
           h('label', { class: 'prop-check' },
             h('input', { type: 'checkbox', checked: !!field.defaultOpen, onchange: (e) => { field.defaultOpen = e.target.checked; } }),
@@ -2347,10 +2381,8 @@
           ),
         ) : null,
         usesOptions(field.type) ? optionsSourceEditor(field) : null,
-        (field.type === 'button' || field.type === 'image' || field.type === 'accordion') ? null : h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, t('helpText')),
-          h('textarea', { oninput: (e) => { field.helpText = e.target.value; } }, field.helpText || ''),
-        ),
+        (field.type === 'button' || field.type === 'image' || field.type === 'accordion') ? null
+          : bilingualField('helpText', field, 'helpText', { textarea: true, onInput: () => {} }),
         h('button', { class: 'delete-field-btn', type: 'button', onclick: () => deleteField(field.id) }, t('deleteField')),
       );
       return;
@@ -2360,10 +2392,7 @@
       const screen = activeScreen();
       appendAll(el,
         h('p', { class: 'prop-heading' }, t('screenPropertiesHeading')),
-        h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, t('screenTitle')),
-          h('input', { type: 'text', value: screen.title, oninput: (e) => { screen.title = e.target.value; renderCanvas(); renderTabs(); } }),
-        ),
+        bilingualField('screenTitle', screen, 'title', { onInput: () => { renderCanvas(); renderTabs(); } }),
         h('p', { class: 'prop-hint' }, fieldsOnScreenText(screen.fields.length)),
         h('button', {
           class: 'delete-screen-btn', type: 'button', disabled: state.screens.length <= 1,
@@ -2376,10 +2405,7 @@
     // form settings (default)
     appendAll(el,
       h('p', { class: 'prop-heading' }, t('formSettingsHeading')),
-      h('div', { class: 'prop-field' },
-        h('span', { class: 'prop-label' }, t('formTitle')),
-        h('input', { type: 'text', value: state.title, oninput: (e) => { state.title = e.target.value; renderCanvas(); renderAppRibbonTitle(); } }),
-      ),
+      bilingualField('formTitle', state, 'title', { onInput: () => { renderCanvas(); renderAppRibbonTitle(); } }),
       h('div', { class: 'prop-field' },
         h('label', { class: 'prop-check' },
           h('input', { type: 'checkbox', checked: state.includeReviewScreen, onchange: (e) => { state.includeReviewScreen = e.target.checked; renderCanvas(); } }),
@@ -2466,7 +2492,7 @@
       label: f.label,
       type: f.type,
       required: f.required || undefined,
-      placeholder: f.placeholder || undefined,
+      placeholder: locOrUndef(f.placeholder),
       options: (!f.sourceKind || f.sourceKind === 'static') ? f.options : undefined,
       source: (usesOptions(f.type) && f.sourceKind && f.sourceKind !== 'static') ? {
         kind: f.sourceKind,
@@ -2474,13 +2500,13 @@
         workbookId: f.sourceKind === 'excel' ? (f.sourceWorkbookId || undefined) : undefined,
         sheet: f.sourceKind === 'excel' ? (f.sourceSheet || undefined) : undefined,
       } : undefined,
-      helpText: f.helpText || undefined,
+      helpText: locOrUndef(f.helpText),
       layout: (f.type === 'radio' && f.radioLayout === 'horizontal') ? 'horizontal' : undefined,
       hideLabel: f.hideLabel || undefined,
       width: f.widthPct && f.widthPct < 100 ? f.widthPct : undefined,
       disabled: f.disabled || undefined,
       src: f.type === 'image' ? (f.imageUrl || undefined) : undefined,
-      alt: f.type === 'image' ? (f.imageAlt || undefined) : undefined,
+      alt: f.type === 'image' ? locOrUndef(f.imageAlt) : undefined,
       align: (f.type === 'image' && f.imageAlign && f.imageAlign !== 'center') ? f.imageAlign : undefined,
       background: f.bgColor || undefined,
       textColor: f.textColor || undefined,
@@ -2496,7 +2522,7 @@
 
   function buildConfig() {
     return {
-      id: slug(state.title),
+      id: slug(loc(state.title, 'en')),
       title: state.title,
       includeReviewScreen: state.includeReviewScreen,
       headerLogoUrl: state.headerLogoUrl || undefined,
@@ -2514,7 +2540,7 @@
             label: f.label,
             type: f.type,
             required: f.required || undefined,
-            placeholder: f.placeholder || undefined,
+            placeholder: locOrUndef(f.placeholder),
             options: (!f.sourceKind || f.sourceKind === 'static') ? f.options : undefined,
             source: (usesOptions(f.type) && f.sourceKind && f.sourceKind !== 'static') ? {
               kind: f.sourceKind,
@@ -2522,15 +2548,15 @@
               workbookId: f.sourceKind === 'excel' ? (f.sourceWorkbookId || undefined) : undefined,
               sheet: f.sourceKind === 'excel' ? (f.sourceSheet || undefined) : undefined,
             } : undefined,
-            helpText: f.helpText || undefined,
+            helpText: locOrUndef(f.helpText),
             layout: (f.type === 'radio' && f.radioLayout === 'horizontal') ? 'horizontal' : undefined,
             hideLabel: f.hideLabel || undefined,
             width: f.widthPct && f.widthPct < 100 ? f.widthPct : undefined,
             disabled: f.disabled || undefined,
             src: f.type === 'image' ? (f.imageUrl || undefined) : undefined,
-            alt: f.type === 'image' ? (f.imageAlt || undefined) : undefined,
+            alt: f.type === 'image' ? locOrUndef(f.imageAlt) : undefined,
             align: (f.type === 'image' && f.imageAlign && f.imageAlign !== 'center') ? f.imageAlign : undefined,
-            content: f.type === 'accordion' ? (f.bodyText || undefined) : undefined,
+            content: f.type === 'accordion' ? locOrUndef(f.bodyText) : undefined,
             defaultOpen: (f.type === 'accordion' && f.defaultOpen) ? true : undefined,
             children: (f.type === 'accordion' && f.children && f.children.length) ? f.children.map(mapChildField) : undefined,
             background: f.bgColor || undefined,

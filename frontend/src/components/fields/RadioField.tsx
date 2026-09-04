@@ -1,7 +1,7 @@
-import { FieldConfig } from '../../types/config'
+import { ResolvedFieldConfig } from '../../types/config'
 
 interface Props {
-  field: FieldConfig
+  field: ResolvedFieldConfig
   value: string | undefined
   onChange: (value: string) => void
 }

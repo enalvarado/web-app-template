@@ -1,12 +1,13 @@
 interface Props {
   onBack?: () => void
   onNext?: () => void
+  backLabel?: string
   nextLabel?: string
   backDisabled?: boolean
   nextDisabled?: boolean
 }
 
-export default function NavButtons({ onBack, onNext, nextLabel = 'Next', backDisabled, nextDisabled }: Props) {
+export default function NavButtons({ onBack, onNext, backLabel = 'Back', nextLabel = 'Next', backDisabled, nextDisabled }: Props) {
   return (
     <div className="flex justify-between mt-8">
       <button
@@ -15,7 +16,7 @@ export default function NavButtons({ onBack, onNext, nextLabel = 'Next', backDis
         disabled={backDisabled}
         className="px-5 py-3 rounded-lg font-heading font-semibold text-morado border border-morado disabled:opacity-40 disabled:cursor-not-allowed active:scale-95 transition"
       >
-        ◀ Back
+        ◀ {backLabel}
       </button>
       <button
         type="button"

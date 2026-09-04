@@ -1,34 +1,34 @@
 {
   "id": "_actions-test",
-  "title": "Actions Test",
+  "title": { "en": "Actions Test", "es": "Prueba de Acciones" },
   "includeReviewScreen": true,
   "screens": [
     {
       "id": "menu",
-      "title": "Where to?",
+      "title": { "en": "Where to?", "es": "¿A dónde?" },
       "fields": [
-        { "name": "note", "label": "Note", "type": "text", "placeholder": "Optional" }
+        { "name": "note", "label": { "en": "Note", "es": "Nota" }, "type": "text", "placeholder": { "en": "Optional", "es": "Opcional" } }
       ],
       "actions": [
-        { "id": "a1", "label": "Skip to Step 3", "style": "outline", "action": "goto", "targetScreenId": "step-3" },
-        { "id": "a2", "label": "Reset", "style": "outline", "action": "reset" }
+        { "id": "a1", "label": { "en": "Skip to Step 3", "es": "Saltar al Paso 3" }, "style": "outline", "action": "goto", "targetScreenId": "step-3" },
+        { "id": "a2", "label": { "en": "Reset", "es": "Reiniciar" }, "style": "outline", "action": "reset" }
       ]
     },
     {
       "id": "step-2",
-      "title": "Step 2",
+      "title": { "en": "Step 2", "es": "Paso 2" },
       "fields": [
-        { "name": "step2Field", "label": "Step 2 field", "type": "text" }
+        { "name": "step2Field", "label": { "en": "Step 2 field", "es": "Campo del paso 2" }, "type": "text" }
       ]
     },
     {
       "id": "step-3",
-      "title": "Step 3",
+      "title": { "en": "Step 3", "es": "Paso 3" },
       "fields": [
-        { "name": "step3Field", "label": "Step 3 field", "type": "text" }
+        { "name": "step3Field", "label": { "en": "Step 3 field", "es": "Campo del paso 3" }, "type": "text" }
       ],
       "actions": [
-        { "id": "a3", "label": "Submit from here", "style": "primary", "action": "submit" }
+        { "id": "a3", "label": { "en": "Submit from here", "es": "Enviar desde aquí" }, "style": "primary", "action": "submit" }
       ]
     }
   ]
