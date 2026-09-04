@@ -5,9 +5,7 @@ from .base import DataSource
 
 # Builders reference a query by name in config; only queries registered here
 # can run, so form config JSON never carries raw SQL.
-REGISTERED_QUERIES: dict[str, str] = {
-    "warehouses": "SELECT name FROM warehouses ORDER BY name",
-}
+REGISTERED_QUERIES: dict[str, str] = {}
 
 
 class SqlDataSource(DataSource):

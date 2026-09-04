@@ -66,12 +66,6 @@
             { "en": "Green", "es": "Verde" },
             { "en": "Blue", "es": "Azul" }
           ]
-        },
-        {
-          "name": "warehouse",
-          "label": { "en": "Warehouse", "es": "Almacén" },
-          "type": "select",
-          "source": { "kind": "sql", "query": "warehouses" }
         }
       ]
     },
