@@ -151,52 +151,72 @@
 
   .done h2 { margin: 0 0 6px; font-family: var(--font-head); font-size: 19px; color: var(--morado); }
   .done p { margin: 0; font-size: 14px; color: var(--gris-soft); }
+  .done-countdown { margin-top: 14px !important; font-size: 12px !important; font-variant-numeric: tabular-nums; }
 </style>
 
 <div class="card">
   <div class="titlebar"><h1>Untitled Form</h1></div>
-  <div class="body" id="body">
-    <div class="progress">
-      <div class="progress-row"><span>Step 1 of 1</span><span>100%</span></div>
-      <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
-    </div>
-    <h2 class="screen-title">Screen 1</h2>
-
-    <div class="field">
-      <label class="field-label">Full Name<span class="req"> *</span></label>
-      <input type="text" placeholder="Full name">
-    </div>
-
-    <div class="field">
-      <label class="field-label">Category</label>
-      <select>
-        <option disabled selected>Select…</option>
-        <option>Option 1</option>
-        <option>Option 2</option>
-      </select>
-    </div>
-
-    <div class="field">
-      <button type="button" class="action-btn" id="customBtn">Button</button>
-    </div>
-
-    <div class="nav">
-      <button class="btn btn-back" disabled>◀ Back</button>
-      <button class="btn btn-next" id="submitBtn">Submit</button>
-    </div>
-  </div>
+  <div class="body" id="body"></div>
 </div>
 
 <script>
-  document.getElementById('customBtn').addEventListener('click', () => {
-    const btn = document.getElementById('customBtn');
-    const original = btn.textContent;
-    btn.textContent = 'No action wired up yet';
-    setTimeout(() => { btn.textContent = original; }, 1400);
-  });
+  // Mirrors the Form Builder's default two-screen starting point: an empty "Home" screen
+  // first, then "Screen 1" with the demo fields — see design/mockups/form-builder.html's
+  // initial state.
+  const bodyEl = document.getElementById('body');
+  const RETURN_DELAY_SECONDS = 10;
+  let returnTimer;
+  let countdownTimer;
 
-  document.getElementById('submitBtn').addEventListener('click', () => {
-    document.getElementById('body').innerHTML = `
+  function homeScreenHtml() {
+    return `
+      <div class="progress">
+        <div class="progress-row"><span>Step 1 of 2</span><span>50%</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:50%"></div></div>
+      </div>
+      <h2 class="screen-title">Home</h2>
+      <div class="nav">
+        <button class="btn btn-back" disabled>◀ Back</button>
+        <button class="btn btn-next" id="nextBtn">Next ▶</button>
+      </div>
+    `;
+  }
+
+  function screen1Html() {
+    return `
+      <div class="progress">
+        <div class="progress-row"><span>Step 2 of 2</span><span>100%</span></div>
+        <div class="progress-track"><div class="progress-fill" style="width:100%"></div></div>
+      </div>
+      <h2 class="screen-title">Screen 1</h2>
+
+      <div class="field">
+        <label class="field-label">Full Name<span class="req"> *</span></label>
+        <input type="text" placeholder="Full name">
+      </div>
+
+      <div class="field">
+        <label class="field-label">Category</label>
+        <select>
+          <option disabled selected>Select…</option>
+          <option>Option 1</option>
+          <option>Option 2</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <button type="button" class="action-btn" id="customBtn">Button</button>
+      </div>
+
+      <div class="nav">
+        <button class="btn btn-back" id="backBtn">◀ Back</button>
+        <button class="btn btn-next" id="submitBtn">Submit</button>
+      </div>
+    `;
+  }
+
+  function doneHtml() {
+    return `
       <div class="done">
         <div class="done-badge">
           <svg viewBox="0 0 24 24" width="26" height="26" fill="none">
@@ -205,7 +225,44 @@
         </div>
         <h2>Thank you!</h2>
         <p>Your submission was received.</p>
+        <p class="done-countdown">Returning to Home in <span id="countdown">${RETURN_DELAY_SECONDS}</span>s…</p>
       </div>
     `;
-  });
+  }
+
+  function showHome() {
+    clearInterval(countdownTimer);
+    clearTimeout(returnTimer);
+    bodyEl.innerHTML = homeScreenHtml();
+    document.getElementById('nextBtn').addEventListener('click', showScreen1);
+  }
+
+  function showScreen1() {
+    bodyEl.innerHTML = screen1Html();
+    document.getElementById('backBtn').addEventListener('click', showHome);
+    document.getElementById('customBtn').addEventListener('click', () => {
+      const btn = document.getElementById('customBtn');
+      const original = btn.textContent;
+      btn.textContent = 'No action wired up yet';
+      setTimeout(() => { btn.textContent = original; }, 1400);
+    });
+    document.getElementById('submitBtn').addEventListener('click', showDone);
+  }
+
+  function showDone() {
+    bodyEl.innerHTML = doneHtml();
+    startReturnCountdown();
+  }
+
+  function startReturnCountdown() {
+    let secondsLeft = RETURN_DELAY_SECONDS;
+    countdownTimer = setInterval(() => {
+      secondsLeft -= 1;
+      const el = document.getElementById('countdown');
+      if (el) el.textContent = String(secondsLeft);
+    }, 1000);
+    returnTimer = setTimeout(showHome, RETURN_DELAY_SECONDS * 1000);
+  }
+
+  showHome();
 </script>
