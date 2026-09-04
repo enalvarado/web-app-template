@@ -14,6 +14,8 @@ export function resolveField(field: FieldConfig, locale: Locale): ResolvedFieldC
     placeholder: resolveLocalized(field.placeholder, locale),
     helpText: resolveLocalized(field.helpText, locale),
     options: field.options?.map((opt) => resolveLocalized(opt, locale)),
+    alt: resolveLocalized(field.alt, locale),
+    content: resolveLocalized(field.content, locale),
   }
 }
 

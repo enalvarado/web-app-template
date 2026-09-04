@@ -68,11 +68,11 @@ The template will be hosted on **GitHub** so any team member can clone/download 
 `combobox`, `listbox`, `slider`
 
 **Layout / content field types (emerged from Form Builder design work, not in the original spec):**
-- `button` — a screen-level action control (Next / Back / Submit / Reset / Jump-to-screen), rendered above the automatic Back/Next row. **Implemented** in the real frontend: `ActionConfig` in `frontend/src/types/config.ts`, dispatched by `ScreenActions`/`FormApp.tsx`.
-- `image` — a decorative image/logo block (URL, alt text, alignment, width). Explored only in the Form Builder mockup (`design/mockups/form-builder.html`) — not yet added to the real `FieldRenderer`.
-- `accordion` (Collapsible section) — an expandable header with optional intro text and nested fields (any core/high-priority type, including nested buttons, one level deep). Explored only in the Form Builder mockup — not yet added to the real `FieldRenderer`. Note this introduces field *nesting* into the config schema, which Section 8's flat `fields: FieldConfig[]` doesn't currently support — confirm the nested shape before implementing for real.
+- `button` — a screen-level action control (Next / Back / Submit / Reset / Jump-to-screen), rendered above the automatic Back/Next row. **Implemented** in the real frontend: `ActionConfig` in `frontend/src/types/config.ts`, dispatched by `ScreenActions`/`FormApp.tsx`. Also implemented as a *content-block* field (`FieldConfig.type === 'button'`) for a button nested inside an accordion — see below.
+- `image` — a decorative image/logo block (URL, alt text, alignment, width). **Implemented** in the real frontend: `ImageField.tsx`, rendered by `FieldRenderer`.
+- `accordion` (Collapsible section) — an expandable header with optional intro text and nested fields, one level deep (accordion-in-accordion not supported). **Implemented**: `AccordionField.tsx` recursively renders `FieldConfig.children` (including nested `button`/`image` fields) via `FieldRenderer` itself. `FieldConfig.children?: FieldConfig[]` is the nested shape that was an open question below — resolved by just extending the existing flat type with an optional self-referencing array, no separate schema needed.
 
-> **Status note (2026-09-02):** the three types above, plus a per-field background-color swatch (see Section 5) and a form-level header logo/background wallpaper, came out of iterating on the Form Builder authoring tool itself, not from a Power Apps use case in Section 2. Worth a pass to decide which of these are genuinely needed by the real forms vs. builder-tool scope creep before they're built into `FieldRenderer`.
+> **Status note (2026-09-04):** resolved — all three types above, the per-field background-color/text-color/font-size/width/hideLabel/disabled controls (Section 5), and the form-level header logo/background wallpaper are now implemented in the real frontend, not just the Form Builder mockup. See `frontend/src/types/config.ts` for the full field shape, `frontend/src/lib/fieldStyle.ts` for the swatch-key → CSS-value maps (the Form Builder stores a swatch *key* like `"beige"`, not a resolved color), and `frontend/src/components/FieldRenderer.tsx` (wraps every field in a `<fieldset disabled>` so the `disabled` flag actually disables inputs natively, applies `hideLabel` as `sr-only` rather than removing the label, for screen readers).
 
 ### 4.3 Dynamic Dropdown Data Sources
 Dropdown options can be:
@@ -83,6 +83,8 @@ Dropdown options can be:
   - **SharePoint Lists** (via Microsoft Graph API) — same, for legacy compatibility
 
 Note: Excel/SharePoint List connectors reintroduce tenant dependency for that specific data — acceptable for legacy support, but not the target pattern for new apps.
+
+> **Status note (2026-09-04):** SQL Server dropdowns are real, but not via raw SQL — the backend (`backend/app/datasources/sql_source.py`) only ever executes a small hardcoded allowlist of developer-registered queries (`REGISTERED_QUERIES`), keyed by name, to rule out SQL injection from a form author. The Form Builder mirrors this: its "SQL query" option is a dropdown of registered query names (`REGISTERED_SQL_QUERIES` in the mockup, kept in sync with the backend list by hand), not a free-text SQL box. Adding a new dropdown query means a developer registers it in `sql_source.py` first. Excel/SharePoint were removed from the Form Builder's Options-source picker entirely for now — they need real Microsoft Graph API credentials (Azure AD app registration) that this project doesn't have configured yet; `excel_source.py`/`sharepoint_source.py` still raise `NotImplementedError` and the schema still recognizes `"excel"`/`"sharepoint"` as valid `DropdownSource.kind` values for forward-compat, but nothing in the builder can produce one. Revisit once Graph credentials exist.
 
 ### 4.4 QR Code Generator (separate utility, not part of a form)
 - Standalone tool: given equipment data (serial number, warehouse assignment, etc. — this is new data, no existing system to migrate from), generate a printable/downloadable QR code
@@ -109,7 +111,7 @@ Status colors intentionally stay within the brand palette rather than introducin
 - Success → Azul Claro
 - Error/Warning → Rosado Claro (consider a deepened/higher-contrast derivative for text/icons/borders on error states so they read as sufficiently urgent — flag this as a design detail to refine during implementation)
 
-> **Status note (2026-09-02):** the Form Builder mockup adds a per-field background-color picker (swatch choices: None, White, Beige, Azul, Rosado, Morado — constrained to this palette, not a free color input) so a builder can tint an individual field's card. This is a step beyond "builders should not need to touch this" at the top of this section — worth confirming whether that level of per-field customization is actually wanted in the real app, or whether it should stay a Form-Builder-only preview affordance.
+> **Status note (2026-09-02, resolved 2026-09-04):** the Form Builder mockup adds a per-field background-color picker (swatch choices: None, White, Beige, Azul, Rosado, Morado — constrained to this palette, not a free color input) so a builder can tint an individual field's card, plus a text-color and font-size picker. All three are now applied for real by `FieldRenderer` via `frontend/src/lib/fieldStyle.ts`'s swatch-key maps — still constrained to the same fixed palette, so this doesn't reopen "builders should not need to touch this" into a free-color picker.
 
 **Fonts:**
 - Primary: **Montserrat** (headings, buttons, emphasis)

@@ -31,6 +31,30 @@ class FieldConfig(BaseModel):
     max: Optional[float] = None
     autoFillTargets: Optional[list[str]] = None
     lookupEndpoint: Optional[str] = None
+    # Layout / presentation
+    width: Optional[float] = None
+    hideLabel: Optional[bool] = None
+    disabled: Optional[bool] = None
+    background: Optional[str] = None
+    textColor: Optional[str] = None
+    fontSize: Optional[str] = None
+    # radio only
+    layout: Optional[Literal["horizontal", "vertical"]] = None
+    # image only
+    src: Optional[str] = None
+    alt: Optional[LocalizedString] = None
+    align: Optional[Literal["left", "center", "right"]] = None
+    # accordion only — one level of nesting, no accordion-in-accordion
+    content: Optional[LocalizedString] = None
+    defaultOpen: Optional[bool] = None
+    children: Optional[list["FieldConfig"]] = None
+    # button only (a content-block button, e.g. nested inside an accordion)
+    action: Optional[Literal["next", "back", "submit", "reset", "goto", "none"]] = None
+    targetScreenId: Optional[str] = None
+    style: Optional[Literal["primary", "outline"]] = None
+
+
+FieldConfig.model_rebuild()
 
 
 class ScreenConfig(BaseModel):
@@ -45,6 +69,10 @@ class FormConfig(BaseModel):
     title: LocalizedString
     description: Optional[LocalizedString] = None
     includeReviewScreen: bool = False
+    headerLogoUrl: Optional[str] = None
+    headerLogoPosition: Optional[Literal["left", "right"]] = None
+    headerLogoSize: Optional[float] = None
+    backgroundImageUrl: Optional[str] = None
     screens: list[ScreenConfig]
 
 

@@ -6,9 +6,12 @@ import { uiText } from '../../lib/i18n'
 interface Props {
   value: string | undefined
   onChange: (value: string) => void
+  disabled?: boolean
 }
 
-export default function SignatureField({ value, onChange }: Props) {
+// The signature pad is a <canvas>, not a native form control, so it's the one field body that
+// a wrapping <fieldset disabled> can't reach — it needs its own explicit disabled handling.
+export default function SignatureField({ value, onChange, disabled }: Props) {
   const { locale } = useLocale()
   const padRef = useRef<SignatureCanvas>(null)
 
@@ -26,7 +29,9 @@ export default function SignatureField({ value, onChange }: Props) {
 
   return (
     <div>
-      <div className="border border-beige rounded-lg bg-white touch-none">
+      <div
+        className={`border border-beige rounded-lg bg-white touch-none ${disabled ? 'opacity-50 pointer-events-none' : ''}`}
+      >
         <SignatureCanvas
           ref={padRef}
           penColor="#383A35"
@@ -34,7 +39,12 @@ export default function SignatureField({ value, onChange }: Props) {
           onEnd={handleEnd}
         />
       </div>
-      <button type="button" onClick={handleClear} className="mt-2 text-sm text-morado font-body underline">
+      <button
+        type="button"
+        onClick={handleClear}
+        disabled={disabled}
+        className="mt-2 text-sm text-morado font-body underline disabled:opacity-50 disabled:cursor-not-allowed"
+      >
         {uiText(locale, 'clear')}
       </button>
       {!value && <p className="text-xs text-rosado-deep mt-1">{uiText(locale, 'signatureRequired')}</p>}

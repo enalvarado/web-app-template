@@ -1,10 +1,10 @@
-import { ActionConfig } from '../types/config'
+import { ActionConfig, ActionTrigger } from '../types/config'
 import { useLocale } from '../context/LocaleContext'
 import { resolveLocalized } from '../lib/i18n'
 
 interface Props {
   actions: ActionConfig[]
-  onAction: (action: ActionConfig) => void
+  onAction: (action: ActionTrigger) => void
 }
 
 export default function ScreenActions({ actions, onAction }: Props) {

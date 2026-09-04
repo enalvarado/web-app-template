@@ -1218,6 +1218,14 @@
     { presetAction: 'goto', paletteLabel: 'Skip to step…', buttonLabel: 'Skip ahead', buttonStyle: 'outline' },
   ];
 
+  // Mirrors backend/app/datasources/sql_source.py's REGISTERED_QUERIES keys — the backend only
+  // ever runs SQL it already knows about (no raw SQL from a form author, ever), so a SQL-sourced
+  // dropdown here can only pick from this same allowlist, not type arbitrary query text. Add a
+  // query to sql_source.py first, then add its key + a display label here.
+  const REGISTERED_SQL_QUERIES = [
+    { key: 'warehouses', label: { en: 'Warehouses', es: 'Almacenes' } },
+  ];
+
   const STRINGS = {
     en: {
       home: 'Home', user: 'User',
@@ -1282,12 +1290,9 @@
       fontSizeLabel: 'Font size', fontSizeHint: "Resizes this field's label (and button/section text).",
       fsSmall: 'Small', fsMedium: 'Medium', fsLarge: 'Large',
       options: 'Options', removeOption: 'Remove option', addOption: '+ Add option',
-      optionsSource: 'Options source', staticList: 'Static list', sqlQuery: 'SQL query', excelWorkbook: 'Excel workbook',
-      sqlHint: 'Runs against the shared SQL Server connection — the first column becomes the option list.',
-      workbookId: 'Workbook ID', workbookIdPlaceholder: 'OneDrive/SharePoint workbook ID or path',
-      sheetName: 'Sheet name', excelHint: "Reads the sheet's first column as the option list.",
-      sqlPrefix: 'SQL: ', sqlNoQuery: '(no query set yet)',
-      excelPrefix: 'Excel: ', excelNoWorkbook: ' (no workbook set yet)',
+      optionsSource: 'Options source', staticList: 'Static list', sqlQuery: 'SQL query',
+      sqlHint: 'Pick from queries a developer has already registered in the backend (sql_source.py) — the first column becomes the option list. Need a different one? Ask a developer to register it there first.',
+      sqlPrefix: 'SQL: ', sqlNoQuery: '(no query set yet)', noQueriesRegistered: 'No SQL queries are registered in the backend yet.',
       screenPropertiesHeading: 'Screen properties', screenTitle: 'Screen title', deleteScreen: 'Delete screen',
       formSettingsHeading: 'Form settings', formTitle: 'Form title',
       headerLogoUrl: 'Header logo URL',
@@ -1366,12 +1371,9 @@
       fontSizeLabel: 'Tamaño de fuente', fontSizeHint: 'Cambia el tamaño de la etiqueta de este campo (y el texto de botones/secciones).',
       fsSmall: 'Pequeño', fsMedium: 'Mediano', fsLarge: 'Grande',
       options: 'Opciones', removeOption: 'Eliminar opción', addOption: '+ Agregar opción',
-      optionsSource: 'Fuente de las opciones', staticList: 'Lista estática', sqlQuery: 'Consulta SQL', excelWorkbook: 'Libro de Excel',
-      sqlHint: 'Se ejecuta contra la conexión compartida de SQL Server — la primera columna se convierte en la lista de opciones.',
-      workbookId: 'ID del libro', workbookIdPlaceholder: 'ID o ruta del libro en OneDrive/SharePoint',
-      sheetName: 'Nombre de la hoja', excelHint: 'Lee la primera columna de la hoja como la lista de opciones.',
-      sqlPrefix: 'SQL: ', sqlNoQuery: '(sin consulta definida)',
-      excelPrefix: 'Excel: ', excelNoWorkbook: ' (sin libro definido)',
+      optionsSource: 'Fuente de las opciones', staticList: 'Lista estática', sqlQuery: 'Consulta SQL',
+      sqlHint: 'Elige entre las consultas que un desarrollador ya registró en el backend (sql_source.py) — la primera columna se convierte en la lista de opciones. ¿Necesitas otra? Pide a un desarrollador que la registre primero.',
+      sqlPrefix: 'SQL: ', sqlNoQuery: '(sin consulta definida)', noQueriesRegistered: 'Aún no hay consultas SQL registradas en el backend.',
       screenPropertiesHeading: 'Propiedades de la pantalla', screenTitle: 'Título de la pantalla', deleteScreen: 'Eliminar pantalla',
       formSettingsHeading: 'Configuración del formulario', formTitle: 'Título del formulario',
       headerLogoUrl: 'URL del logo del encabezado',
@@ -1427,7 +1429,7 @@
       {
         id: 'screen-2', title: { en: 'Screen 1', es: 'Pantalla 1' }, fields: [
           { id: 'f1', type: 'text', label: { en: 'Full Name', es: 'Nombre Completo' }, name: 'full_name', required: true, placeholder: { en: 'Full name', es: 'Nombre completo' }, helpText: emptyLoc(), widthPct: 100, disabled: false, hideLabel: false },
-          { id: 'f2', type: 'select', label: { en: 'Category', es: 'Categoría' }, name: 'category', required: false, placeholder: { en: 'Select…', es: 'Seleccionar…' }, options: [{ en: 'Option 1', es: 'Opción 1' }, { en: 'Option 2', es: 'Opción 2' }], helpText: emptyLoc(), widthPct: 100, disabled: false, hideLabel: false, sourceKind: 'static', sourceQuery: '', sourceWorkbookId: '', sourceSheet: '' },
+          { id: 'f2', type: 'select', label: { en: 'Category', es: 'Categoría' }, name: 'category', required: false, placeholder: { en: 'Select…', es: 'Seleccionar…' }, options: [{ en: 'Option 1', es: 'Opción 1' }, { en: 'Option 2', es: 'Opción 2' }], helpText: emptyLoc(), widthPct: 100, disabled: false, hideLabel: false, sourceKind: 'static', sourceQuery: '' },
         ]
       },
     ],
@@ -1564,7 +1566,7 @@
       options: usesOptions(type) ? [{ en: 'Option 1', es: 'Opción 1' }, { en: 'Option 2', es: 'Opción 2' }] : undefined,
       sourceKind: usesOptions(type) ? 'static' : undefined,
       radioLayout: type === 'radio' ? 'vertical' : undefined,
-      sourceQuery: '', sourceWorkbookId: '', sourceSheet: '',
+      sourceQuery: '',
       buttonStyle: type === 'button' ? 'primary' : undefined,
       buttonAction: type === 'button' ? 'next' : undefined,
       buttonTargetScreenId: undefined,
@@ -1607,7 +1609,7 @@
       id, type: 'button', label: { en: preset.buttonLabel, es: STRINGS.es['preset_' + preset.presetAction] || preset.buttonLabel }, name: slug(preset.buttonLabel) + '_' + count,
       required: false, placeholder: emptyLoc(), helpText: emptyLoc(), widthPct: 100, disabled: false, hideLabel: false,
       options: undefined, sourceKind: undefined, radioLayout: undefined,
-      sourceQuery: '', sourceWorkbookId: '', sourceSheet: '',
+      sourceQuery: '',
       buttonStyle: preset.buttonStyle,
       buttonAction: preset.presetAction,
       buttonTargetScreenId: undefined,
@@ -2046,41 +2048,35 @@
     wrap.append(h('div', { class: 'prop-field' },
       h('span', { class: 'prop-label' }, t('optionsSource')),
       h('select', {
-        onchange: (e) => { field.sourceKind = e.target.value; renderProperties(); renderCanvas(); },
+        onchange: (e) => {
+          field.sourceKind = e.target.value;
+          if (field.sourceKind === 'sql' && !REGISTERED_SQL_QUERIES.some((q) => q.key === field.sourceQuery)) {
+            field.sourceQuery = REGISTERED_SQL_QUERIES[0] ? REGISTERED_SQL_QUERIES[0].key : '';
+          }
+          renderProperties(); renderCanvas();
+        },
       },
         h('option', { value: 'static', selected: kind === 'static' }, t('staticList')),
         h('option', { value: 'sql', selected: kind === 'sql' }, t('sqlQuery')),
-        h('option', { value: 'excel', selected: kind === 'excel' }, t('excelWorkbook')),
       ),
     ));
 
     if (kind === 'sql') {
-      wrap.append(h('div', { class: 'prop-field' },
-        h('span', { class: 'prop-label' }, t('sqlQuery')),
-        h('textarea', {
-          placeholder: 'SELECT DISTINCT name FROM dbo.Warehouses ORDER BY name',
-          oninput: (e) => { field.sourceQuery = e.target.value; },
-        }, field.sourceQuery || ''),
-        h('p', { class: 'prop-hint' }, t('sqlHint')),
-      ));
-    } else if (kind === 'excel') {
-      wrap.append(
-        h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, t('workbookId')),
-          h('input', {
-            type: 'text', placeholder: t('workbookIdPlaceholder'), value: field.sourceWorkbookId || '',
-            oninput: (e) => { field.sourceWorkbookId = e.target.value; },
-          }),
-        ),
-        h('div', { class: 'prop-field' },
-          h('span', { class: 'prop-label' }, t('sheetName')),
-          h('input', {
-            type: 'text', placeholder: 'Sheet1', value: field.sourceSheet || '',
-            oninput: (e) => { field.sourceSheet = e.target.value; },
-          }),
-          h('p', { class: 'prop-hint' }, t('excelHint')),
-        ),
-      );
+      if (REGISTERED_SQL_QUERIES.length === 0) {
+        wrap.append(h('p', { class: 'prop-hint' }, t('noQueriesRegistered')));
+      } else {
+        wrap.append(h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, t('sqlQuery')),
+          h('select', {
+            onchange: (e) => { field.sourceQuery = e.target.value; },
+          },
+            ...REGISTERED_SQL_QUERIES.map((q) => h('option', {
+              value: q.key, selected: (field.sourceQuery || REGISTERED_SQL_QUERIES[0].key) === q.key,
+            }, loc(q.label))),
+          ),
+          h('p', { class: 'prop-hint' }, t('sqlHint')),
+        ));
+      }
     } else {
       wrap.append(optionsEditor(field));
     }
@@ -2090,12 +2086,8 @@
 
   function sourceHint(field) {
     if (field.sourceKind === 'sql') {
-      const q = (field.sourceQuery || '').trim();
-      return t('sqlPrefix') + (q ? (q.length > 46 ? q.slice(0, 46) + '…' : q) : t('sqlNoQuery'));
-    }
-    if (field.sourceKind === 'excel') {
-      const sheet = field.sourceSheet || 'sheet';
-      return t('excelPrefix') + sheet + (field.sourceWorkbookId ? ' — ' + field.sourceWorkbookId : t('excelNoWorkbook'));
+      const q = REGISTERED_SQL_QUERIES.find((r) => r.key === field.sourceQuery);
+      return t('sqlPrefix') + (q ? loc(q.label) : t('sqlNoQuery'));
     }
     return '';
   }
@@ -2494,11 +2486,9 @@
       required: f.required || undefined,
       placeholder: locOrUndef(f.placeholder),
       options: (!f.sourceKind || f.sourceKind === 'static') ? f.options : undefined,
-      source: (usesOptions(f.type) && f.sourceKind && f.sourceKind !== 'static') ? {
-        kind: f.sourceKind,
-        query: f.sourceKind === 'sql' ? (f.sourceQuery || undefined) : undefined,
-        workbookId: f.sourceKind === 'excel' ? (f.sourceWorkbookId || undefined) : undefined,
-        sheet: f.sourceKind === 'excel' ? (f.sourceSheet || undefined) : undefined,
+      source: (usesOptions(f.type) && f.sourceKind === 'sql') ? {
+        kind: 'sql',
+        query: f.sourceQuery || undefined,
       } : undefined,
       helpText: locOrUndef(f.helpText),
       layout: (f.type === 'radio' && f.radioLayout === 'horizontal') ? 'horizontal' : undefined,
@@ -2542,11 +2532,9 @@
             required: f.required || undefined,
             placeholder: locOrUndef(f.placeholder),
             options: (!f.sourceKind || f.sourceKind === 'static') ? f.options : undefined,
-            source: (usesOptions(f.type) && f.sourceKind && f.sourceKind !== 'static') ? {
-              kind: f.sourceKind,
-              query: f.sourceKind === 'sql' ? (f.sourceQuery || undefined) : undefined,
-              workbookId: f.sourceKind === 'excel' ? (f.sourceWorkbookId || undefined) : undefined,
-              sheet: f.sourceKind === 'excel' ? (f.sourceSheet || undefined) : undefined,
+            source: (usesOptions(f.type) && f.sourceKind === 'sql') ? {
+              kind: 'sql',
+              query: f.sourceQuery || undefined,
             } : undefined,
             helpText: locOrUndef(f.helpText),
             layout: (f.type === 'radio' && f.radioLayout === 'horizontal') ? 'horizontal' : undefined,

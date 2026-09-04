@@ -1,0 +1,111 @@
+{
+  "id": "_full-featured-test",
+  "title": { "en": "Full Featured Test", "es": "Prueba Completa" },
+  "includeReviewScreen": true,
+  "headerLogoUrl": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' rx='6' fill='%23F4C7CE'/%3E%3C/svg%3E",
+  "headerLogoPosition": "left",
+  "headerLogoSize": 24,
+  "backgroundImageUrl": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23F3F1F6'/%3E%3Cpath d='M0 80L80 0' stroke='%23D8D2C4' stroke-width='2'/%3E%3C/svg%3E",
+  "screens": [
+    {
+      "id": "screen-1",
+      "title": { "en": "Layout & Styling", "es": "Diseño y Estilo" },
+      "fields": [
+        {
+          "name": "image1",
+          "label": { "en": "Logo", "es": "Logo" },
+          "type": "image",
+          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='60'%3E%3Crect width='120' height='60' rx='8' fill='%23545386'/%3E%3C/svg%3E",
+          "alt": { "en": "Company logo", "es": "Logo de la empresa" },
+          "align": "center"
+        },
+        {
+          "name": "firstName",
+          "label": { "en": "First Name", "es": "Nombre" },
+          "type": "text",
+          "width": 50,
+          "placeholder": { "en": "Jane", "es": "Juana" }
+        },
+        {
+          "name": "lastName",
+          "label": { "en": "Last Name", "es": "Apellido" },
+          "type": "text",
+          "width": 50,
+          "placeholder": { "en": "Doe", "es": "Pérez" }
+        },
+        {
+          "name": "styledField",
+          "label": { "en": "Styled field", "es": "Campo con estilo" },
+          "type": "text",
+          "background": "azul",
+          "textColor": "blue",
+          "fontSize": "large",
+          "placeholder": { "en": "Blue label, blue background", "es": "Etiqueta azul, fondo azul" }
+        },
+        {
+          "name": "hiddenLabelField",
+          "label": { "en": "Hidden label field", "es": "Campo con etiqueta oculta" },
+          "type": "text",
+          "hideLabel": true,
+          "placeholder": { "en": "No visible label above this", "es": "Sin etiqueta visible arriba" }
+        },
+        {
+          "name": "disabledField",
+          "label": { "en": "Disabled field", "es": "Campo deshabilitado" },
+          "type": "text",
+          "disabled": true,
+          "placeholder": { "en": "Can't type here", "es": "No se puede escribir aquí" }
+        },
+        {
+          "name": "colorPref",
+          "label": { "en": "Favorite color", "es": "Color favorito" },
+          "type": "radio",
+          "layout": "horizontal",
+          "options": [
+            { "en": "Red", "es": "Rojo" },
+            { "en": "Green", "es": "Verde" },
+            { "en": "Blue", "es": "Azul" }
+          ]
+        },
+        {
+          "name": "warehouse",
+          "label": { "en": "Warehouse", "es": "Almacén" },
+          "type": "select",
+          "source": { "kind": "sql", "query": "warehouses" }
+        }
+      ]
+    },
+    {
+      "id": "screen-2",
+      "title": { "en": "Collapsible Section", "es": "Sección Plegable" },
+      "fields": [
+        {
+          "name": "moreInfo",
+          "label": { "en": "More details (optional)", "es": "Más detalles (opcional)" },
+          "type": "accordion",
+          "content": { "en": "Expand this if you have extra notes to add.", "es": "Expande esto si tienes notas adicionales." },
+          "defaultOpen": true,
+          "children": [
+            {
+              "name": "notes",
+              "label": { "en": "Notes", "es": "Notas" },
+              "type": "textarea",
+              "placeholder": { "en": "Anything else we should know?", "es": "¿Algo más que debamos saber?" }
+            },
+            {
+              "name": "gotoScreen1",
+              "label": { "en": "Back to screen 1", "es": "Volver a la pantalla 1" },
+              "type": "button",
+              "style": "outline",
+              "action": "goto",
+              "targetScreenId": "screen-1"
+            }
+          ]
+        }
+      ],
+      "actions": [
+        { "id": "submit1", "label": { "en": "Submit", "es": "Enviar" }, "style": "primary", "action": "submit" }
+      ]
+    }
+  ]
+}
