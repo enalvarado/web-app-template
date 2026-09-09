@@ -17,6 +17,7 @@ import SignatureField from './fields/SignatureField'
 import RatingField from './fields/RatingField'
 import PhotoField from './fields/PhotoField'
 import QrScanField from './fields/QrScanField'
+import QrGenerateField from './fields/QrGenerateField'
 import ImageField from './fields/ImageField'
 import AccordionField from './fields/AccordionField'
 import InlineButtonField from './fields/InlineButtonField'
@@ -97,6 +98,10 @@ export default function FieldRenderer({ field, formId, onAction }: Props) {
             onScanned={handleQrScanned}
           />
         )
+      case 'qrgenerate': {
+        const encoded = field.sourceField ? (values[field.sourceField] as string | undefined) : undefined
+        return <QrGenerateField value={encoded || resolved.staticValue} />
+      }
       default:
         return <p className="text-rosado-deep text-sm">Unsupported field type: {resolved.type}</p>
     }

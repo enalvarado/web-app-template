@@ -49,6 +49,8 @@ const UI_STRINGS = {
     stars: 'stars',
     noFormFound: 'No form found for "{formId}".',
     availableForms: 'Available Forms',
+    qrNothingToEncode: 'Nothing to encode yet.',
+    qrGenerating: 'Generating QR code…',
   },
   es: {
     stepOf: 'Paso {n} de {total}',
@@ -76,6 +78,8 @@ const UI_STRINGS = {
     stars: 'estrellas',
     noFormFound: 'No se encontró ningún formulario para "{formId}".',
     availableForms: 'Formularios Disponibles',
+    qrNothingToEncode: 'Aún no hay nada que codificar.',
+    qrGenerating: 'Generando código QR…',
   },
 } satisfies Record<Locale, Record<string, string>>
 

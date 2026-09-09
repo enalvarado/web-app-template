@@ -19,6 +19,7 @@ export type FieldType =
   | 'rating'
   | 'photo'
   | 'qrscan'
+  | 'qrgenerate'
   | 'image'
   | 'accordion'
   | 'button'
@@ -53,6 +54,10 @@ export interface FieldConfig {
   max?: number
   autoFillTargets?: string[]
   lookupEndpoint?: string
+  // qrgenerate only — encodes another field's current value (sourceField) into a QR image;
+  // falls back to staticValue when sourceField is unset or that field is still empty.
+  sourceField?: string
+  staticValue?: string
   // Layout / presentation — set by the Form Builder's per-field styling controls.
   width?: number
   hideLabel?: boolean

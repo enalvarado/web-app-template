@@ -1181,6 +1181,7 @@
     rating: '<polygon points="10,3 12,7.5 17,8 13.3,11.2 14.3,16 10,13.5 5.7,16 6.7,11.2 3,8 8,7.5"/>',
     photo: '<rect x="3" y="6.5" width="14" height="10" rx="1.5"/><circle cx="10" cy="11.5" r="3"/><rect x="7.5" y="4" width="5" height="2.5" rx="0.6"/>',
     qrscan: '<rect x="3" y="3" width="5" height="5"/><rect x="12" y="3" width="5" height="5"/><rect x="3" y="12" width="5" height="5"/><rect x="12.7" y="12.7" width="1.6" height="1.6" fill="currentColor" stroke="none"/><rect x="15.3" y="12.7" width="1.6" height="1.6" fill="currentColor" stroke="none"/><rect x="12.7" y="15.3" width="1.6" height="1.6" fill="currentColor" stroke="none"/><rect x="15.3" y="15.3" width="1.6" height="1.6" fill="currentColor" stroke="none"/>',
+    qrgenerate: '<rect x="3" y="6" width="5" height="5"/><rect x="3" y="15" width="5" height="5"/><rect x="6.7" y="12.7" width="1.6" height="1.6" fill="currentColor" stroke="none"/><rect x="9.3" y="12.7" width="1.6" height="1.6" fill="currentColor" stroke="none"/><rect x="6.7" y="15.3" width="1.6" height="1.6" fill="currentColor" stroke="none"/><rect x="9.3" y="15.3" width="1.6" height="1.6" fill="currentColor" stroke="none"/><path d="M11 3.5h5.5v5.5" stroke-width="1.3"/><path d="M16.5 3.5l-6 6" stroke-width="1.3"/>',
     combobox: '<rect x="3" y="5" width="14" height="10" rx="1.5"/><polyline points="7,9 10,12 13,9"/>',
     listbox: '<rect x="3" y="4" width="14" height="12" rx="1.5"/><line x1="5.5" y1="7" x2="14.5" y2="7"/><line x1="5.5" y1="10" x2="14.5" y2="10"/><line x1="5.5" y1="13" x2="14.5" y2="13"/>',
     slider: '<line x1="3" y1="10" x2="17" y2="10"/><circle cx="11" cy="10" r="2.5" fill="currentColor" stroke="none"/>',
@@ -1206,6 +1207,7 @@
     { type: 'rating', label: 'Rating', group: 'Advanced' },
     { type: 'photo', label: 'Photo', group: 'Advanced' },
     { type: 'qrscan', label: 'QR / Barcode Scan', group: 'Advanced' },
+    { type: 'qrgenerate', label: 'QR / Generate', group: 'Advanced' },
     { type: 'combobox', label: 'Combobox', group: 'Later phase', disabled: true },
     { type: 'listbox', label: 'Listbox', group: 'Later phase', disabled: true },
     { type: 'slider', label: 'Slider', group: 'Later phase', disabled: true },
@@ -1234,6 +1236,7 @@
       ft_textarea: 'Textarea', ft_number: 'Number', ft_select: 'Dropdown', ft_date: 'Date',
       ft_datetime: 'Date/Time', ft_checkbox: 'Checkbox', ft_radio: 'Radio', ft_toggle: 'Toggle',
       ft_signature: 'Signature', ft_rating: 'Rating', ft_photo: 'Photo', ft_qrscan: 'QR / Barcode Scan',
+      ft_qrgenerate: 'QR / Generate',
       ft_combobox: 'Combobox', ft_listbox: 'Listbox', ft_slider: 'Slider',
       addFieldTitle: 'Add {label}',
       view_screens: 'Screens', view_review: 'Review summary', view_success: 'Success screen', view_failure: 'Failure screen',
@@ -1241,6 +1244,11 @@
       addFieldsHint: 'Add fields from the palette on the left.',
       ph_select: 'Select…', ph_date: 'mm/dd/yyyy', ph_datetime: 'mm/dd/yyyy --:--',
       cameraUpload: 'Camera / file upload', signaturePad: 'Signature pad', qrOpensCamera: 'Opens camera to scan',
+      qrGenSourceField: 'Encode value from field', qrGenSourceFieldHint: "Regenerates the QR whenever that field's answer changes. Leave unset to always encode the static value below instead.",
+      qrGenSourceFieldNone: '(use static value)',
+      qrGenStaticValue: 'Static value', qrGenStaticValueHint: 'Encoded when no source field is set, or while it\'s still empty.',
+      qrGenPreviewNoValue: 'Generates a QR code once a value is set', qrGenPreviewFrom: 'Encodes the "{label}" field',
+      qrGenPreviewStatic: 'Encodes: {value}',
       noImageSet: 'No image set — add an Image URL in properties', accordionDefaultLabel: 'Section',
       noFieldsYetAddBelow: 'No fields yet — add one below.',
       stepOf: 'Step {n} of {total}', untitledForm: 'Untitled Form',
@@ -1316,6 +1324,7 @@
       ft_textarea: 'Área de texto', ft_number: 'Número', ft_select: 'Menú desplegable', ft_date: 'Fecha',
       ft_datetime: 'Fecha/Hora', ft_checkbox: 'Casilla', ft_radio: 'Opción única', ft_toggle: 'Interruptor',
       ft_signature: 'Firma', ft_rating: 'Calificación', ft_photo: 'Foto', ft_qrscan: 'Escaneo QR / código de barras',
+      ft_qrgenerate: 'QR / Generar',
       ft_combobox: 'Combo', ft_listbox: 'Lista', ft_slider: 'Deslizador',
       addFieldTitle: 'Agregar {label}',
       view_screens: 'Pantallas', view_review: 'Resumen de revisión', view_success: 'Pantalla de éxito', view_failure: 'Pantalla de error',
@@ -1323,6 +1332,11 @@
       addFieldsHint: 'Agrega campos desde la paleta de la izquierda.',
       ph_select: 'Seleccionar…', ph_date: 'dd/mm/aaaa', ph_datetime: 'dd/mm/aaaa --:--',
       cameraUpload: 'Cámara / subir archivo', signaturePad: 'Panel de firma', qrOpensCamera: 'Abre la cámara para escanear',
+      qrGenSourceField: 'Codificar valor desde el campo', qrGenSourceFieldHint: 'Regenera el QR cada vez que cambia la respuesta de ese campo. Déjalo sin definir para codificar siempre el valor estático de abajo.',
+      qrGenSourceFieldNone: '(usar valor estático)',
+      qrGenStaticValue: 'Valor estático', qrGenStaticValueHint: 'Se codifica cuando no hay campo de origen definido, o mientras esté vacío.',
+      qrGenPreviewNoValue: 'Genera un código QR una vez que haya un valor', qrGenPreviewFrom: 'Codifica el campo "{label}"',
+      qrGenPreviewStatic: 'Codifica: {value}',
       noImageSet: 'No se ha definido una imagen — agrega una URL en propiedades', accordionDefaultLabel: 'Sección',
       noFieldsYetAddBelow: 'Aún no hay campos — agrega uno abajo.',
       stepOf: 'Paso {n} de {total}', untitledForm: 'Formulario sin título',
@@ -1554,6 +1568,20 @@
     return type === 'select' || type === 'radio';
   }
 
+  // Fields a qrgenerate field can encode: every scalar (non-layout) field across all screens,
+  // since form values persist across screens as people move Back/Next.
+  function allScalarFields() {
+    const result = [];
+    function walk(list) {
+      for (const f of list) {
+        if (f.type === 'accordion' && f.children) walk(f.children);
+        else if (!['button', 'image', 'accordion', 'qrgenerate'].includes(f.type)) result.push(f);
+      }
+    }
+    state.screens.forEach((s) => walk(s.fields));
+    return result;
+  }
+
   // ---- actions ----
 
   function makeField(type, list) {
@@ -1576,6 +1604,8 @@
       bodyText: type === 'accordion' ? emptyLoc() : undefined,
       defaultOpen: type === 'accordion' ? false : undefined,
       children: type === 'accordion' ? [] : undefined,
+      qrSourceField: type === 'qrgenerate' ? '' : undefined,
+      qrStaticValue: type === 'qrgenerate' ? '' : undefined,
       bgColor: '',
       textColor: '',
       fontSize: '',
@@ -1805,6 +1835,16 @@
         return h('div', { class: 'cf-dashed' }, t('signaturePad'));
       case 'qrscan':
         return h('div', { class: 'cf-dashed' }, t('qrOpensCamera'));
+      case 'qrgenerate': {
+        if (field.qrSourceField) {
+          const source = allScalarFields().find((f) => f.name === field.qrSourceField);
+          return h('div', { class: 'cf-dashed' }, tf('qrGenPreviewFrom', { label: source ? loc(source.label) : field.qrSourceField }));
+        }
+        if (field.qrStaticValue) {
+          return h('div', { class: 'cf-dashed' }, tf('qrGenPreviewStatic', { value: field.qrStaticValue }));
+        }
+        return h('div', { class: 'cf-dashed' }, t('qrGenPreviewNoValue'));
+      }
       default:
         return h('div', { class: 'cf-dashed' }, field.type);
     }
@@ -1851,7 +1891,7 @@
     return svg;
   }
 
-  const NESTABLE_TYPES = ['text', 'textarea', 'number', 'select', 'date', 'datetime', 'checkbox', 'radio', 'toggle', 'button', 'photo', 'signature', 'rating', 'qrscan', 'image']
+  const NESTABLE_TYPES = ['text', 'textarea', 'number', 'select', 'date', 'datetime', 'checkbox', 'radio', 'toggle', 'button', 'photo', 'signature', 'rating', 'qrscan', 'qrgenerate', 'image']
     .map((t) => FIELD_TYPES.find((f) => f.type === t));
 
   function accordionAddRow(field) {
@@ -2354,7 +2394,7 @@
           ),
           h('p', { class: 'prop-hint' }, t('buttonStyleHint')),
         ) : null,
-        (field.type === 'button' || field.type === 'image' || field.type === 'accordion') ? null : h('div', { class: 'prop-field' },
+        (field.type === 'button' || field.type === 'image' || field.type === 'accordion' || field.type === 'qrgenerate') ? null : h('div', { class: 'prop-field' },
           h('label', { class: 'prop-check' },
             h('input', { type: 'checkbox', checked: field.required, onchange: (e) => { field.required = e.target.checked; renderCanvas(); } }),
             t('required'),
@@ -2376,6 +2416,23 @@
             h('option', { value: 'center', selected: (field.imageAlign || 'center') === 'center' }, t('alignCenter')),
             h('option', { value: 'right', selected: field.imageAlign === 'right' }, t('alignRight')),
           ),
+        ) : null,
+        field.type === 'qrgenerate' ? h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, t('qrGenSourceField')),
+          h('select', {
+            onchange: (e) => { field.qrSourceField = e.target.value; renderCanvas(); },
+          },
+            h('option', { value: '', selected: !field.qrSourceField }, t('qrGenSourceFieldNone')),
+            ...allScalarFields().filter((f) => f.id !== field.id).map((f) => h('option', {
+              value: f.name, selected: field.qrSourceField === f.name,
+            }, `${loc(f.label)} (${f.name})`)),
+          ),
+          h('p', { class: 'prop-hint' }, t('qrGenSourceFieldHint')),
+        ) : null,
+        field.type === 'qrgenerate' ? h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, t('qrGenStaticValue')),
+          h('input', { type: 'text', value: field.qrStaticValue || '', oninput: (e) => { field.qrStaticValue = e.target.value; renderCanvas(); } }),
+          h('p', { class: 'prop-hint' }, t('qrGenStaticValueHint')),
         ) : null,
         field.type === 'accordion' ? bilingualField('introText', field, 'bodyText', { textarea: true, hint: 'introTextHint' }) : null,
         field.type === 'accordion' ? h('div', { class: 'prop-field' },
@@ -2521,6 +2578,8 @@
       src: f.type === 'image' ? (f.imageUrl || undefined) : undefined,
       alt: f.type === 'image' ? locOrUndef(f.imageAlt) : undefined,
       align: (f.type === 'image' && f.imageAlign && f.imageAlign !== 'center') ? f.imageAlign : undefined,
+      sourceField: f.type === 'qrgenerate' ? (f.qrSourceField || undefined) : undefined,
+      staticValue: f.type === 'qrgenerate' ? (f.qrStaticValue || undefined) : undefined,
       background: f.bgColor || undefined,
       textColor: f.textColor || undefined,
       fontSize: f.fontSize || undefined,
@@ -2571,6 +2630,8 @@
             content: f.type === 'accordion' ? locOrUndef(f.bodyText) : undefined,
             defaultOpen: (f.type === 'accordion' && f.defaultOpen) ? true : undefined,
             children: (f.type === 'accordion' && f.children && f.children.length) ? f.children.map(mapChildField) : undefined,
+            sourceField: f.type === 'qrgenerate' ? (f.qrSourceField || undefined) : undefined,
+            staticValue: f.type === 'qrgenerate' ? (f.qrStaticValue || undefined) : undefined,
             background: f.bgColor || undefined,
             textColor: f.textColor || undefined,
             fontSize: f.fontSize || undefined,
