@@ -144,7 +144,10 @@
     padding: 5px 10px 5px 5px;
     border-radius: 999px;
     cursor: pointer;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
   }
 
   .user-chip:hover { background: rgba(255, 255, 255, .16); }
@@ -161,9 +164,54 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
   }
 
   .user-chip span { font-family: var(--font-head); font-size: 12.5px; font-weight: 600; color: #fff; }
+
+  #userChipName { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+  .user-chip-wrap { position: relative; min-width: 0; max-width: 45vw; }
+
+  .user-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    width: 240px;
+    background: var(--surface);
+    border-radius: 12px;
+    box-shadow: 0 24px 60px -20px rgba(56, 58, 53, .5);
+    padding: 14px;
+    z-index: 20;
+  }
+
+  .user-menu-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .user-menu-source { font-size: 11px; color: var(--gris-soft); }
+
+  .user-menu-btn {
+    width: 100%;
+    appearance: none;
+    border: 1.3px solid var(--beige);
+    background: var(--surface);
+    color: var(--gris);
+    font-family: var(--font-head);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+
+  .user-menu-btn:hover { background: var(--backdrop); }
+
+  .user-menu-btn.primary { background: var(--morado); border-color: var(--morado); color: #fff; }
 
   /* ---- functional toolbar: screens, add screen, export ---- */
 
@@ -898,6 +946,7 @@
   }
 
   .prop-field input[type="text"],
+  .prop-field input[type="password"],
   .prop-field textarea {
     width: 100%;
     font-family: var(--font-body);
@@ -1113,10 +1162,13 @@
         <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l7-6 7 6"/><path d="M5 9v7a1 1 0 0 0 1 1h3v-4h2v4h3a1 1 0 0 0 1-1V9"/></svg>
         <span data-i18n="home">Home</span>
       </button>
-      <button class="user-chip" id="userBtn" type="button">
-        <span class="avatar">U</span>
-        <span data-i18n="user">User</span>
-      </button>
+      <div class="user-chip-wrap">
+        <button class="user-chip" id="userBtn" type="button">
+          <span class="avatar" id="userAvatar">U</span>
+          <span id="userChipName">User</span>
+        </button>
+        <div class="user-menu" id="userMenu" hidden></div>
+      </div>
     </div>
   </div>
   <div class="topbar" id="builderToolbar">
@@ -1169,6 +1221,9 @@
 <script>
   const ICONS = {
     text: '<line x1="3" y1="6" x2="17" y2="6"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="14" x2="11" y2="14"/>',
+    email: '<rect x="2.5" y="4.5" width="15" height="11" rx="1.5"/><path d="M3 5.5l7 5.5 7-5.5"/>',
+    phone: '<path d="M5.5 3.5h2.2l1 3.3-1.6 1.4c.7 1.8 2.1 3.2 3.9 3.9l1.4-1.6 3.3 1v2.2c0 .9-.8 1.6-1.7 1.5-5-.5-8.9-4.4-9.4-9.4-.1-.9.6-1.7 1.5-1.7z"/>',
+    currency: '<circle cx="10" cy="10" r="7"/><path d="M10 5.5v9M12.3 7.3c0-1-1-1.6-2.3-1.6-1.5 0-2.5.8-2.5 1.9 0 2.5 4.8 1.3 4.8 3.8 0 1.1-1.1 1.9-2.5 1.9-1.3 0-2.3-.6-2.3-1.6" fill="none"/>',
     textarea: '<rect x="3" y="4" width="14" height="12" rx="1.5"/><line x1="5.5" y1="7.5" x2="14.5" y2="7.5"/><line x1="5.5" y1="10.5" x2="14.5" y2="10.5"/><line x1="5.5" y1="13.5" x2="11" y2="13.5"/>',
     number: '<line x1="6.5" y1="3" x2="5" y2="17"/><line x1="14" y1="3" x2="12.5" y2="17"/><line x1="3.5" y1="7.5" x2="16" y2="7.5"/><line x1="3" y1="12.5" x2="15.5" y2="12.5"/>',
     select: '<rect x="3" y="5" width="14" height="10" rx="1.5"/><polyline points="7,9 10,12 13,9"/>',
@@ -1195,8 +1250,11 @@
     { type: 'image', label: 'Image', group: 'Core' },
     { type: 'accordion', label: 'Collapsible section', group: 'Core' },
     { type: 'text', label: 'Text', group: 'Core' },
+    { type: 'email', label: 'Email', group: 'Core' },
+    { type: 'phone', label: 'Phone', group: 'Core' },
     { type: 'textarea', label: 'Textarea', group: 'Core' },
     { type: 'number', label: 'Number', group: 'Core' },
+    { type: 'currency', label: 'Currency', group: 'Core' },
     { type: 'select', label: 'Dropdown', group: 'Core' },
     { type: 'date', label: 'Date', group: 'Core' },
     { type: 'datetime', label: 'Date/Time', group: 'Core' },
@@ -1228,11 +1286,12 @@
 
   const STRINGS = {
     en: {
-      home: 'Home', user: 'User',
+      home: 'Home',
       addScreen: '+ Screen', exportJson: 'Export JSON',
       groupCore: 'Core', groupAdvanced: 'Advanced', groupLater: 'Later phase', soon: 'Soon',
       preset_next: 'Next', preset_back: 'Back', preset_submit: 'Submit', preset_goto: 'Skip to step…',
       ft_button: 'Button', ft_image: 'Image', ft_accordion: 'Collapsible section', ft_text: 'Text',
+      ft_email: 'Email', ft_phone: 'Phone', ft_currency: 'Currency',
       ft_textarea: 'Textarea', ft_number: 'Number', ft_select: 'Dropdown', ft_date: 'Date',
       ft_datetime: 'Date/Time', ft_checkbox: 'Checkbox', ft_radio: 'Radio', ft_toggle: 'Toggle',
       ft_signature: 'Signature', ft_rating: 'Rating', ft_photo: 'Photo', ft_qrscan: 'QR / Barcode Scan',
@@ -1280,6 +1339,9 @@
       style: 'Style', stylePrimary: 'Primary (filled)', styleOutline: 'Outline',
       buttonStyleHint: "In the real app, all of a screen's buttons render together in one row above Back/Next — their order here (relative to other buttons) carries over, but their position among regular fields doesn't.",
       required: 'Required', placeholder: 'Placeholder',
+      numberFormat: 'Format', numberFormat_integer: 'Whole number', numberFormat_decimal: 'Decimal',
+      numberFormat_percentage: 'Percentage', numberFormat_comma: 'Comma-separated (1,000)',
+      numberFormatHint: 'Controls how this field accepts and displays numbers.',
       imageUrl: 'Image URL', imageUrlHint: "There's no file upload yet — paste a hosted URL (e.g. the company logo).",
       altText: 'Alt text', altTextHint: 'Describes the image for screen readers.',
       alignment: 'Alignment', alignLeft: 'Left', alignCenter: 'Center', alignRight: 'Right',
@@ -1312,15 +1374,18 @@
       exportBodyIntroHtml: 'Save this as <code>frontend/src/forms/&lt;id&gt;/config.json</code> in the template repo — <code>FieldRenderer</code> renders every field type below, and screen-level <code>actions</code> (your Button fields) are rendered by <code>ScreenActions</code>, above the automatic Back/Next row.',
       sourceWarningHtml: "Heads up: one or more dropdowns pull options from SQL or Excel via <code>source</code>. The backend endpoint that resolves those queries isn't built yet — it currently throws <code>NotImplementedError</code> — so wire that up before this config works end-to-end.",
       copyJson: 'Copy JSON', copied: 'Copied!', selectToCopy: 'Select the text above to copy.',
-      userMenuToast: 'Would open the user menu (not wired up in this mockup)',
       moveUp: 'Move up', moveDown: 'Move down', delete: 'Delete',
+      windowsAccount: 'Windows account', signedInManually: 'Signed in manually',
+      useWindowsAccount: 'Use my Windows account ({username})',
+      identityLabel: 'Email', identitySave: 'Save',
     },
     es: {
-      home: 'Inicio', user: 'Usuario',
+      home: 'Inicio',
       addScreen: '+ Pantalla', exportJson: 'Exportar JSON',
       groupCore: 'Básico', groupAdvanced: 'Avanzado', groupLater: 'Próximamente', soon: 'Pronto',
       preset_next: 'Siguiente', preset_back: 'Atrás', preset_submit: 'Enviar', preset_goto: 'Saltar a paso…',
       ft_button: 'Botón', ft_image: 'Imagen', ft_accordion: 'Sección plegable', ft_text: 'Texto',
+      ft_email: 'Correo electrónico', ft_phone: 'Teléfono', ft_currency: 'Moneda',
       ft_textarea: 'Área de texto', ft_number: 'Número', ft_select: 'Menú desplegable', ft_date: 'Fecha',
       ft_datetime: 'Fecha/Hora', ft_checkbox: 'Casilla', ft_radio: 'Opción única', ft_toggle: 'Interruptor',
       ft_signature: 'Firma', ft_rating: 'Calificación', ft_photo: 'Foto', ft_qrscan: 'Escaneo QR / código de barras',
@@ -1368,6 +1433,9 @@
       style: 'Estilo', stylePrimary: 'Primario (relleno)', styleOutline: 'Contorno',
       buttonStyleHint: 'En la app real, todos los botones de una pantalla se muestran juntos en una fila arriba de Atrás/Siguiente — su orden aquí (respecto a otros botones) se conserva, pero su posición entre los campos normales no.',
       required: 'Obligatorio', placeholder: 'Marcador de posición',
+      numberFormat: 'Formato', numberFormat_integer: 'Número entero', numberFormat_decimal: 'Decimal',
+      numberFormat_percentage: 'Porcentaje', numberFormat_comma: 'Con comas (1,000)',
+      numberFormatHint: 'Controla cómo este campo acepta y muestra números.',
       imageUrl: 'URL de la imagen', imageUrlHint: 'Todavía no hay subida de archivos — pega una URL alojada (por ejemplo, el logo de la empresa).',
       altText: 'Texto alternativo', altTextHint: 'Describe la imagen para lectores de pantalla.',
       alignment: 'Alineación', alignLeft: 'Izquierda', alignCenter: 'Centro', alignRight: 'Derecha',
@@ -1400,8 +1468,10 @@
       exportBodyIntroHtml: 'Guarda esto como <code>frontend/src/forms/&lt;id&gt;/config.json</code> en el repositorio de la plantilla — <code>FieldRenderer</code> renderiza cada tipo de campo de abajo, y las <code>actions</code> a nivel de pantalla (tus campos de Botón) son renderizadas por <code>ScreenActions</code>, arriba de la fila automática Atrás/Siguiente.',
       sourceWarningHtml: 'Aviso: uno o más menús desplegables obtienen sus opciones de SQL o Excel mediante <code>source</code>. El endpoint del backend que resuelve esas consultas aún no está construido — actualmente lanza <code>NotImplementedError</code> — así que conéctalo antes de que esta configuración funcione de principio a fin.',
       copyJson: 'Copiar JSON', copied: '¡Copiado!', selectToCopy: 'Selecciona el texto de arriba para copiarlo.',
-      userMenuToast: 'Abriría el menú de usuario (no implementado en este mockup)',
       moveUp: 'Subir', moveDown: 'Bajar', delete: 'Eliminar',
+      windowsAccount: 'Cuenta de Windows', signedInManually: 'Sesión iniciada manualmente',
+      useWindowsAccount: 'Usar mi cuenta de Windows ({username})',
+      identityLabel: 'Correo electrónico', identitySave: 'Guardar',
     },
   };
 
@@ -1435,6 +1505,11 @@
     activeScreen: 0,
     nextFieldId: 3,
     nextScreenId: 3,
+    // Stands in for the real GET /api/whoami call (backend/app/api/identity.py) —
+    // this mockup runs as a raw file:// page, which can't reach the backend, so
+    // the "windows" identity below is mocked. source is 'windows' | 'manual'.
+    auth: { username: 'User', source: 'windows' },
+    userMenuOpen: false,
     panel: 'screen',
     selectedFieldId: null,
     canvasView: 'screens',
@@ -1561,7 +1636,7 @@
   }
 
   function usesPlaceholder(type) {
-    return ['text', 'textarea', 'number', 'date', 'datetime', 'select'].includes(type);
+    return ['text', 'email', 'phone', 'textarea', 'number', 'currency', 'date', 'datetime', 'select'].includes(type);
   }
 
   function usesOptions(type) {
@@ -1593,6 +1668,7 @@
       required: false, placeholder: emptyLoc(), helpText: emptyLoc(), widthPct: 100, disabled: false, hideLabel: false,
       options: usesOptions(type) ? [{ en: 'Option 1', es: 'Opción 1' }, { en: 'Option 2', es: 'Opción 2' }] : undefined,
       sourceKind: usesOptions(type) ? 'static' : undefined,
+      numberFormat: type === 'number' ? 'integer' : undefined,
       radioLayout: type === 'radio' ? 'vertical' : undefined,
       sourceQuery: '',
       buttonStyle: type === 'button' ? 'primary' : undefined,
@@ -1803,8 +1879,17 @@
       }
       case 'text':
         return h('input', { type: 'text', disabled: true, placeholder: loc(field.placeholder) });
-      case 'number':
-        return h('input', { type: 'text', disabled: true, placeholder: loc(field.placeholder) || '0' });
+      case 'email':
+        return h('input', { type: 'text', disabled: true, placeholder: loc(field.placeholder) || 'name@example.com' });
+      case 'phone':
+        return h('input', { type: 'text', disabled: true, placeholder: loc(field.placeholder) || '(555) 555-1234' });
+      case 'number': {
+        const fmt = field.numberFormat || 'integer';
+        const fallback = fmt === 'decimal' ? '0.00' : fmt === 'percentage' ? '0%' : fmt === 'comma' ? '1,000' : '0';
+        return h('input', { type: 'text', disabled: true, placeholder: loc(field.placeholder) || fallback });
+      }
+      case 'currency':
+        return h('input', { type: 'text', disabled: true, placeholder: loc(field.placeholder) || '$0.00' });
       case 'date':
         return h('input', { type: 'text', disabled: true, placeholder: t('ph_date') });
       case 'datetime':
@@ -1891,7 +1976,7 @@
     return svg;
   }
 
-  const NESTABLE_TYPES = ['text', 'textarea', 'number', 'select', 'date', 'datetime', 'checkbox', 'radio', 'toggle', 'button', 'photo', 'signature', 'rating', 'qrscan', 'qrgenerate', 'image']
+  const NESTABLE_TYPES = ['text', 'email', 'phone', 'textarea', 'number', 'currency', 'select', 'date', 'datetime', 'checkbox', 'radio', 'toggle', 'button', 'photo', 'signature', 'rating', 'qrscan', 'qrgenerate', 'image']
     .map((t) => FIELD_TYPES.find((f) => f.type === t));
 
   function accordionAddRow(field) {
@@ -2401,6 +2486,18 @@
           ),
         ),
         usesPlaceholder(field.type) ? bilingualField('placeholder', field, 'placeholder') : null,
+        field.type === 'number' ? h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, t('numberFormat')),
+          h('select', {
+            onchange: (e) => { field.numberFormat = e.target.value; renderCanvas(); },
+          },
+            h('option', { value: 'integer', selected: (field.numberFormat || 'integer') === 'integer' }, t('numberFormat_integer')),
+            h('option', { value: 'decimal', selected: field.numberFormat === 'decimal' }, t('numberFormat_decimal')),
+            h('option', { value: 'percentage', selected: field.numberFormat === 'percentage' }, t('numberFormat_percentage')),
+            h('option', { value: 'comma', selected: field.numberFormat === 'comma' }, t('numberFormat_comma')),
+          ),
+          h('p', { class: 'prop-hint' }, t('numberFormatHint')),
+        ) : null,
         field.type === 'image' ? h('div', { class: 'prop-field' },
           h('span', { class: 'prop-label' }, t('imageUrl')),
           h('input', { type: 'text', placeholder: 'https://…/logo.png', value: field.imageUrl || '', oninput: (e) => { field.imageUrl = e.target.value; renderCanvas(); } }),
@@ -2538,6 +2635,60 @@
     selectScreen(0);
   }
 
+  const MOCK_WINDOWS_USER = 'User';
+
+  function renderUserChip() {
+    const name = state.auth.username;
+    const nameEl = document.getElementById('userChipName');
+    document.getElementById('userAvatar').textContent = name.charAt(0).toUpperCase();
+    nameEl.textContent = name.length > 10 ? name.slice(0, 9) + '…' : name;
+    nameEl.title = name;
+  }
+
+  function renderUserMenu() {
+    const menu = document.getElementById('userMenu');
+    menu.hidden = !state.userMenuOpen;
+    menu.innerHTML = '';
+    if (!state.userMenuOpen) return;
+
+    const { username, source } = state.auth;
+
+    // Purely informational — a record of who's using this for the developer's own
+    // reference. Never validated, never required, never blocks use of the builder.
+    // Mirrors GET /api/whoami (backend/app/api/identity.py), mocked here since this
+    // static file:// mockup can't call the real backend.
+    const input = h('input', { type: 'email', value: username, placeholder: 'user@xxx.xxx', autocomplete: 'email' });
+    const save = () => {
+      const value = input.value.trim();
+      if (!value) return;
+      state.auth = { username: value, source: 'manual' };
+      state.userMenuOpen = false;
+      renderUserMenu();
+      renderUserChip();
+    };
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') save(); });
+
+    menu.append(
+      h('div', { class: 'user-menu-row' },
+        h('span', { class: 'avatar' }, username.charAt(0).toUpperCase()),
+        h('div', { class: 'user-menu-source' }, t(source === 'manual' ? 'signedInManually' : 'windowsAccount')),
+      ),
+      h('div', { class: 'prop-field' }, h('span', { class: 'prop-label' }, t('identityLabel')), input),
+      h('button', { class: 'user-menu-btn primary', type: 'button', onClick: save }, t('identitySave')),
+    );
+    if (source === 'manual') {
+      menu.append(h('button', {
+        class: 'user-menu-btn', type: 'button',
+        onClick: () => {
+          state.auth = { username: MOCK_WINDOWS_USER, source: 'windows' };
+          state.userMenuOpen = false;
+          renderUserMenu();
+          renderUserChip();
+        },
+      }, tf('useWindowsAccount', { username: MOCK_WINDOWS_USER })));
+    }
+  }
+
   function applyStaticI18n() {
     document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
     document.querySelectorAll('[data-i18n-html]').forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
@@ -2554,6 +2705,8 @@
     renderCanvas();
     renderProperties();
     renderAppRibbonTitle();
+    renderUserChip();
+    renderUserMenu();
   }
 
   // ---- export ----
@@ -2572,6 +2725,7 @@
       } : undefined,
       helpText: locOrUndef(f.helpText),
       layout: (f.type === 'radio' && f.radioLayout === 'horizontal') ? 'horizontal' : undefined,
+      numberFormat: (f.type === 'number' && f.numberFormat && f.numberFormat !== 'integer') ? f.numberFormat : undefined,
       hideLabel: f.hideLabel || undefined,
       width: f.widthPct && f.widthPct < 100 ? f.widthPct : undefined,
       disabled: f.disabled || undefined,
@@ -2621,6 +2775,7 @@
             } : undefined,
             helpText: locOrUndef(f.helpText),
             layout: (f.type === 'radio' && f.radioLayout === 'horizontal') ? 'horizontal' : undefined,
+            numberFormat: (f.type === 'number' && f.numberFormat && f.numberFormat !== 'integer') ? f.numberFormat : undefined,
             hideLabel: f.hideLabel || undefined,
             width: f.widthPct && f.widthPct < 100 ? f.widthPct : undefined,
             disabled: f.disabled || undefined,
@@ -2710,7 +2865,17 @@
     });
   });
   document.getElementById('homeBtn').addEventListener('click', goHome);
-  document.getElementById('userBtn').addEventListener('click', () => fbToast(t('userMenuToast')));
+  document.getElementById('userBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    state.userMenuOpen = !state.userMenuOpen;
+    renderUserMenu();
+  });
+  document.addEventListener('click', (e) => {
+    if (state.userMenuOpen && !e.target.closest('.user-chip-wrap')) {
+      state.userMenuOpen = false;
+      renderUserMenu();
+    }
+  }, true);
 
   render();
 </script>

@@ -7,8 +7,11 @@ export interface LocalizedString {
 
 export type FieldType =
   | 'text'
+  | 'email'
+  | 'phone'
   | 'textarea'
   | 'number'
+  | 'currency'
   | 'select'
   | 'date'
   | 'datetime'
@@ -52,6 +55,8 @@ export interface FieldConfig {
   source?: DropdownSource
   min?: number
   max?: number
+  // number only — controls step/decimal handling and display; defaults to 'integer'.
+  numberFormat?: 'integer' | 'decimal' | 'percentage' | 'comma'
   autoFillTargets?: string[]
   lookupEndpoint?: string
   // qrgenerate only — encodes another field's current value (sourceField) into a QR image;

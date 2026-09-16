@@ -29,6 +29,7 @@ class FieldConfig(BaseModel):
     source: Optional[DropdownSource] = None
     min: Optional[float] = None
     max: Optional[float] = None
+    numberFormat: Optional[Literal["integer", "decimal", "percentage", "comma"]] = None
     autoFillTargets: Optional[list[str]] = None
     lookupEndpoint: Optional[str] = None
     # Layout / presentation
@@ -90,3 +91,8 @@ class SubmissionOut(BaseModel):
 
 class DropdownOptionsOut(BaseModel):
     options: list[str]
+
+
+class WhoAmIOut(BaseModel):
+    username: str
+    source: Literal["windows", "local"]

@@ -8,9 +8,11 @@ import ProgressIndicator from '../components/ProgressIndicator'
 import NavButtons from '../components/NavButtons'
 import ScreenActions from '../components/ScreenActions'
 import LanguageToggle from '../components/LanguageToggle'
+import IdentityChip from '../components/IdentityChip'
 import ScreenRenderer from './ScreenRenderer'
 import ReviewScreen from './ReviewScreen'
 import { submitForm } from '../lib/api'
+import { useIdentity } from '../context/IdentityContext'
 
 interface Props {
   config: FormConfig
@@ -27,6 +29,7 @@ export default function FormApp({ config }: Props) {
 function FormFlow({ config }: Props) {
   const { values, reset } = useFormValues()
   const { locale } = useLocale()
+  const { identity } = useIdentity()
   const includeReview = config.includeReviewScreen ?? false
   const totalSteps = config.screens.length + (includeReview ? 1 : 0)
   const [step, setStep] = useState(0)
@@ -41,7 +44,7 @@ function FormFlow({ config }: Props) {
     setSubmitting(true)
     setSubmitError(null)
     try {
-      await submitForm(config.id, values)
+      await submitForm(config.id, { ...values, __submittedBy: identity || undefined })
       reset()
       setSubmitted(true)
     } catch {
@@ -186,7 +189,10 @@ function FormTitleBar({ config }: { config: FormConfig }) {
           </>
         )}
       </div>
-      <LanguageToggle />
+      <div className="flex items-center gap-2 flex-shrink-0">
+        <IdentityChip />
+        <LanguageToggle />
+      </div>
     </div>
   )
 }

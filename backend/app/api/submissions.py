@@ -31,8 +31,10 @@ def _extract_images(payload: dict) -> dict:
 
 @router.post("/forms/{form_id}/submissions", response_model=SubmissionOut)
 def create_submission(form_id: str, submission: SubmissionIn, db: Session = Depends(get_db)):
-    payload = _extract_images(submission.model_dump())
-    record = FormSubmission(form_id=form_id, payload=payload)
+    data = submission.model_dump()
+    submitted_by = data.pop("__submittedBy", None)
+    payload = _extract_images(data)
+    record = FormSubmission(form_id=form_id, payload=payload, submitted_by=submitted_by)
     db.add(record)
     db.commit()
     db.refresh(record)

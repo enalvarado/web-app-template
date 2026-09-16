@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .api import dropdowns, qr, submissions
+from .api import dropdowns, identity, qr, submissions
 from .config import settings
 from .db import Base, engine
 from .security import require_api_key
@@ -28,6 +28,7 @@ protected = [Depends(require_api_key)]
 app.include_router(submissions.router, prefix="/api", dependencies=protected)
 app.include_router(dropdowns.router, prefix="/api", dependencies=protected)
 app.include_router(qr.router, prefix="/api", dependencies=protected)
+app.include_router(identity.router, prefix="/api", dependencies=protected)
 
 
 @app.get("/api/health")

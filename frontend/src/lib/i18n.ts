@@ -51,6 +51,10 @@ const UI_STRINGS = {
     availableForms: 'Available Forms',
     qrNothingToEncode: 'Nothing to encode yet.',
     qrGenerating: 'Generating QR code…',
+    identityEditTitle: 'Edit who this is for the developer’s records',
+    identityPlaceholder: 'user@xxx.xxx',
+    identitySave: 'Save',
+    identityUseDetected: 'Use detected: {value}',
   },
   es: {
     stepOf: 'Paso {n} de {total}',
@@ -80,6 +84,10 @@ const UI_STRINGS = {
     availableForms: 'Formularios Disponibles',
     qrNothingToEncode: 'Aún no hay nada que codificar.',
     qrGenerating: 'Generando código QR…',
+    identityEditTitle: 'Edita quién es esto para los registros del desarrollador',
+    identityPlaceholder: 'user@xxx.xxx',
+    identitySave: 'Guardar',
+    identityUseDetected: 'Usar detectado: {value}',
   },
 } satisfies Record<Locale, Record<string, string>>
 

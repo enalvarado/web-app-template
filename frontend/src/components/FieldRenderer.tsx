@@ -5,8 +5,11 @@ import { resolveField } from '../lib/i18n'
 import { fieldBackground, fieldTextColor, fieldFontSize } from '../lib/fieldStyle'
 import { qrLookup } from '../lib/api'
 import TextField from './fields/TextField'
+import EmailField from './fields/EmailField'
+import PhoneField from './fields/PhoneField'
 import TextareaField from './fields/TextareaField'
 import NumberField from './fields/NumberField'
+import CurrencyField from './fields/CurrencyField'
 import SelectField from './fields/SelectField'
 import DateField from './fields/DateField'
 import DateTimeField from './fields/DateTimeField'
@@ -53,10 +56,16 @@ export default function FieldRenderer({ field, formId, onAction }: Props) {
     switch (resolved.type) {
       case 'text':
         return <TextField field={resolved} value={value as string} onChange={(v) => setValue(field.name, v)} />
+      case 'email':
+        return <EmailField field={resolved} value={value as string} onChange={(v) => setValue(field.name, v)} />
+      case 'phone':
+        return <PhoneField field={resolved} value={value as string} onChange={(v) => setValue(field.name, v)} />
       case 'textarea':
         return <TextareaField field={resolved} value={value as string} onChange={(v) => setValue(field.name, v)} />
       case 'number':
         return <NumberField field={resolved} value={value as number} onChange={(v) => setValue(field.name, v)} />
+      case 'currency':
+        return <CurrencyField field={resolved} value={value as number} onChange={(v) => setValue(field.name, v)} />
       case 'select':
         return (
           <SelectField

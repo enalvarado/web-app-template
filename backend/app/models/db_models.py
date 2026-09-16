@@ -13,3 +13,6 @@ class FormSubmission(Base):
     form_id = Column(String(100), nullable=False, index=True)
     submitted_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
     payload = Column(JSON, nullable=False)
+    # Informational only — who the client says was using the app, for the developer's
+    # own record-keeping. Never validated or required; never gates access to the form.
+    submitted_by = Column(String(255), nullable=True)

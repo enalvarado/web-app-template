@@ -32,6 +32,12 @@ export async function qrLookup(formId: string, fieldName: string, code: string) 
   return res.json() as Promise<Record<string, unknown>>
 }
 
+export async function fetchWhoAmI() {
+  const res = await fetch(`${API_BASE}/whoami`, { headers })
+  if (!res.ok) throw new Error(`whoami failed: ${res.status}`)
+  return res.json() as Promise<{ username: string; source: 'windows' | 'local' }>
+}
+
 export async function generateQr(referenceId: string) {
   const res = await fetch(`${API_BASE}/qr/generate`, {
     method: 'POST',
