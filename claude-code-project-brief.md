@@ -75,6 +75,14 @@ The template will be hosted on **GitHub** so any team member can clone/download 
 
 > **Status note (2026-09-04):** resolved — all three types above, the per-field background-color/text-color/font-size/width/hideLabel/disabled controls (Section 5), and the form-level header logo/background wallpaper are now implemented in the real frontend, not just the Form Builder mockup. See `frontend/src/types/config.ts` for the full field shape, `frontend/src/lib/fieldStyle.ts` for the swatch-key → CSS-value maps (the Form Builder stores a swatch *key* like `"beige"`, not a resolved color), and `frontend/src/components/FieldRenderer.tsx` (wraps every field in a `<fieldset disabled>` so the `disabled` flag actually disables inputs natively, applies `hideLabel` as `sr-only` rather than removing the label, for screen readers).
 
+**Additional Core-adjacent field types (emerged from Form Builder design work, not in the original spec):**
+- `email` — a single-line input rendering `<input type="email">` for native browser format hints/validation.
+- `phone` — a single-line input rendering `<input type="tel">`.
+- `currency` — a numeric input with a `$` prefix.
+- `number` gained a `numberFormat` property (`integer` | `decimal` | `percentage` | `comma`, default `integer`) controlling step/decimal handling and display — `percentage` adds a `%` suffix and clamps 0–100 by default, `comma` live-formats with thousands separators (e.g. `1,000`).
+
+> **Status note (2026-09-16):** resolved — all four above are implemented in the real frontend (`EmailField.tsx`, `PhoneField.tsx`, `CurrencyField.tsx`, and the format-aware `NumberField.tsx`, all in `frontend/src/components/fields/`), not just the Form Builder mockup. Schema mirrored in `frontend/src/types/config.ts` and `backend/app/models/schemas.py`.
+
 ### 4.3 Dynamic Dropdown Data Sources
 Dropdown options can be:
 - **Static** — hardcoded in the config (`"options": ["A", "B"]`)
@@ -97,6 +105,9 @@ Note: Excel/SharePoint List connectors reintroduce tenant dependency for that sp
 - **No partial/autosave.** Form data lives in local/session state across all screens as the user navigates. Nothing is sent to the backend until the user hits final Submit.
 - One API call at final submit, sending the complete payload (including any photos, signature image, QR-linked data) to be written to the database.
 - **No offline support needed** — stable connectivity is assumed for the current phase.
+- **Optional submission identity** (emerged from Form Builder design work, not in the original spec) — a non-blocking, purely informational record of who filled out a form, for the developer's own reference. Never gates access to a form — stays consistent with Section 7's "no complex end-user auth."
+
+> **Status note (2026-09-16):** resolved — `GET /api/whoami` (`backend/app/api/identity.py`) auto-detects a default identity: a `X-Remote-User` header (what a future IIS/reverse-proxy Windows Authentication setup would pass through), falling back to the OS login of whoever is running the backend locally. The real frontend surfaces this in an editable `IdentityChip` (`frontend/src/components/IdentityChip.tsx`, header) backed by `IdentityContext` (`frontend/src/context/IdentityContext.tsx`) — anyone can override it with any email, no password, persisted via `localStorage`. The resolved value rides along at submit as a reserved `__submittedBy` payload key, which `POST /forms/{id}/submissions` (`backend/app/api/submissions.py`) extracts into a new `FormSubmission.submitted_by` column (`backend/app/models/db_models.py`), kept separate from the form's own field data. The Form Builder mockup's own "User" chip mirrors the same lightweight model for attribution while building, not real login — an earlier password/session-based version was built and then deliberately replaced with this simpler approach.
 
 ## 5. Design System (must be applied automatically via a shared theme — builders should not need to touch this)
 
