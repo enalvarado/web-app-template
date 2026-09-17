@@ -55,6 +55,7 @@ const UI_STRINGS = {
     identityPlaceholder: 'user@xxx.xxx',
     identitySave: 'Save',
     identityUseDetected: 'Use detected: {value}',
+    requiredFieldsMissing: 'Please fill out all required fields before continuing.',
   },
   es: {
     stepOf: 'Paso {n} de {total}',
@@ -88,6 +89,7 @@ const UI_STRINGS = {
     identityPlaceholder: 'user@xxx.xxx',
     identitySave: 'Guardar',
     identityUseDetected: 'Usar detectado: {value}',
+    requiredFieldsMissing: 'Completa todos los campos obligatorios antes de continuar.',
   },
 } satisfies Record<Locale, Record<string, string>>
 

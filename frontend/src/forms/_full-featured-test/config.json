@@ -5,7 +5,7 @@
   "headerLogoUrl": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Crect width='40' height='40' rx='6' fill='%23F4C7CE'/%3E%3C/svg%3E",
   "headerLogoPosition": "left",
   "headerLogoSize": 24,
-  "backgroundImageUrl": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23F3F1F6'/%3E%3Cpath d='M0 80L80 0' stroke='%23D8D2C4' stroke-width='2'/%3E%3C/svg%3E",
+  "backgroundImageUrl": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='%23F3F1F6'/%3E%3C/svg%3E",
   "screens": [
     {
       "id": "screen-1",
@@ -32,6 +32,23 @@
           "type": "text",
           "width": 50,
           "placeholder": { "en": "Doe", "es": "Pérez" }
+        },
+        {
+          "name": "email",
+          "label": { "en": "Email", "es": "Correo electrónico" },
+          "type": "email",
+          "required": true,
+          "placeholder": { "en": "jane.doe@example.com", "es": "juana.perez@ejemplo.com" }
+        },
+        {
+          "name": "warehouse",
+          "label": { "en": "Warehouse", "es": "Almacén" },
+          "type": "select",
+          "options": [
+            { "en": "Miami FL, 290", "es": "Miami FL, 290" },
+            { "en": "Miami FL 120", "es": "Miami FL 120" },
+            { "en": "Belfair, WA", "es": "Belfair, WA" }
+          ]
         },
         {
           "name": "styledField",

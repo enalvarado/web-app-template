@@ -10,7 +10,7 @@ export default function Home() {
   const { locale } = useLocale()
   const forms = Object.values(configModules).map((m) => m.default)
   return (
-    <div className="max-w-lg mx-auto p-8">
+    <div className="max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-heading font-semibold text-morado">{uiText(locale, 'availableForms')}</h1>
         <div className="bg-morado rounded-full">

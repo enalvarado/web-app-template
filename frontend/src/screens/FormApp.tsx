@@ -1,5 +1,5 @@
 import { CSSProperties, useState } from 'react'
-import { ActionTrigger, FormConfig } from '../types/config'
+import { ActionTrigger, FieldConfig, FormConfig } from '../types/config'
 import { FormProvider, useFormValues } from '../context/FormContext'
 import { useLocale } from '../context/LocaleContext'
 import { resolveLocalized, uiText } from '../lib/i18n'
@@ -16,6 +16,17 @@ import { useIdentity } from '../context/IdentityContext'
 
 interface Props {
   config: FormConfig
+}
+
+function isEmptyValue(value: unknown) {
+  return value === undefined || value === null || value === ''
+}
+
+function hasMissingRequiredFields(fields: FieldConfig[], values: Record<string, unknown>): boolean {
+  return fields.some((field) => {
+    if (field.type === 'accordion') return hasMissingRequiredFields(field.children ?? [], values)
+    return !!field.required && isEmptyValue(values[field.name])
+  })
 }
 
 export default function FormApp({ config }: Props) {
@@ -36,6 +47,7 @@ function FormFlow({ config }: Props) {
   const [submitted, setSubmitted] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
+  const [validationError, setValidationError] = useState<string | null>(null)
 
   const isReviewStep = includeReview && step === config.screens.length
   const isLastScreen = step === config.screens.length - 1 && !includeReview
@@ -55,6 +67,11 @@ function FormFlow({ config }: Props) {
   }
 
   const handleNext = async () => {
+    if (!isReviewStep && hasMissingRequiredFields(config.screens[step].fields, values)) {
+      setValidationError(uiText(locale, 'requiredFieldsMissing'))
+      return
+    }
+    setValidationError(null)
     if (isReviewStep || isLastScreen) {
       await doSubmit()
       return
@@ -114,7 +131,7 @@ function FormFlow({ config }: Props) {
 
   if (submitted) {
     return (
-      <div className="max-w-lg mx-auto" style={wallpaperStyle}>
+      <div className="max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto" style={wallpaperStyle}>
         <FormTitleBar config={config} />
         <div className="p-8 text-center">
           <h2 className="text-xl font-heading font-semibold text-morado mb-2">{uiText(locale, 'thankYou')}</h2>
@@ -125,7 +142,7 @@ function FormFlow({ config }: Props) {
   }
 
   return (
-    <div className="max-w-lg mx-auto" style={wallpaperStyle}>
+    <div className="max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto" style={wallpaperStyle}>
       <FormTitleBar config={config} />
       <div className="p-4 sm:p-8">
         <ProgressIndicator current={step + 1} total={totalSteps} />
@@ -134,6 +151,7 @@ function FormFlow({ config }: Props) {
         ) : (
           <ScreenRenderer screen={config.screens[step]} formId={config.id} onAction={handleAction} />
         )}
+        {validationError && <p className="text-rosado-deep font-body text-sm mt-4">{validationError}</p>}
         {submitError && <p className="text-rosado-deep font-body text-sm mt-4">{submitError}</p>}
         {!isReviewStep && config.screens[step].actions?.length ? (
           <ScreenActions actions={config.screens[step].actions ?? []} onAction={handleAction} />
