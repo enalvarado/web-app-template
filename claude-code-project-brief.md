@@ -155,6 +155,8 @@ Status colors intentionally stay within the brand palette rather than introducin
 - Complex end-user auth (tenant-based login) — frontend access is meant to be open/link-based, no Microsoft tenant dependency. This does not preclude generic service-level authentication on the backend (see Section 6).
 - Sensitive data handling / compliance features (current data is not considered sensitive)
 
+> **Status note (2026-09-21):** the "Partial/autosave of in-progress forms" exclusion above (and Section 4.5's "No partial/autosave") is about **end users filling in a published form** — that stays out of scope. It does not cover the **Form Builder**: the builder mockup (`design/mockups/form-builder.html`) now autosaves the form being *authored* and has a Save draft button and a Drafts panel (open / delete / new form), and it restores the last-open draft on load. These drafts are `localStorage`-only for now — the mockup has no backend, so they don't follow an author across browsers or machines. **Not yet decided:** how authored forms get from draft to live — i.e., a Publish / promote-to-production step that stores the config server-side (today forms are `frontend/src/forms/<id>/config.json` files baked in at build time). That decision ties into the dev/production environments in Section 8 and the "smaller technical subset owns the backend" model in Section 6.
+
 ## 8. Proposed Tech Stack (draft — for review)
 
 **Frontend**
