@@ -41,11 +41,13 @@ class FieldConfig(BaseModel):
     fontSize: Optional[str] = None
     # radio only
     layout: Optional[Literal["horizontal", "vertical"]] = None
-    # image only
+    # image and textblock — `align` positions the image / aligns the text (textblock defaults to left)
     src: Optional[str] = None
     alt: Optional[LocalizedString] = None
     align: Optional[Literal["left", "center", "right"]] = None
-    # accordion only — one level of nesting, no accordion-in-accordion
+    # accordion (its intro text) and textblock (the plain display text itself; it has no answer of
+    # its own). Accordion also takes defaultOpen and children — one level of nesting, no
+    # accordion-in-accordion.
     content: Optional[LocalizedString] = None
     defaultOpen: Optional[bool] = None
     children: Optional[list["FieldConfig"]] = None

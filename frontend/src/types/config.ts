@@ -23,6 +23,7 @@ export type FieldType =
   | 'photo'
   | 'qrscan'
   | 'qrgenerate'
+  | 'textblock'
   | 'image'
   | 'accordion'
   | 'button'
@@ -72,11 +73,13 @@ export interface FieldConfig {
   fontSize?: string
   // radio only
   layout?: 'horizontal' | 'vertical'
-  // image only
+  // image and textblock — `align` positions the image / aligns the text (textblock defaults to left)
   src?: string
   alt?: LocalizedString
   align?: 'left' | 'center' | 'right'
-  // accordion only — one level of nesting, no accordion-in-accordion
+  // accordion (its intro text) and textblock (the plain display text itself). A textblock has no
+  // answer of its own; it also honours background / textColor / fontSize / width. Accordion also
+  // takes defaultOpen and children — one level of nesting, no accordion-in-accordion.
   content?: LocalizedString
   defaultOpen?: boolean
   children?: FieldConfig[]

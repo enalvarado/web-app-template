@@ -22,6 +22,7 @@ import PhotoField from './fields/PhotoField'
 import QrScanField from './fields/QrScanField'
 import QrGenerateField from './fields/QrGenerateField'
 import ImageField from './fields/ImageField'
+import TextBlockField from './fields/TextBlockField'
 import AccordionField from './fields/AccordionField'
 import InlineButtonField from './fields/InlineButtonField'
 
@@ -49,6 +50,7 @@ export default function FieldRenderer({ field, formId, onAction }: Props) {
   // Content-block types render their own layout entirely — no label/required/helpText chrome,
   // no disabled fieldset (accordion manages its own children's disabled state individually).
   if (resolved.type === 'image') return <ImageField field={resolved} />
+  if (resolved.type === 'textblock') return <TextBlockField field={resolved} />
   if (resolved.type === 'accordion') return <AccordionField field={field} formId={formId} onAction={onAction} />
   if (resolved.type === 'button') return <InlineButtonField field={resolved} onAction={onAction} />
 

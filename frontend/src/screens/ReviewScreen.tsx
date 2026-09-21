@@ -14,9 +14,10 @@ export default function ReviewScreen({ config }: Props) {
     <div>
       <h2 className="text-xl font-heading font-semibold text-morado mb-4">{uiText(locale, 'reviewYourAnswers')}</h2>
       {config.screens.map((screen) => {
-        // Content-block fields (image/accordion) have no answer of their own to review —
+        // Content-block fields (text block/image/accordion) have no answer of their own to review —
         // matches the Form Builder's own review preview, which skips them the same way.
-        const fields = screen.fields.filter((f) => f.type !== 'image' && f.type !== 'accordion' && f.type !== 'button')
+        const CONTENT_TYPES = ['textblock', 'image', 'accordion', 'button']
+        const fields = screen.fields.filter((f) => !CONTENT_TYPES.includes(f.type))
         if (fields.length === 0) return null
         return (
           <div key={screen.id} className="mb-6">

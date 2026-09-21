@@ -20,6 +20,16 @@
           "align": "center"
         },
         {
+          "name": "welcomeText",
+          "label": { "en": "Welcome text", "es": "Texto de bienvenida" },
+          "type": "textblock",
+          "content": {
+            "en": "Welcome!\nPlease fill in the details below.",
+            "es": "¡Bienvenido!\nCompleta los datos a continuación."
+          },
+          "align": "center"
+        },
+        {
           "name": "firstName",
           "label": { "en": "First Name", "es": "Nombre" },
           "type": "text",
@@ -98,6 +108,16 @@
           "content": { "en": "Expand this if you have extra notes to add.", "es": "Expande esto si tienes notas adicionales." },
           "defaultOpen": true,
           "children": [
+            {
+              "name": "notesTip",
+              "label": { "en": "Notes tip", "es": "Consejo sobre notas" },
+              "type": "textblock",
+              "content": { "en": "Tip: keep notes short.", "es": "Consejo: mantén las notas breves." },
+              "background": "azul",
+              "textColor": "blue",
+              "fontSize": "large",
+              "align": "right"
+            },
             {
               "name": "notes",
               "label": { "en": "Notes", "es": "Notas" },

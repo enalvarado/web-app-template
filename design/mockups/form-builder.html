@@ -576,7 +576,7 @@
     .cf-preview input, .cf-preview select, .cf-preview textarea { font-size: 14.5px; padding: 9px 12px; }
     .cf-btn { font-size: 14px; padding: 10px 16px; }
     .cf-accordion-head { font-size: 14px; }
-    .cf-accordion-text, .cf-dashed { font-size: 13.5px; }
+    .cf-accordion-text, .cf-dashed, .cf-textblock { font-size: 13.5px; }
     .review-title { font-size: 17px; }
     .review-heading { font-size: 14px; }
     .review-row { font-size: 14px; }
@@ -591,7 +591,7 @@
     .cf-preview input, .cf-preview select, .cf-preview textarea { font-size: 15.5px; padding: 10px 13px; }
     .cf-btn { font-size: 15px; padding: 11px 18px; }
     .cf-accordion-head { font-size: 15px; }
-    .cf-accordion-text, .cf-dashed { font-size: 14.5px; }
+    .cf-accordion-text, .cf-dashed, .cf-textblock { font-size: 14.5px; }
     .review-title { font-size: 19px; }
     .review-heading { font-size: 15px; }
     .review-row { font-size: 15px; }
@@ -967,6 +967,15 @@
   .cf-accordion-body {
     padding: 12px;
     border-top: 1px solid var(--beige);
+  }
+
+  .cf-textblock {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--gris);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
   }
 
   .cf-accordion-text {
@@ -1409,12 +1418,14 @@
     listbox: '<rect x="3" y="4" width="14" height="12" rx="1.5"/><line x1="5.5" y1="7" x2="14.5" y2="7"/><line x1="5.5" y1="10" x2="14.5" y2="10"/><line x1="5.5" y1="13" x2="14.5" y2="13"/>',
     slider: '<line x1="3" y1="10" x2="17" y2="10"/><circle cx="11" cy="10" r="2.5" fill="currentColor" stroke="none"/>',
     button: '<rect x="2.5" y="7" width="15" height="6.5" rx="2" fill="currentColor" stroke="none"/>',
+    textblock: '<path d="M4 5h12M10 5v11M7.5 16h5"/>',
     image: '<rect x="3" y="4" width="14" height="12" rx="1.5"/><circle cx="7.5" cy="8.5" r="1.5"/><path d="M4 14l4-4 3 3 2-2 3 3"/>',
     accordion: '<rect x="3" y="3.5" width="14" height="5" rx="1.3"/><polyline points="7,6 8.5,7.5 10,6"/><line x1="5" y1="12" x2="15" y2="12"/><line x1="5" y1="15.5" x2="12" y2="15.5"/>',
   };
 
   const FIELD_TYPES = [
     { type: 'button', label: 'Button', group: 'hidden' },
+    { type: 'textblock', label: 'Text block', group: 'Core' },
     { type: 'image', label: 'Image', group: 'Core' },
     { type: 'accordion', label: 'Collapsible section', group: 'Core' },
     { type: 'text', label: 'Text', group: 'Core' },
@@ -1458,7 +1469,7 @@
       addScreen: '+ Screen', exportJson: 'Export JSON',
       groupCore: 'Core', groupAdvanced: 'Advanced', groupLater: 'Later phase', soon: 'Soon',
       preset_next: 'Next', preset_back: 'Back', preset_submit: 'Submit', preset_goto: 'Skip to step…',
-      ft_button: 'Button', ft_image: 'Image', ft_accordion: 'Collapsible section', ft_text: 'Text',
+      ft_button: 'Button', ft_textblock: 'Text block', ft_image: 'Image', ft_accordion: 'Collapsible section', ft_text: 'Text',
       ft_email: 'Email', ft_phone: 'Phone', ft_currency: 'Currency',
       ft_textarea: 'Textarea', ft_number: 'Number', ft_select: 'Dropdown', ft_date: 'Date',
       ft_datetime: 'Date/Time', ft_checkbox: 'Checkbox', ft_radio: 'Radio', ft_toggle: 'Toggle',
@@ -1513,6 +1524,9 @@
       imageUrl: 'Image URL', imageUrlHint: "There's no file upload yet — paste a hosted URL (e.g. the company logo).",
       altText: 'Alt text', altTextHint: 'Describes the image for screen readers.',
       alignment: 'Alignment', alignLeft: 'Left', alignCenter: 'Center', alignRight: 'Right',
+      blockText: 'Text',
+      blockTextHint: 'Shown to people exactly as written — line breaks are kept. This is display text, not an input box, so nothing is asked or saved.',
+      noTextSet: 'No text yet — write it in properties',
       introText: 'Intro text (optional)',
       introTextHint: 'Shown above the fields inside this section when expanded; hidden while collapsed. Add fields to the section itself from the canvas.',
       expandedByDefault: 'Expanded by default',
@@ -1572,7 +1586,7 @@
       addScreen: '+ Pantalla', exportJson: 'Exportar JSON',
       groupCore: 'Básico', groupAdvanced: 'Avanzado', groupLater: 'Próximamente', soon: 'Pronto',
       preset_next: 'Siguiente', preset_back: 'Atrás', preset_submit: 'Enviar', preset_goto: 'Saltar a paso…',
-      ft_button: 'Botón', ft_image: 'Imagen', ft_accordion: 'Sección plegable', ft_text: 'Texto',
+      ft_button: 'Botón', ft_textblock: 'Bloque de texto', ft_image: 'Imagen', ft_accordion: 'Sección plegable', ft_text: 'Texto',
       ft_email: 'Correo electrónico', ft_phone: 'Teléfono', ft_currency: 'Moneda',
       ft_textarea: 'Área de texto', ft_number: 'Número', ft_select: 'Menú desplegable', ft_date: 'Fecha',
       ft_datetime: 'Fecha/Hora', ft_checkbox: 'Casilla', ft_radio: 'Opción única', ft_toggle: 'Interruptor',
@@ -1627,6 +1641,9 @@
       imageUrl: 'URL de la imagen', imageUrlHint: 'Todavía no hay subida de archivos — pega una URL alojada (por ejemplo, el logo de la empresa).',
       altText: 'Texto alternativo', altTextHint: 'Describe la imagen para lectores de pantalla.',
       alignment: 'Alineación', alignLeft: 'Izquierda', alignCenter: 'Centro', alignRight: 'Derecha',
+      blockText: 'Texto',
+      blockTextHint: 'Se muestra a las personas exactamente como lo escribas — se conservan los saltos de línea. Es texto para mostrar, no un campo de entrada, así que no se pregunta ni se guarda nada.',
+      noTextSet: 'Aún no hay texto — escríbelo en propiedades',
       introText: 'Texto introductorio (opcional)',
       introTextHint: 'Se muestra arriba de los campos dentro de esta sección cuando está expandida; se oculta cuando está colapsada. Agrega campos a la sección desde el lienzo.',
       expandedByDefault: 'Expandido de forma predeterminada',
@@ -1859,7 +1876,7 @@
     function walk(list) {
       for (const f of list) {
         if (f.type === 'accordion' && f.children) walk(f.children);
-        else if (!['button', 'image', 'accordion', 'qrgenerate'].includes(f.type)) result.push(f);
+        else if (!['button', 'textblock', 'image', 'accordion', 'qrgenerate'].includes(f.type)) result.push(f);
       }
     }
     state.screens.forEach((s) => walk(s.fields));
@@ -1886,7 +1903,8 @@
       imageUrl: type === 'image' ? '' : undefined,
       imageAlt: type === 'image' ? emptyLoc() : undefined,
       imageAlign: type === 'image' ? 'center' : undefined,
-      bodyText: type === 'accordion' ? emptyLoc() : undefined,
+      bodyText: (type === 'accordion' || type === 'textblock') ? emptyLoc() : undefined,
+      textAlign: type === 'textblock' ? 'left' : undefined,
       defaultOpen: type === 'accordion' ? false : undefined,
       children: type === 'accordion' ? [] : undefined,
       qrSourceField: type === 'qrgenerate' ? '' : undefined,
@@ -2228,6 +2246,11 @@
     switch (field.type) {
       case 'button':
         return h('button', { type: 'button', disabled: true, class: btnClass(field.buttonStyle), style: labelStyle(field) }, loc(field.label) || 'Button');
+      case 'textblock': {
+        const text = loc(field.bodyText);
+        if (!text) return h('div', { class: 'cf-dashed' }, t('noTextSet'));
+        return h('p', { class: 'cf-textblock', style: `${labelStyle(field) || ''} text-align:${field.textAlign || 'left'};` }, text);
+      }
       case 'image':
         if (!field.imageUrl) {
           return h('div', { class: 'cf-dashed' }, t('noImageSet'));
@@ -2350,7 +2373,7 @@
     return svg;
   }
 
-  const NESTABLE_TYPES = ['text', 'email', 'phone', 'textarea', 'number', 'currency', 'select', 'date', 'datetime', 'checkbox', 'radio', 'toggle', 'button', 'photo', 'signature', 'rating', 'qrscan', 'qrgenerate', 'image']
+  const NESTABLE_TYPES = ['text', 'email', 'phone', 'textarea', 'number', 'currency', 'select', 'date', 'datetime', 'checkbox', 'radio', 'toggle', 'button', 'photo', 'signature', 'rating', 'qrscan', 'qrgenerate', 'textblock', 'image']
     .map((t) => FIELD_TYPES.find((f) => f.type === t));
 
   function accordionAddRow(field) {
@@ -2376,7 +2399,7 @@
         h('button', { type: 'button', title: t('moveDown'), disabled: idx === siblings.length - 1, onclick: (e) => { e.stopPropagation(); moveField(field.id, 1); } }, '↓'),
         h('button', { type: 'button', class: 'danger', title: t('delete'), onclick: (e) => { e.stopPropagation(); deleteField(field.id); } }, '✕'),
       ),
-      (field.type === 'button' || field.type === 'image')
+      (field.type === 'button' || field.type === 'textblock' || field.type === 'image')
         ? (field.disabled ? h('div', { class: 'cf-label' }, h('span', { class: 'cf-disabled-badge' }, t('disabledBadge'))) : null)
         : h('label', { class: 'cf-label' + (field.hideLabel ? ' cf-label-hidden-note' : ''), style: labelStyle(field) },
             field.hideLabel ? t('labelHidden') : loc(field.label),
@@ -2436,7 +2459,7 @@
     applyCanvasBackground(el);
 
     const groups = state.screens
-      .map((s) => ({ screen: s, fields: s.fields.filter((f) => f.type !== 'button' && f.type !== 'image' && f.type !== 'accordion') }))
+      .map((s) => ({ screen: s, fields: s.fields.filter((f) => !['button', 'textblock', 'image', 'accordion'].includes(f.type)) }))
       .filter((g) => g.fields.length > 0)
       .map((g) => h('div', { class: 'review-group' },
         h('h3', { class: 'review-heading' }, loc(g.screen.title)),
@@ -2505,7 +2528,7 @@
             h('button', { type: 'button', title: t('moveDown'), disabled: idx === screen.fields.length - 1, onclick: (e) => { e.stopPropagation(); moveField(field.id, 1); } }, '↓'),
             h('button', { type: 'button', class: 'danger', title: t('delete'), onclick: (e) => { e.stopPropagation(); deleteField(field.id); } }, '✕'),
           ),
-          (field.type === 'button' || field.type === 'image' || field.type === 'accordion')
+          (field.type === 'button' || field.type === 'textblock' || field.type === 'image' || field.type === 'accordion')
             ? (field.disabled ? h('div', { class: 'cf-label' }, h('span', { class: 'cf-disabled-badge' }, t('disabledBadge'))) : null)
             : h('label', { class: 'cf-label' + (field.hideLabel ? ' cf-label-hidden-note' : ''), style: labelStyle(field) },
                 field.hideLabel ? t('labelHidden') : loc(field.label),
@@ -2823,23 +2846,36 @@
       appendAll(el,
         h('p', { class: 'prop-heading' }, t('fieldPropertiesHeading')),
         h('span', { class: 'type-chip' }, icon(field.type), typeLabel(field.type)),
-        bilingualField('label', field, 'label'),
-        h('div', { class: 'prop-field' },
+        // A text block is pure display text: the text itself is the main property, and it has no
+        // visible label or answer key to edit.
+        field.type === 'textblock' ? bilingualField('blockText', field, 'bodyText', { textarea: true, hint: 'blockTextHint' }) : null,
+        field.type === 'textblock' ? null : bilingualField('label', field, 'label'),
+        field.type === 'textblock' ? null : h('div', { class: 'prop-field' },
           h('span', { class: 'prop-label' }, t('fieldKey')),
           h('input', { type: 'text', value: field.name, oninput: (e) => { field.name = e.target.value; } }),
         ),
+        field.type === 'textblock' ? h('div', { class: 'prop-field' },
+          h('span', { class: 'prop-label' }, t('alignment')),
+          h('select', {
+            onchange: (e) => { field.textAlign = e.target.value; renderCanvas(); },
+          },
+            h('option', { value: 'left', selected: (field.textAlign || 'left') === 'left' }, t('alignLeft')),
+            h('option', { value: 'center', selected: field.textAlign === 'center' }, t('alignCenter')),
+            h('option', { value: 'right', selected: field.textAlign === 'right' }, t('alignRight')),
+          ),
+        ) : null,
         widthField(field),
         bgSwatchPicker(field),
         field.type === 'image' ? null : textColorSwatchPicker(field),
         field.type === 'image' ? null : fontSizePicker(field),
-        h('div', { class: 'prop-field' },
+        field.type === 'textblock' ? null : h('div', { class: 'prop-field' },
           h('label', { class: 'prop-check' },
             h('input', { type: 'checkbox', checked: !!field.disabled, onchange: (e) => { field.disabled = e.target.checked; renderCanvas(); } }),
             t('disabledOnScreen'),
           ),
           h('p', { class: 'prop-hint' }, t('disabledHint')),
         ),
-        (field.type === 'button' || field.type === 'image' || field.type === 'accordion') ? null : h('div', { class: 'prop-field' },
+        (field.type === 'button' || field.type === 'textblock' || field.type === 'image' || field.type === 'accordion') ? null : h('div', { class: 'prop-field' },
           h('label', { class: 'prop-check' },
             h('input', { type: 'checkbox', checked: !!field.hideLabel, onchange: (e) => { field.hideLabel = e.target.checked; renderCanvas(); } }),
             t('hideLabel'),
@@ -2879,7 +2915,7 @@
           ),
           h('p', { class: 'prop-hint' }, t('buttonStyleHint')),
         ) : null,
-        (field.type === 'button' || field.type === 'image' || field.type === 'accordion' || field.type === 'qrgenerate') ? null : h('div', { class: 'prop-field' },
+        (field.type === 'button' || field.type === 'textblock' || field.type === 'image' || field.type === 'accordion' || field.type === 'qrgenerate') ? null : h('div', { class: 'prop-field' },
           h('label', { class: 'prop-check' },
             h('input', { type: 'checkbox', checked: field.required, onchange: (e) => { field.required = e.target.checked; renderCanvas(); } }),
             t('required'),
@@ -2949,7 +2985,7 @@
           ),
         ) : null,
         usesOptions(field.type) ? optionsSourceEditor(field) : null,
-        (field.type === 'button' || field.type === 'image' || field.type === 'accordion') ? null
+        (field.type === 'button' || field.type === 'textblock' || field.type === 'image' || field.type === 'accordion') ? null
           : bilingualField('helpText', field, 'helpText', { textarea: true, onInput: () => {} }),
         h('button', { class: 'delete-field-btn', type: 'button', onclick: () => deleteField(field.id) }, t('deleteField')),
       );
@@ -3116,6 +3152,13 @@
 
   // ---- export ----
 
+  // Only non-default alignment is exported: an image defaults to centered, a text block to left.
+  function exportAlign(f) {
+    if (f.type === 'image') return (f.imageAlign && f.imageAlign !== 'center') ? f.imageAlign : undefined;
+    if (f.type === 'textblock') return (f.textAlign && f.textAlign !== 'left') ? f.textAlign : undefined;
+    return undefined;
+  }
+
   function mapChildField(f) {
     const out = {
       name: f.name,
@@ -3136,7 +3179,8 @@
       disabled: f.disabled || undefined,
       src: f.type === 'image' ? (f.imageUrl || undefined) : undefined,
       alt: f.type === 'image' ? locOrUndef(f.imageAlt) : undefined,
-      align: (f.type === 'image' && f.imageAlign && f.imageAlign !== 'center') ? f.imageAlign : undefined,
+      align: exportAlign(f),
+      content: f.type === 'textblock' ? locOrUndef(f.bodyText) : undefined,
       sourceField: f.type === 'qrgenerate' ? (f.qrSourceField || undefined) : undefined,
       staticValue: f.type === 'qrgenerate' ? (f.qrStaticValue || undefined) : undefined,
       background: f.bgColor || undefined,
@@ -3186,8 +3230,8 @@
             disabled: f.disabled || undefined,
             src: f.type === 'image' ? (f.imageUrl || undefined) : undefined,
             alt: f.type === 'image' ? locOrUndef(f.imageAlt) : undefined,
-            align: (f.type === 'image' && f.imageAlign && f.imageAlign !== 'center') ? f.imageAlign : undefined,
-            content: f.type === 'accordion' ? locOrUndef(f.bodyText) : undefined,
+            align: exportAlign(f),
+            content: (f.type === 'accordion' || f.type === 'textblock') ? locOrUndef(f.bodyText) : undefined,
             defaultOpen: (f.type === 'accordion' && f.defaultOpen) ? true : undefined,
             children: (f.type === 'accordion' && f.children && f.children.length) ? f.children.map(mapChildField) : undefined,
             sourceField: f.type === 'qrgenerate' ? (f.qrSourceField || undefined) : undefined,
