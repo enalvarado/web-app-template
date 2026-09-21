@@ -1,0 +1,121 @@
+{
+  "id": "test_web_app_template",
+  "title": {
+    "en": "Test Web App Template",
+    "es": "Test Web App Template"
+  },
+  "includeReviewScreen": true,
+  "screens": [
+    {
+      "id": "screen-1",
+      "title": {
+        "en": "Home",
+        "es": "Inicio"
+      },
+      "fields": [
+        {
+          "name": "text_block_1",
+          "label": {
+            "en": "Text block",
+            "es": "Bloque de texto"
+          },
+          "type": "textblock",
+          "content": {
+            "en": "Welcome to the first web app template test...click Next.",
+            "es": ""
+          }
+        }
+      ]
+    },
+    {
+      "id": "screen-2",
+      "title": {
+        "en": "Screen 1",
+        "es": "Pantalla 1"
+      },
+      "fields": [
+        {
+          "name": "full_name",
+          "label": {
+            "en": "Full Name",
+            "es": "Nombre Completo"
+          },
+          "type": "text",
+          "required": true,
+          "placeholder": {
+            "en": "Full name",
+            "es": "Nombre completo"
+          }
+        },
+        {
+          "name": "category",
+          "label": {
+            "en": "Category",
+            "es": "Ingrese su bodega"
+          },
+          "type": "select",
+          "placeholder": {
+            "en": "Select…",
+            "es": "Seleccionar…"
+          },
+          "options": [
+            {
+              "en": "EL Miami 120",
+              "es": "EL Miami 120"
+            },
+            {
+              "en": "El Miami 340",
+              "es": "EL Miami 340"
+            },
+            {
+              "en": "EL Miami 290",
+              "es": "EL Miami 290"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "screen-3",
+      "title": {
+        "en": "Screen 3",
+        "es": "Pantalla 3"
+      },
+      "showNavigation": false,
+      "fields": [
+        {
+          "name": "text_block_1",
+          "label": {
+            "en": "Text block",
+            "es": "Bloque de texto"
+          },
+          "type": "textblock",
+          "content": {
+            "en": "Prueba con Exito",
+            "es": ""
+          }
+        }
+      ],
+      "actions": [
+        {
+          "id": "f10",
+          "label": {
+            "en": "Back",
+            "es": "Atrás"
+          },
+          "style": "outline",
+          "action": "back"
+        },
+        {
+          "id": "f9",
+          "label": {
+            "en": "Submit",
+            "es": "Enviar"
+          },
+          "style": "primary",
+          "action": "submit"
+        }
+      ]
+    }
+  ]
+}
