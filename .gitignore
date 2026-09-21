@@ -9,3 +9,7 @@ __pycache__/
 storage/
 .DS_Store
 *.log
+
+# Form Builder "Save to app": the previous version of a replaced form, and an in-flight write
+frontend/src/forms/*/config.previous.json
+frontend/src/forms/*/config.json.tmp

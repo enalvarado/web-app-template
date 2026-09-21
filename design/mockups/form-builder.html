@@ -339,7 +339,8 @@
   /* Nothing to save or export on the blank template — the one thing to do there is create an app. */
   .app.template-mode #saveDraftBtn,
   .app.template-mode .autosave-toggle,
-  .app.template-mode #exportBtn { display: none; }
+  .app.template-mode #exportBtn,
+  .app.template-mode #saveToAppBtn { display: none; }
   .app.template-mode #newAppBtn { background: var(--morado); color: #fff; }
   .app.template-mode #newAppBtn:hover { background: var(--morado-dark); }
 
@@ -978,6 +979,13 @@
     overflow-wrap: anywhere;
   }
 
+  .cf-nav-wrap { margin-top: 20px; }
+  .cf-nav-row { display: flex; justify-content: space-between; gap: 8px; }
+  .cf-nav-row.ghost { opacity: .5; pointer-events: none; }
+  .cf-nav-caption { margin: 8px 0 0; font-size: 11px; color: var(--gris-faint); text-align: center; }
+  .cf-nav-caption.warn, .prop-hint.warn { color: var(--rosado-deep); }
+  .cf-nav-caption.warn { margin-top: 20px; font-size: 12px; }
+
   .cf-accordion-text {
     margin: 0 0 12px;
     font-size: 12.5px;
@@ -1314,7 +1322,8 @@
     <button class="draft-btn" id="previewBtn" type="button" aria-pressed="false">Preview</button>
     <button class="draft-btn" id="draftsBtn" type="button" data-i18n="drafts">Drafts</button>
     <button class="draft-btn" id="saveDraftBtn" type="button" data-i18n="saveDraft">Save draft</button>
-    <button class="export-btn" id="exportBtn" data-i18n="exportJson">Export JSON</button>
+    <button class="draft-btn" id="exportBtn" type="button" data-i18n="exportJson">Export JSON</button>
+    <button class="export-btn" id="saveToAppBtn" type="button" data-i18n="saveToApp">Save to app</button>
   </div>
   <div class="workspace" id="workspace">
     <aside class="palette" id="palette"></aside>
@@ -1390,6 +1399,17 @@
       <button class="draft-btn" id="newAppCancel" type="button" data-i18n="cancel">Cancel</button>
       <button class="draft-btn active" id="newAppCreate" type="button" data-i18n="create">Create</button>
     </div>
+  </div>
+</div>
+
+<div class="export-overlay" id="saveAppOverlay">
+  <div class="export-panel" style="max-width:480px">
+    <div class="export-panel-head">
+      <h2 id="saveAppTitle"></h2>
+      <button class="export-close" id="saveAppClose" data-i18n-aria="close" aria-label="Close">✕</button>
+    </div>
+    <div class="export-body" id="saveAppBody"></div>
+    <div class="export-panel-foot" id="saveAppFoot"></div>
   </div>
 </div>
 
@@ -1524,6 +1544,19 @@
       imageUrl: 'Image URL', imageUrlHint: "There's no file upload yet — paste a hosted URL (e.g. the company logo).",
       altText: 'Alt text', altTextHint: 'Describes the image for screen readers.',
       alignment: 'Alignment', alignLeft: 'Left', alignCenter: 'Center', alignRight: 'Right',
+      saveToApp: 'Save to app', openForm: 'Open form',
+      saveToAppTitleOk: 'Saved to app', saveToAppTitleErr: "Couldn't save to app",
+      saveToAppSaved: 'Saved to {path}.',
+      saveToAppReplaced: 'It replaced the earlier version, which is kept as config.previous.json in the same folder.',
+      saveToAppTry: 'Open the form to try it in the real app.',
+      saveToAppReplace: 'A form with the id "{id}" is already in the app. Replace it? The earlier version is kept as config.previous.json.',
+      saveToAppUnreachable: 'Save to app only works while the dev server is running and the builder is opened at http://localhost:5173/builder.html. Use Export JSON instead.',
+      showAutoNav: 'Show automatic Back / Next buttons',
+      showAutoNavHint: 'The app adds these under every screen. Turn them off when this screen has its own buttons, such as a lone Submit on the last screen — and add your own Back button too, or people can\'t go back.',
+      noBackWarning: 'No Back button on this screen — people won\'t be able to go back. Add a Back button from the palette, or turn the automatic buttons back on.',
+      autoNavHint: 'Automatic Back / Next — turn off in Screen properties if this screen has its own buttons',
+      lockDraft: 'Lock', unlockDraft: 'Unlock', lockedBadge: 'Locked',
+      lockedDeleteHint: 'Locked — unlock it first to delete',
       blockText: 'Text',
       blockTextHint: 'Shown to people exactly as written — line breaks are kept. This is display text, not an input box, so nothing is asked or saved.',
       noTextSet: 'No text yet — write it in properties',
@@ -1641,6 +1674,19 @@
       imageUrl: 'URL de la imagen', imageUrlHint: 'Todavía no hay subida de archivos — pega una URL alojada (por ejemplo, el logo de la empresa).',
       altText: 'Texto alternativo', altTextHint: 'Describe la imagen para lectores de pantalla.',
       alignment: 'Alineación', alignLeft: 'Izquierda', alignCenter: 'Centro', alignRight: 'Derecha',
+      saveToApp: 'Guardar en la app', openForm: 'Abrir formulario',
+      saveToAppTitleOk: 'Guardado en la app', saveToAppTitleErr: 'No se pudo guardar en la app',
+      saveToAppSaved: 'Guardado en {path}.',
+      saveToAppReplaced: 'Reemplazó la versión anterior, que se conserva como config.previous.json en la misma carpeta.',
+      saveToAppTry: 'Abre el formulario para probarlo en la app real.',
+      saveToAppReplace: 'Ya hay un formulario con el id "{id}" en la app. ¿Reemplazarlo? La versión anterior se conserva como config.previous.json.',
+      saveToAppUnreachable: 'Guardar en la app solo funciona mientras el servidor de desarrollo está en ejecución y el constructor está abierto en http://localhost:5173/builder.html. Usa Exportar JSON en su lugar.',
+      showAutoNav: 'Mostrar botones automáticos Atrás / Siguiente',
+      showAutoNavHint: 'La aplicación los agrega debajo de cada pantalla. Desactívalos cuando esta pantalla tenga sus propios botones, como un Enviar solitario en la última pantalla, y agrega también tu propio botón Atrás, o las personas no podrán regresar.',
+      noBackWarning: 'No hay un botón Atrás en esta pantalla: las personas no podrán regresar. Agrega un botón Atrás desde la paleta o vuelve a activar los botones automáticos.',
+      autoNavHint: 'Atrás / Siguiente automáticos — desactívalos en Propiedades de la pantalla si esta pantalla tiene sus propios botones',
+      lockDraft: 'Bloquear', unlockDraft: 'Desbloquear', lockedBadge: 'Bloqueado',
+      lockedDeleteHint: 'Bloqueado — desbloquéalo primero para eliminarlo',
       blockText: 'Texto',
       blockTextHint: 'Se muestra a las personas exactamente como lo escribas — se conservan los saltos de línea. Es texto para mostrar, no un campo de entrada, así que no se pregunta ni se guarda nada.',
       noTextSet: 'Aún no hay texto — escríbelo en propiedades',
@@ -2541,7 +2587,36 @@
       });
     }
 
-    el.append(h('div', { class: 'canvas-body' }, progress, screenTitle, fieldsWrap));
+    el.append(h('div', { class: 'canvas-body' }, progress, screenTitle, fieldsWrap, autoNavRow(screen)));
+  }
+
+  // The real app puts its own Back/Next row under every screen unless the screen turns it off
+  // (Screen properties). Drawn here so the canvas matches what people will actually see: a faint,
+  // inactive look-alike while editing, and working buttons in Preview.
+  function hasBackButton(fields) {
+    return fields.some((f) => (f.type === 'button' && (f.buttonAction === 'back' || f.buttonAction === 'goto'))
+      || (f.children && hasBackButton(f.children)));
+  }
+
+  // With the automatic row off and no Back/"Skip to step" button of its own, a screen after the
+  // first is a dead end for the person filling it in — say so where the author is working.
+  function screenLacksBack(screen) {
+    return !!screen.hideNav && state.screens.indexOf(screen) > 0 && !hasBackButton(screen.fields);
+  }
+
+  function autoNavRow(screen) {
+    if (screen.hideNav) return screenLacksBack(screen) ? h('p', { class: 'cf-nav-caption warn' }, t('noBackWarning')) : null;
+    const live = state.previewMode;
+    const isFirst = state.activeScreen === 0;
+    const isLast = state.activeScreen === state.screens.length - 1;
+    const nextLabel = isLast && !state.includeReviewScreen ? t('preset_submit') : t('preset_next');
+    return h('div', { class: 'cf-nav-wrap' },
+      h('div', { class: 'cf-nav-row' + (live ? '' : ' ghost') },
+        h('button', { type: 'button', class: btnClass('outline'), disabled: !live || isFirst, onclick: () => runPreviewAction('back') }, '◀ ' + t('preset_back')),
+        h('button', { type: 'button', class: btnClass('primary'), disabled: !live, onclick: () => runPreviewAction('next') }, nextLabel + ' ▶'),
+      ),
+      live ? null : h('p', { class: 'cf-nav-caption' }, t('autoNavHint')),
+    );
   }
 
   // ---- render: properties panel ----
@@ -2998,6 +3073,14 @@
         h('p', { class: 'prop-heading' }, t('screenPropertiesHeading')),
         bilingualField('screenTitle', screen, 'title', { onInput: () => { renderCanvas(); renderTabs(); } }),
         bgSwatchPicker(screen, { swatches: SCREEN_BG_SWATCHES, labelKey: 'screenBgColorLabel', hintKey: 'screenBgColorHint' }),
+        h('div', { class: 'prop-field' },
+          h('label', { class: 'prop-check' },
+            h('input', { type: 'checkbox', checked: !screen.hideNav, onchange: (e) => { screen.hideNav = !e.target.checked; renderCanvas(); renderProperties(); } }),
+            t('showAutoNav'),
+          ),
+          h('p', { class: 'prop-hint' }, t('showAutoNavHint')),
+          screenLacksBack(screen) ? h('p', { class: 'prop-hint warn' }, t('noBackWarning')) : null,
+        ),
         h('p', { class: 'prop-hint' }, fieldsOnScreenText(screen.fields.length)),
         h('button', {
           class: 'delete-screen-btn', type: 'button', disabled: state.screens.length <= 1,
@@ -3211,6 +3294,7 @@
           id: s.id,
           title: s.title,
           background: s.bgColor || undefined,
+          showNavigation: s.hideNav ? false : undefined,
           fields: fields.map((f) => ({
             name: f.name,
             label: f.label,
@@ -3277,6 +3361,63 @@
     } else {
       status.textContent = t('selectToCopy');
     }
+  });
+  // ---- Save to app: writes frontend/src/forms/<id>/config.json via the Vite dev server
+  // (see saveFormToApp in frontend/vite.config.ts). Only works when the builder is opened from
+  // that server; anywhere else the request fails and we point people to Export JSON. ----
+
+  function showSaveResult({ id, path, overwritten, error }) {
+    document.getElementById('saveAppTitle').textContent = t(error ? 'saveToAppTitleErr' : 'saveToAppTitleOk');
+    const body = document.getElementById('saveAppBody');
+    const foot = document.getElementById('saveAppFoot');
+    body.innerHTML = '';
+    foot.innerHTML = '';
+    if (error) {
+      body.append(h('p', { class: 'export-warning' }, error));
+    } else {
+      // appendAll (not el.append) so the optional "replaced" line can be null without printing "null"
+      appendAll(body,
+        h('p', {}, tf('saveToAppSaved', { path })),
+        overwritten ? h('p', {}, t('saveToAppReplaced')) : null,
+        h('p', {}, t('saveToAppTry')),
+      );
+      foot.append(h('a', {
+        class: 'export-btn', href: '/f/' + encodeURIComponent(id), target: '_blank', rel: 'noopener',
+        style: 'text-decoration:none; display:inline-block',
+      }, t('openForm')));
+    }
+    document.getElementById('saveAppOverlay').classList.add('open');
+  }
+
+  async function saveToApp(overwrite) {
+    const config = buildConfig();
+    let res;
+    try {
+      res = await fetch('/__builder/save-form', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ config, overwrite: !!overwrite }),
+      });
+    } catch {
+      showSaveResult({ error: t('saveToAppUnreachable') });
+      return;
+    }
+    let data = null;
+    try { data = await res.json(); } catch { /* not our endpoint (static host, 404 page…) */ }
+    if (res.status === 409 && data && data.exists) {
+      if (confirm(tf('saveToAppReplace', { id: config.id }))) await saveToApp(true);
+      return;
+    }
+    if (!res.ok || !data || !data.ok) {
+      showSaveResult({ error: (data && data.error) || t('saveToAppUnreachable') });
+      return;
+    }
+    showSaveResult(data);
+  }
+
+  document.getElementById('saveToAppBtn').addEventListener('click', () => saveToApp(false));
+  document.getElementById('saveAppClose').addEventListener('click', () => document.getElementById('saveAppOverlay').classList.remove('open'));
+  document.getElementById('saveAppOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'saveAppOverlay') e.currentTarget.classList.remove('open');
   });
   document.getElementById('addScreenBtn').addEventListener('click', addScreen);
 
@@ -3414,7 +3555,8 @@
     if (!currentDraftId) return false; // the blank template is never saved — only an app made with "New app"
     const drafts = readDrafts();
     const savedAt = Date.now();
-    drafts[currentDraftId] = { id: currentDraftId, name: currentDraftName(), savedAt, data: draftSnapshot() };
+    const locked = !!(drafts[currentDraftId] && drafts[currentDraftId].locked); // autosave must not drop the lock
+    drafts[currentDraftId] = { id: currentDraftId, name: currentDraftName(), savedAt, data: draftSnapshot(), locked };
     if (storageSet(DRAFTS_KEY, JSON.stringify(drafts))) {
       storageSet(CURRENT_DRAFT_KEY, currentDraftId);
       markClean(savedAt);
@@ -3511,7 +3653,7 @@
 
   function deleteDraft(id) {
     const drafts = readDrafts();
-    if (!drafts[id]) return;
+    if (!drafts[id] || drafts[id].locked) return; // a locked draft can't be deleted until it's unlocked
     if (!confirm(tf('confirmDeleteDraft', { name: drafts[id].name }))) return;
     delete drafts[id];
     storageSet(DRAFTS_KEY, JSON.stringify(drafts));
@@ -3519,6 +3661,14 @@
     if (id === currentDraftId) loadForm(JSON.parse(BLANK_JSON), null, null);
     renderDrafts();
     renderSaveStatus();
+  }
+
+  function toggleLock(id) {
+    const drafts = readDrafts();
+    if (!drafts[id]) return;
+    drafts[id].locked = !drafts[id].locked;
+    storageSet(DRAFTS_KEY, JSON.stringify(drafts));
+    renderDrafts();
   }
 
   function renderDrafts() {
@@ -3533,11 +3683,16 @@
           h('div', { class: 'draft-name-row' },
             h('span', { class: 'draft-name', title: d.name }, d.name),
             isCurrent ? h('span', { class: 'draft-badge' }, t('openNow')) : null,
+            d.locked ? h('span', { class: 'draft-badge' }, t('lockedBadge')) : null,
           ),
           h('div', { class: 'draft-meta' }, tf('draftMeta', { date: fmtDateTime(d.savedAt), screens: screensText(d.data.screens.length) })),
         ),
         h('button', { class: 'draft-btn small', type: 'button', disabled: isCurrent, onclick: () => openDraft(d.id) }, t('openDraft')),
-        h('button', { class: 'draft-btn small', type: 'button', onclick: () => deleteDraft(d.id) }, t('delete')),
+        h('button', { class: 'draft-btn small', type: 'button', onclick: () => toggleLock(d.id) }, t(d.locked ? 'unlockDraft' : 'lockDraft')),
+        h('button', {
+          class: 'draft-btn small', type: 'button', disabled: !!d.locked,
+          title: d.locked ? t('lockedDeleteHint') : null, onclick: () => deleteDraft(d.id),
+        }, t('delete')),
       ));
     }
   }
