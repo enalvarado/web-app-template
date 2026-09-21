@@ -304,6 +304,74 @@
 
   .export-btn:hover { background: var(--morado-dark); }
 
+  /* ---- drafts: autosave toggle, save status, Save draft / Drafts buttons ---- */
+
+  .draft-btn {
+    appearance: none;
+    border: 1px solid var(--morado);
+    background: transparent;
+    color: var(--morado);
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .draft-btn:hover:not(:disabled) { background: var(--morado-tint); }
+  .draft-btn:disabled { opacity: .45; cursor: default; }
+  .draft-btn.small { padding: 5px 10px; font-size: 12px; }
+
+  .autosave-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--gris-soft);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .save-status { font-size: 12px; color: var(--gris-soft); white-space: nowrap; }
+  .save-status.dirty { color: var(--morado); }
+  .save-status.error { color: var(--rosado-deep); }
+
+  .draft-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--beige);
+  }
+
+  .draft-row:last-child { border-bottom: none; }
+  .draft-info { flex: 1; min-width: 0; }
+  .draft-name-row { display: flex; align-items: center; gap: 8px; }
+
+  .draft-name {
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--gris);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .draft-badge {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--morado);
+    background: var(--morado-tint);
+    padding: 2px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .draft-meta { font-size: 11.5px; color: var(--gris-soft); margin-top: 2px; }
+
   .fb-toast {
     position: fixed;
     left: 50%;
@@ -1174,6 +1242,13 @@
   <div class="topbar" id="builderToolbar">
     <div class="tabs" id="tabs"></div>
     <button class="add-screen" id="addScreenBtn" data-i18n="addScreen">+ Screen</button>
+    <span class="save-status" id="saveStatus" role="status" aria-live="polite"></span>
+    <label class="autosave-toggle" data-i18n-title="autosaveHint" title="Automatically save changes to this draft as you work">
+      <input type="checkbox" id="autosaveToggle" checked>
+      <span data-i18n="autosave">Autosave</span>
+    </label>
+    <button class="draft-btn" id="draftsBtn" type="button" data-i18n="drafts">Drafts</button>
+    <button class="draft-btn" id="saveDraftBtn" type="button" data-i18n="saveDraft">Save draft</button>
     <button class="export-btn" id="exportBtn" data-i18n="exportJson">Export JSON</button>
   </div>
   <div class="workspace" id="workspace">
@@ -1212,6 +1287,22 @@
     <div class="export-panel-foot">
       <span class="copy-status" id="copyStatus"></span>
       <button class="export-btn" id="copyBtn" data-i18n="copyJson">Copy JSON</button>
+    </div>
+  </div>
+</div>
+
+<div class="export-overlay" id="draftsOverlay">
+  <div class="export-panel">
+    <div class="export-panel-head">
+      <h2 data-i18n="draftsTitle">Drafts</h2>
+      <button class="export-close" id="draftsClose" data-i18n-aria="close" aria-label="Close">✕</button>
+    </div>
+    <div class="export-body">
+      <p data-i18n="draftsIntro">Drafts are stored in this browser only. Use Export JSON to keep a copy somewhere else.</p>
+      <div id="draftsList"></div>
+    </div>
+    <div class="export-panel-foot">
+      <button class="draft-btn" id="newFormBtn" type="button" data-i18n="newForm">New form</button>
     </div>
   </div>
 </div>
@@ -1378,6 +1469,17 @@
       windowsAccount: 'Windows account', signedInManually: 'Signed in manually',
       useWindowsAccount: 'Use my Windows account ({username})',
       identityLabel: 'Email', identitySave: 'Save',
+      saveDraft: 'Save draft', drafts: 'Drafts', autosave: 'Autosave',
+      autosaveHint: 'Automatically save changes to this draft as you work',
+      savedAt: 'Saved {time}', saving: 'Saving…', unsavedChanges: 'Unsaved changes',
+      saveFailed: "Couldn't save — browser storage is blocked or full",
+      draftSaved: 'Draft saved: {name}', draftRestored: 'Restored your draft: {name}',
+      draftsTitle: 'Drafts',
+      draftsIntro: 'Drafts are stored in this browser only. Use Export JSON to keep a copy somewhere else.',
+      noDrafts: 'No saved drafts yet.', openDraft: 'Open', openNow: 'Open now', newForm: 'New form',
+      draftMeta: 'Saved {date} · {screens}',
+      confirmDiscard: 'You have unsaved changes that will be lost. Continue?',
+      confirmDeleteDraft: 'Delete the draft "{name}"? This can\'t be undone.',
     },
     es: {
       home: 'Inicio',
@@ -1472,6 +1574,17 @@
       windowsAccount: 'Cuenta de Windows', signedInManually: 'Sesión iniciada manualmente',
       useWindowsAccount: 'Usar mi cuenta de Windows ({username})',
       identityLabel: 'Correo electrónico', identitySave: 'Guardar',
+      saveDraft: 'Guardar borrador', drafts: 'Borradores', autosave: 'Autoguardado',
+      autosaveHint: 'Guardar automáticamente los cambios en este borrador mientras trabajas',
+      savedAt: 'Guardado {time}', saving: 'Guardando…', unsavedChanges: 'Cambios sin guardar',
+      saveFailed: 'No se pudo guardar: el almacenamiento del navegador está bloqueado o lleno',
+      draftSaved: 'Borrador guardado: {name}', draftRestored: 'Se restauró tu borrador: {name}',
+      draftsTitle: 'Borradores',
+      draftsIntro: 'Los borradores se guardan solo en este navegador. Usa Exportar JSON para conservar una copia en otro lugar.',
+      noDrafts: 'Aún no hay borradores guardados.', openDraft: 'Abrir', openNow: 'Abierto', newForm: 'Nuevo formulario',
+      draftMeta: 'Guardado {date} · {screens}',
+      confirmDiscard: 'Tienes cambios sin guardar que se perderán. ¿Continuar?',
+      confirmDeleteDraft: '¿Eliminar el borrador "{name}"? No se puede deshacer.',
     },
   };
 
@@ -2693,6 +2806,7 @@
     document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = t(el.dataset.i18n); });
     document.querySelectorAll('[data-i18n-html]').forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml); });
     document.querySelectorAll('[data-i18n-aria]').forEach((el) => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); });
+    document.querySelectorAll('[data-i18n-title]').forEach((el) => { el.title = t(el.dataset.i18nTitle); });
     document.querySelectorAll('.app-ribbon .lang-chip').forEach((chip) => {
       chip.classList.toggle('active', chip.dataset.lang.toLowerCase() === state.lang);
     });
@@ -2707,6 +2821,7 @@
     renderAppRibbonTitle();
     renderUserChip();
     renderUserMenu();
+    renderSaveStatus();
   }
 
   // ---- export ----
@@ -2876,6 +2991,234 @@
       renderUserMenu();
     }
   }, true);
+
+  // ---- drafts: autosave + Save draft ----
+  // Drafts live in this browser's localStorage only — this mockup is a static page with no backend
+  // (the real builder would POST the same snapshot to the API). A snapshot is the form's content,
+  // not UI state (selected field, open panel, EN/ES toggle) or the identity chip. One draft per
+  // form: autosave and Save draft both update the draft this session is bound to, and the first
+  // save of a new form creates it. A form nobody has touched is never saved.
+
+  const DRAFTS_KEY = 'formBuilder.drafts.v1';
+  const CURRENT_DRAFT_KEY = 'formBuilder.currentDraft.v1';
+  const AUTOSAVE_KEY = 'formBuilder.autosave.v1';
+  const AUTOSAVE_DELAY_MS = 800;
+
+  function storageGet(key) { try { return localStorage.getItem(key); } catch { return null; } }
+  function storageSet(key, value) { try { localStorage.setItem(key, value); return true; } catch { return false; } }
+  function storageRemove(key) { try { localStorage.removeItem(key); } catch { /* storage blocked */ } }
+
+  function readDrafts() {
+    try {
+      const parsed = JSON.parse(storageGet(DRAFTS_KEY));
+      return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch { return {}; }
+  }
+
+  function isValidDraft(d) {
+    return !!(d && d.id && d.data && d.data.title && Array.isArray(d.data.screens) && d.data.screens.length);
+  }
+
+  function draftSnapshot() {
+    const {
+      title, includeReviewScreen, backgroundImageUrl, headerLogoUrl, headerLogoPosition,
+      headerLogoSize, nextFieldId, nextScreenId, screens,
+    } = state;
+    return {
+      title, includeReviewScreen, backgroundImageUrl, headerLogoUrl, headerLogoPosition,
+      headerLogoSize, nextFieldId, nextScreenId, screens,
+    };
+  }
+
+  const BLANK_JSON = JSON.stringify(draftSnapshot());
+
+  let currentDraftId = null;      // draft this session is bound to; null until the first save
+  let lastSavedJson = BLANK_JSON; // what's on disk (or the blank form) — anything else is "dirty"
+  let lastSavedAt = null;
+  let saveError = false;
+  let autosaveOn = storageGet(AUTOSAVE_KEY) !== 'off';
+  let autosaveTimer = null;
+
+  function isDirty() { return JSON.stringify(draftSnapshot()) !== lastSavedJson; }
+
+  function currentDraftName() { return loc(state.title, 'en') || loc(state.title, 'es') || 'Untitled'; }
+
+  function fmtTime(ts) {
+    return new Date(ts).toLocaleTimeString(state.lang, { hour: 'numeric', minute: '2-digit' });
+  }
+
+  function fmtDateTime(ts) {
+    return new Date(ts).toLocaleString(state.lang, { dateStyle: 'medium', timeStyle: 'short' });
+  }
+
+  function screensText(count) {
+    if (state.lang === 'es') return `${count} pantalla${count === 1 ? '' : 's'}`;
+    return `${count} screen${count === 1 ? '' : 's'}`;
+  }
+
+  function renderSaveStatus() {
+    const el = document.getElementById('saveStatus');
+    let text = '';
+    let cls = '';
+    if (saveError) { text = t('saveFailed'); cls = 'error'; }
+    else if (isDirty()) { text = t(autosaveOn ? 'saving' : 'unsavedChanges'); cls = 'dirty'; }
+    else if (lastSavedAt) { text = tf('savedAt', { time: fmtTime(lastSavedAt) }); }
+    el.textContent = text;
+    el.className = 'save-status' + (cls ? ' ' + cls : '');
+  }
+
+  function markClean(savedAt) {
+    lastSavedJson = JSON.stringify(draftSnapshot());
+    lastSavedAt = savedAt;
+    saveError = false;
+  }
+
+  function saveDraft() {
+    const drafts = readDrafts();
+    if (!currentDraftId) currentDraftId = 'draft-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const savedAt = Date.now();
+    drafts[currentDraftId] = { id: currentDraftId, name: currentDraftName(), savedAt, data: draftSnapshot() };
+    if (storageSet(DRAFTS_KEY, JSON.stringify(drafts))) {
+      storageSet(CURRENT_DRAFT_KEY, currentDraftId);
+      markClean(savedAt);
+    } else {
+      saveError = true;
+    }
+    renderSaveStatus();
+    return !saveError;
+  }
+
+  // Runs after every user event (see the listeners below): if the form differs from what was last
+  // saved, schedule an autosave. Change detection by snapshot comparison rather than hooking every
+  // mutation site keeps this working for any new editor control without extra wiring.
+  function onPossibleChange() {
+    if (autosaveOn && isDirty()) {
+      clearTimeout(autosaveTimer);
+      autosaveTimer = setTimeout(saveDraft, AUTOSAVE_DELAY_MS);
+    }
+    renderSaveStatus();
+  }
+
+  ['input', 'change', 'click', 'keyup', 'drop', 'dragend'].forEach((type) => {
+    document.addEventListener(type, () => setTimeout(onPossibleChange, 0), true);
+  });
+
+  // Before replacing the form (open another draft / new form): with autosave on, flush the pending
+  // save instead of prompting; with it off, ask before discarding unsaved changes.
+  function confirmLeaveCurrent() {
+    if (!isDirty()) return true;
+    if (autosaveOn) return saveDraft();
+    return confirm(t('confirmDiscard'));
+  }
+
+  function loadForm(data, draftId, savedAt) {
+    clearTimeout(autosaveTimer);
+    // Start from the blank form so a draft missing newer keys can't inherit the previous form's values.
+    Object.assign(state, JSON.parse(BLANK_JSON), JSON.parse(JSON.stringify(data)), {
+      activeScreen: 0, panel: 'screen', selectedFieldId: null,
+    });
+    currentDraftId = draftId;
+    if (draftId) storageSet(CURRENT_DRAFT_KEY, draftId); else storageRemove(CURRENT_DRAFT_KEY);
+    markClean(savedAt);
+    render();
+  }
+
+  function openDraft(id) {
+    const draft = readDrafts()[id];
+    if (!isValidDraft(draft) || id === currentDraftId) return;
+    if (!confirmLeaveCurrent()) return;
+    loadForm(draft.data, id, draft.savedAt);
+    closeDrafts();
+  }
+
+  function newForm() {
+    if (!confirmLeaveCurrent()) return;
+    loadForm(JSON.parse(BLANK_JSON), null, null);
+    closeDrafts();
+  }
+
+  function deleteDraft(id) {
+    const drafts = readDrafts();
+    if (!drafts[id]) return;
+    if (!confirm(tf('confirmDeleteDraft', { name: drafts[id].name }))) return;
+    delete drafts[id];
+    storageSet(DRAFTS_KEY, JSON.stringify(drafts));
+    if (id === currentDraftId) {
+      // The form stays on screen; the next change autosaves it as a fresh draft.
+      clearTimeout(autosaveTimer);
+      currentDraftId = null;
+      storageRemove(CURRENT_DRAFT_KEY);
+      markClean(null);
+    }
+    renderDrafts();
+    renderSaveStatus();
+  }
+
+  function renderDrafts() {
+    const list = document.getElementById('draftsList');
+    list.innerHTML = '';
+    const drafts = Object.values(readDrafts()).filter(isValidDraft).sort((a, b) => b.savedAt - a.savedAt);
+    if (!drafts.length) { list.append(h('p', {}, t('noDrafts'))); return; }
+    for (const d of drafts) {
+      const isCurrent = d.id === currentDraftId;
+      list.append(h('div', { class: 'draft-row' },
+        h('div', { class: 'draft-info' },
+          h('div', { class: 'draft-name-row' },
+            h('span', { class: 'draft-name', title: d.name }, d.name),
+            isCurrent ? h('span', { class: 'draft-badge' }, t('openNow')) : null,
+          ),
+          h('div', { class: 'draft-meta' }, tf('draftMeta', { date: fmtDateTime(d.savedAt), screens: screensText(d.data.screens.length) })),
+        ),
+        h('button', { class: 'draft-btn small', type: 'button', disabled: isCurrent, onclick: () => openDraft(d.id) }, t('openDraft')),
+        h('button', { class: 'draft-btn small', type: 'button', onclick: () => deleteDraft(d.id) }, t('delete')),
+      ));
+    }
+  }
+
+  function openDrafts() {
+    renderDrafts();
+    document.getElementById('draftsOverlay').classList.add('open');
+  }
+
+  function closeDrafts() {
+    document.getElementById('draftsOverlay').classList.remove('open');
+  }
+
+  document.getElementById('saveDraftBtn').addEventListener('click', () => {
+    clearTimeout(autosaveTimer);
+    fbToast(saveDraft() ? tf('draftSaved', { name: currentDraftName() }) : t('saveFailed'));
+  });
+  document.getElementById('draftsBtn').addEventListener('click', openDrafts);
+  document.getElementById('draftsClose').addEventListener('click', closeDrafts);
+  document.getElementById('draftsOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'draftsOverlay') closeDrafts();
+  });
+  document.getElementById('newFormBtn').addEventListener('click', newForm);
+
+  const autosaveToggle = document.getElementById('autosaveToggle');
+  autosaveToggle.checked = autosaveOn;
+  autosaveToggle.addEventListener('change', () => {
+    autosaveOn = autosaveToggle.checked;
+    storageSet(AUTOSAVE_KEY, autosaveOn ? 'on' : 'off');
+    if (!autosaveOn) clearTimeout(autosaveTimer);
+  });
+
+  // Don't lose work on close/reload: with autosave on, flush now; with it off, ask the browser to prompt.
+  window.addEventListener('beforeunload', (e) => {
+    if (!isDirty()) return;
+    if (autosaveOn && saveDraft()) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
+
+  // Resume the draft that was open last time.
+  (function restoreLastDraft() {
+    const id = storageGet(CURRENT_DRAFT_KEY);
+    const draft = id ? readDrafts()[id] : null;
+    if (!isValidDraft(draft)) return;
+    loadForm(draft.data, draft.id, draft.savedAt);
+    fbToast(tf('draftRestored', { name: draft.name }));
+  })();
 
   render();
 </script>
