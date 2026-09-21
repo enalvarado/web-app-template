@@ -65,6 +65,8 @@ class ScreenConfig(BaseModel):
     title: LocalizedString
     description: Optional[LocalizedString] = None
     background: Optional[str] = None
+    # False hides the automatic Back/Next row for this screen (Review keeps its own); omitted = shown.
+    showNavigation: Optional[bool] = None
     fields: list[FieldConfig]
 
 

@@ -156,20 +156,22 @@ function FormFlow({ config }: Props) {
         {!isReviewStep && config.screens[step].actions?.length ? (
           <ScreenActions actions={config.screens[step].actions ?? []} onAction={handleAction} />
         ) : null}
-        <NavButtons
-          onBack={handleBack}
-          onNext={handleNext}
-          backDisabled={step === 0}
-          nextDisabled={submitting}
-          backLabel={uiText(locale, 'back')}
-          nextLabel={
-            isReviewStep || isLastScreen
-              ? submitting
-                ? uiText(locale, 'submitting')
-                : uiText(locale, 'submit')
-              : uiText(locale, 'next')
-          }
-        />
+        {(isReviewStep || config.screens[step].showNavigation !== false) && (
+          <NavButtons
+            onBack={handleBack}
+            onNext={handleNext}
+            backDisabled={step === 0}
+            nextDisabled={submitting}
+            backLabel={uiText(locale, 'back')}
+            nextLabel={
+              isReviewStep || isLastScreen
+                ? submitting
+                  ? uiText(locale, 'submitting')
+                  : uiText(locale, 'submit')
+                : uiText(locale, 'next')
+            }
+          />
+        )}
       </div>
     </div>
   )

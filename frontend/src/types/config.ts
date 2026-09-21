@@ -122,6 +122,10 @@ export interface ScreenConfig {
   // A brand-palette swatch key (see lib/fieldStyle.ts's screenBackgroundTint) applied as an 80%
   // transparent tint behind this screen only, overriding the form's backgroundImageUrl for it.
   background?: string
+  // false hides the automatic Back/Next row for this screen (the Review step always keeps its own),
+  // so the screen's own buttons — e.g. a lone Submit on the last screen — are the only navigation.
+  // Omitted means shown.
+  showNavigation?: boolean
   fields: FieldConfig[]
   actions?: ActionConfig[]
 }
