@@ -16,7 +16,7 @@ export default function RatingField({ value = 0, onChange, max = 5 }: Props) {
           key={n}
           type="button"
           onClick={() => onChange(n)}
-          className={`text-3xl leading-none ${n <= value ? 'text-morado' : 'text-beige'}`}
+          className={`text-3xl leading-none ${n <= value ? 'text-gold' : 'text-beige'}`}
           aria-label={`${n} ${uiText(locale, n > 1 ? 'stars' : 'star')}`}
         >
           ★

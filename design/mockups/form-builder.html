@@ -14,6 +14,9 @@
     --gris-soft: rgba(56, 58, 53, .62);
     --gris-faint: rgba(56, 58, 53, .38);
     --beige: #D8D2C4;
+    /* Not part of the app's brand palette — a deliberate exception for the Rating field's filled
+       stars, which read as a star rating far better in the conventional gold than in brand purple. */
+    --gold: #E8A317;
     --surface: #FFFFFF;
     --backdrop: #F3F1F6;
     --font-head: 'Montserrat', sans-serif;
@@ -918,7 +921,7 @@
     appearance: none; border: none; background: transparent; padding: 0; line-height: 1;
     font-size: 18px; color: var(--beige); cursor: pointer;
   }
-  .cf-star.on { color: var(--morado); }
+  .cf-star.on { color: var(--gold); }
   .cf-star:disabled { cursor: default; opacity: .5; }
 
   .cf-dashed {
