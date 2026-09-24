@@ -1,0 +1,171 @@
+{
+  "id": "test_web_app_1",
+  "title": {
+    "en": "Test Web App 1",
+    "es": "Test Web App 1"
+  },
+  "includeReviewScreen": true,
+  "screens": [
+    {
+      "id": "screen-1",
+      "title": {
+        "en": "Home",
+        "es": "Inicio"
+      },
+      "fields": [
+        {
+          "name": "text_block_1",
+          "label": {
+            "en": "Text block",
+            "es": "Bloque de texto"
+          },
+          "type": "textblock",
+          "align": "center",
+          "content": {
+            "en": "This is the first page of a web app\nWe welcome you",
+            "es": "Esta es la primera pagina de un web app\nTe damos la bienvenida"
+          },
+          "background": "rosado",
+          "textColor": "red"
+        }
+      ]
+    },
+    {
+      "id": "screen-2",
+      "title": {
+        "en": "Screen 1",
+        "es": "Pantalla 1"
+      },
+      "fields": [
+        {
+          "name": "full_name",
+          "label": {
+            "en": "Full Name",
+            "es": "Nombre Completo"
+          },
+          "type": "text",
+          "required": true,
+          "placeholder": {
+            "en": "Full name",
+            "es": "Nombre completo"
+          }
+        },
+        {
+          "name": "category",
+          "label": {
+            "en": "Warehouse",
+            "es": "Bodega"
+          },
+          "type": "select",
+          "placeholder": {
+            "en": "Select…",
+            "es": "Seleccionar…"
+          },
+          "options": [
+            {
+              "en": "Miami 120",
+              "es": "Miami 120"
+            },
+            {
+              "en": "Miami 340",
+              "es": "Miami 340"
+            },
+            {
+              "en": "Miami 290",
+              "es": "Miami 290"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "screen-3",
+      "title": {
+        "en": "Screen 3",
+        "es": "Pantalla 3"
+      },
+      "fields": [
+        {
+          "name": "collapsible_section_1",
+          "label": {
+            "en": "Collapsible section",
+            "es": "Sección plegable"
+          },
+          "type": "accordion"
+        }
+      ]
+    },
+    {
+      "id": "screen-4",
+      "title": {
+        "en": "Screen 4",
+        "es": "Pantalla 4"
+      },
+      "fields": [
+        {
+          "name": "text_block_2",
+          "label": {
+            "en": "Text block",
+            "es": "Bloque de texto"
+          },
+          "type": "textblock",
+          "content": {
+            "en": "Let us Know If you liked the App",
+            "es": "Indique si le ha gustado el App"
+          }
+        },
+        {
+          "name": "radio_1",
+          "label": {
+            "en": "Radio",
+            "es": "Opción única"
+          },
+          "type": "radio",
+          "options": [
+            {
+              "en": "Yes",
+              "es": "Opción 1"
+            },
+            {
+              "en": "No",
+              "es": "Opción 2"
+            }
+          ]
+        },
+        {
+          "name": "rating_3",
+          "label": {
+            "en": "Rating",
+            "es": "Calificación"
+          },
+          "type": "rating"
+        }
+      ]
+    },
+    {
+      "id": "screen-5",
+      "title": {
+        "en": "Screen 5",
+        "es": "Pantalla 5"
+      },
+      "fields": [
+        {
+          "name": "signature_1",
+          "label": {
+            "en": "Signature",
+            "es": "Firma"
+          },
+          "type": "signature"
+        },
+        {
+          "name": "checkbox_2",
+          "label": {
+            "en": "Checkbox",
+            "es": "Casilla"
+          },
+          "type": "checkbox"
+        }
+      ]
+    }
+  ]
+}
